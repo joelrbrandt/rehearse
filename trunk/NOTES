@@ -1,1 +1,11 @@
 Teh projekt is now spelt curectlee
+
+
+Joel L says: Hahah. Awesome. 
+
+Ok, so I just committed the JS Syntax Highlighter. In that mass of .java files, find SyntaxHighlighter.java and run it. Start typing on the last line - JS should be syntax highlighted. Then press enter. If your line was a complete JS statement, the console should echo your line, followed by "Good to Go." If it wasn't a complete JS statement, finish the statement on the next line, press enter, and see the echo.
+
+Known Bugs/Issues to consider:
+1. The fn seems to get called twice for every press of enter. This is a problem with EventListeners. 
+2. What counts as a JS statement? Fool around with different things and see if you agree with it's decision.
+3. Joel B and I have talked about how to handle the multi-line statements. Basically the question is how much code to evaluate at any given time?
