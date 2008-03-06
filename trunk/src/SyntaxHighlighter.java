@@ -18,13 +18,6 @@ public class SyntaxHighlighter extends JFrame {
 		
 		JEditTextArea ta = new JEditTextArea();
 		ta.setTokenMarker(new JavaScriptTokenMarker());
-		ta.setText("TEST YOUR JAVASCRIPT CODE\n"
-		    + "    ***\n"
-		    + "    ***\n"
-		    + "    ***\n"
-		    + "    ***\n"
-		    + "\n\n\n");
-		
 		add(ta);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	

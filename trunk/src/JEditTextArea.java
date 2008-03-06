@@ -1518,6 +1518,7 @@ public class JEditTextArea extends JComponent
 	 */
 	public void processKeyEvent(KeyEvent evt)
 	{
+		//System.out.println("key pressed: " + evt.getKeyChar());
 		if(inputHandler == null){
 			//if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
 			return;
@@ -1532,10 +1533,11 @@ public class JEditTextArea extends JComponent
 			break;
 		case KeyEvent.KEY_RELEASED:
 			inputHandler.keyReleased(evt);
+			if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
 			break;
 		}
 		
-		if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
+		
 
 	}
 	
@@ -1579,16 +1581,15 @@ public class JEditTextArea extends JComponent
         }
 		*/
 		
-		unfinishedStatements += toEvaluate;
+		unfinishedStatements += " " + toEvaluate;
 		
+		System.out.println("Concatted string: " + unfinishedStatements);
 		boolean compilable = cx.stringIsCompilableUnit(unfinishedStatements);
 		if(compilable) {
 			System.out.println(unfinishedStatements + " -- Good to go!");
 			unfinishedStatements = "";
 			//Hook here to call Firebug if it's compilable
 			//Then immediately print Firebug response
-		} else {
-			unfinishedStatements += toEvaluate;
 		}
 	}
 

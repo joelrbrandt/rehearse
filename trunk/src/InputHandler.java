@@ -12,7 +12,6 @@ import javax.swing.JPopupMenu;
 import java.awt.event.*;
 import java.awt.Component;
 import java.util.*;
-
 /**
  * An input handler converts the user's key strokes into concrete actions.
  * It also takes care of macro recording and action repetition.<p>
@@ -129,10 +128,10 @@ public abstract class InputHandler extends KeyAdapter
 	 */
 	public static String getActionName(ActionListener listener)
 	{
-		Enumeration enum = getActions();
-		while(enum.hasMoreElements())
+		Enumeration enumer = getActions();
+		while(enumer.hasMoreElements())
 		{
-			String name = (String)enum.nextElement();
+			String name = (String)enumer.nextElement();
 			ActionListener _listener = getAction(name);
 			if(_listener == listener)
 				return name;
