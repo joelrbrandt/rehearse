@@ -1,0 +1,3 @@
+$('#p1').css('border','thin solid rgb(255,0,0)')
+$('#p2').css('font-family','monospace')
+$.ajax({ type:"GET", url:"example_more.html", success:function(msg) { $('#empty').html(msg) } } )

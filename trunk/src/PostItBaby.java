@@ -31,13 +31,20 @@ public class PostItBaby {
 		return result;
 	}
 
-	public static void main(String[] args) throws Exception {
-
-		List<String> a = doPost("$('#empty').html('<p>eat it!</p>');");
+	private static void executeAndPrintCommand(String command) throws Exception {
+		System.out.println("command: " + command);
+		System.out.print("result: ");
+		List<String> a = doPost(command);
 		Iterator<String> iter = a.iterator();
 		while (iter.hasNext()) {
 			System.out.println(iter.next());
 		}
+		System.out.println("-----");
 	}
-
+	
+	public static void main(String[] args) throws Exception {
+		executeAndPrintCommand("$('#p1').css('border','thin solid rgb(255,0,0)')");
+		executeAndPrintCommand("$('#p2').css('font-family','monospace')");
+		executeAndPrintCommand("$.ajax({ type:'GET', url:'example_more.html', success:function(msg) { $('#empty').html(msg) } } )");
+	}
 }
