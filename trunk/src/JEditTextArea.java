@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 
 /**
  * jEdit's text area component. It is more suited for editing program
@@ -1518,11 +1519,8 @@ public class JEditTextArea extends JComponent
 	 */
 	public void processKeyEvent(KeyEvent evt)
 	{
-		//System.out.println("key pressed: " + evt.getKeyChar());
-		if(inputHandler == null){
-			//if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
+		if(inputHandler == null)
 			return;
-		}
 		switch(evt.getID())
 		{
 		case KeyEvent.KEY_TYPED:
@@ -1533,65 +1531,10 @@ public class JEditTextArea extends JComponent
 			break;
 		case KeyEvent.KEY_RELEASED:
 			inputHandler.keyReleased(evt);
-			if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
 			break;
 		}
-		
-		
-
 	}
 	
-	//Parses the document
-	String unfinishedStatements = "";
-	
-	public void parseLastLine() {
-		Context cx = new Context();
-
-		// Collect lines of source to test compilability.
-		String toEvaluate = "";
-		int currLine = getLineCount() - 2;
-		toEvaluate = getLineText(currLine);
-		System.out.println("Original string:" + toEvaluate);
-		
-		/*
-		while(true) {
-			//Go back one line
-			currLine--;
-			
-			//If we're back to the instructions, break
-			
-        	if(getLineText(currLine) == "    ***") {
-        		System.out.println("Break!");
-        		break;
-        	}
-        	
-        	
-        	//Otherwise get a newline, and append it to our evaluation string
-            String newline = getLineText(currLine);
-            toEvaluate = newline + toEvaluate; //Add a carriage return?
-            
-            // Continue collecting as long as more lines
-            // are needed to complete the current
-            // statement.  stringIsCompilableUnit is also
-            // true if the source statement will result in
-            // any error other than one that might be
-            // resolved by appending more source.
-            if (cx.stringIsCompilableUnit(toEvaluate))
-                break;
-        }
-		*/
-		
-		unfinishedStatements += " " + toEvaluate;
-		
-		System.out.println("Concatted string: " + unfinishedStatements);
-		boolean compilable = cx.stringIsCompilableUnit(unfinishedStatements);
-		if(compilable) {
-			System.out.println(unfinishedStatements + " -- Good to go!");
-			unfinishedStatements = "";
-			//Hook here to call Firebug if it's compilable
-			//Then immediately print Firebug response
-		}
-	}
 
 	// protected members
 	protected static String CENTER = "center";

@@ -16,7 +16,7 @@ public class SyntaxHighlighter extends JFrame {
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 		
-		JEditTextArea ta = new JEditTextArea();
+		InteractiveTextArea ta = new InteractiveTextArea();
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta);
 		
