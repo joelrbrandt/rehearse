@@ -11,9 +11,9 @@ import javax.swing.table.*;
 
 import org.jedit.syntax.JavaScriptTokenMarker;
 
-public class SyntaxHighlighter extends JFrame {
+public class Rehearse extends JFrame {
 	
-	public SyntaxHighlighter() {
+	public Rehearse() {
 		super("Edit that syntax...");
 		
 		BorderLayout bl = new BorderLayout();
@@ -30,7 +30,7 @@ public class SyntaxHighlighter extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		SyntaxHighlighter SH = new SyntaxHighlighter();
+		Rehearse SH = new Rehearse();
 	}
 }
 

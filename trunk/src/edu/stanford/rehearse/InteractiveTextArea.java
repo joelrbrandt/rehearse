@@ -16,7 +16,7 @@ import org.mozilla.javascript.ContextFactory;
 
 public class InteractiveTextArea extends JEditTextArea {
 
-	private static final String REHEARSE_URL = "http://localhost:6670/rehearse.sjs";
+	private static final String REHEARSE_URL = "http://localhost:6670/rehearse/rehearse.sjs";
 	
 	private String unfinishedStatements = "";
 	
