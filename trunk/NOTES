@@ -1,11 +1,38 @@
-Teh projekt is now spelt curectlee
+TODOs
 
+- need to implement undo (using the plan we already have -- snapshotting at each statement execution and DOM replacement)
 
-Joel L says: Hahah. Awesome. 
+- figure out how to inject the empty $I function into the page, and set a breakpoint on that (and know when breakpoint is hit)
+function $I(functName, parameters) {
+  if isset(_already_defined_functions[functname]) {
+     // call it with the right parameters
+  } else {
+    var _interactive_now = True // breakpoint on this line
+    var _interactive_now = False // once we get here, Rehearse java app needs to insert new function into _already_defined_fucntions by calling a POW script
+  }
+}
+probably the way to do this is to add an onload event to rehearse_client.js that does an AJAX request to a POW script that sets everything up.
+anyone want to use rehearse will have to include this javascript file
+also want to put a random number in a variable like window._rehearse_uid, and send this uid with AJAX request so we can find the right tab to set breakpoint on $I function
 
-Ok, so I just committed the JS Syntax Highlighter. In that mass of .java files, find SyntaxHighlighter.java and run it. Start typing on the last line - JS should be syntax highlighted. Then press enter. If your line was a complete JS statement, the console should echo your line, followed by "Good to Go." If it wasn't a complete JS statement, finish the statement on the next line, press enter, and see the echo.
+thoughts on how to launch rehearse window at right time (i.e. when firebug hits breakpoint):
+main method of java rehearse program calls (repeatedly, with polling, like 10 times a second) a pow script (check_for_breakpoint.sjs) that goes through all the tabs and looks if firebug is stopped at a breakpoint at any of them.
+if so, it returns the _rehearse_uid of that window, if not it returns nothing
+if a uid is returned, pop up an editing window, and remember the uid to send with requests to rehearse.sjs so it can execute stuff in the right tab
 
-Known Bugs/Issues to consider:
-1. The fn seems to get called twice for every press of enter. This is a problem with EventListeners. 
-2. What counts as a JS statement? Fool around with different things and see if you agree with it's decision.
-3. Joel B and I have talked about how to handle the multi-line statements. Basically the question is how much code to evaluate at any given time?
+- when we hit the breakpoint, we'll need to "inject" the variables in arguments array into the "this" variable
+
+- make rehearse.sjs "_rehearse_uid aware"
+
+- need a way to get the call stack from firebug when we're stopped at a breakpoint (get_callstack.sjs <-- take in the uid). This is so we can insert the code into the right file when we're done editing
+
+- need a way to push the "play" button in firebug debugger when we're done interactively editing (resume_execution.sjs <-- take in the uid)
+
+- need to figure out how to actually put the code they typed into the file (and update the DOM accordingly, hopefully w/o reloading)
+  - put the code inside a <script> tag at the top, and then replace the $I(functName) with whatever they named the function (and fix parameter list)
+  - also, go find the $I in the DOM, and replace it with the function object that got created (will have to eval the string to get this)
+
+- make the UI better in the editing window
+  - put the function and parameter names at top
+  - copy and paste
+  - deal with people going back and editing other lines (what should we do? DISALLOW for now)
