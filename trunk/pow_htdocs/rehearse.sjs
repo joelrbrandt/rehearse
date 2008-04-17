@@ -8,4 +8,6 @@ if (command != null) {
     document.write("<p>Enter a command:<br/>");
     document.write("<form method='post'><input name='command' type='text' size='50'/><form></p>");
 }
+
+
 ?>
