@@ -15,6 +15,7 @@ import java.util.Timer;
 public class RehearseClient extends TimerTask implements WindowListener {
 	
 	private static final int DELAY = 1000;
+	private static final int NO_STOPPED_WINDOWS = -1;
 	private static final String REHEARSE_CHECK_BP = 
 		"http://localhost:6670/rehearse/check_for_breakpoint.sjs";
 	
@@ -24,7 +25,6 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		timer = new Timer();
 		TimerTask pollingTask = new RehearseClient();
 		timer.scheduleAtFixedRate(pollingTask, 0, DELAY);
-		
 	}
 
 	@Override
@@ -52,9 +52,9 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		int uid = Integer.parseInt(result);
 		System.out.println(uid);
 		
-		if(uid == 1) {
+		if(uid != NO_STOPPED_WINDOWS) {
 			this.cancel();
-			Rehearse rehearseFrame = new Rehearse();
+			Rehearse rehearseFrame = new Rehearse(uid);
 			rehearseFrame.addWindowListener(this);
 			rehearseFrame.toFront();
 		}

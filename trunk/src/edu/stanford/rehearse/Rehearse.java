@@ -6,8 +6,10 @@ import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -17,20 +19,23 @@ import org.jedit.syntax.JavaScriptTokenMarker;
 
 public class Rehearse extends JFrame implements ActionListener{
 	
+	private int uid;
+	
 	private static final String RESUME_EXECUTION_URL = 
 		"http://localhost:6670/rehearse/resume_execution.sjs";
 
 	public static void main(String[] args) {
-		Rehearse SH = new Rehearse();
+		Rehearse SH = new Rehearse(1);
 	}
 	
-	public Rehearse() {
+	public Rehearse(int uid) {
 		super("Edit that syntax...");
+		this.uid = uid;
 		
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 		
-		InteractiveTextArea ta = new InteractiveTextArea();
+		InteractiveTextArea ta = new InteractiveTextArea(uid);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta);
 		
@@ -57,6 +62,11 @@ public class Rehearse extends JFrame implements ActionListener{
 			myUC.setDoOutput(true);
 			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			myUC.connect();
+			
+			PrintWriter out = new PrintWriter(myUC.getOutputStream());
+			String cmdEnc = "rehearse_uid=" + uid;
+			out.print(cmdEnc);
+			out.close();
 			
 			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
 			String s;

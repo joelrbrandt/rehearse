@@ -19,15 +19,13 @@ public class InteractiveTextArea extends JEditTextArea {
 	private static final String REHEARSE_URL = "http://localhost:6670/rehearse/rehearse.sjs";
 	
 	private String unfinishedStatements = "";
+	private int uid;
 	
-	public InteractiveTextArea() {
+	public InteractiveTextArea(int uid) {
 		super();
+		this.uid = uid;
 	}
 
-	public InteractiveTextArea(TextAreaDefaults defaults) {
-		super(defaults);
-	}
-	
 	public void processKeyEvent(KeyEvent evt)
 	{
 		if(inputHandler == null)
@@ -67,38 +65,7 @@ public class InteractiveTextArea extends JEditTextArea {
 			System.out.println(unfinishedStatements + " -- Good to go!");
 			executeStatement(unfinishedStatements);
 			unfinishedStatements = "";
-			//Hook here to call Firebug if it's compilable
-			//Then immediately print Firebug response
 		}
-		
-
-		/*
-		while(true) {
-			//Go back one line
-			currLine--;
-			
-			//If we're back to the instructions, break
-			
-        	if(getLineText(currLine) == "    ***") {
-        		System.out.println("Break!");
-        		break;
-        	}
-        	
-        	
-        	//Otherwise get a newline, and append it to our evaluation string
-            String newline = getLineText(currLine);
-            toEvaluate = newline + toEvaluate; //Add a carriage return?
-            
-            // Continue collecting as long as more lines
-            // are needed to complete the current
-            // statement.  stringIsCompilableUnit is also
-            // true if the source statement will result in
-            // any error other than one that might be
-            // resolved by appending more source.
-            if (cx.stringIsCompilableUnit(toEvaluate))
-                break;
-        }
-		*/
 	}
 	
 	private void executeStatement(String statement) {
@@ -123,7 +90,8 @@ public class InteractiveTextArea extends JEditTextArea {
 		myUC.connect();
 
 		PrintWriter out = new PrintWriter(myUC.getOutputStream());
-		String cmdEnc = "command=" + URLEncoder.encode(command, "UTF-8");
+		String cmdEnc = "command=" + URLEncoder.encode(command, "UTF-8") +
+						"&rehearse_uid=" + uid;
 		out.print(cmdEnc);
 		out.close();
 

@@ -1,8 +1,7 @@
 <?sjs
 	var uid = pow_server.POST['rehearse_uid'];
 	
-	//var currWindow = getCurrentWindow(uid);
-	var currWindow = getBrowser().browsers[0].contentWindow.window;
+	var currWindow = getCurrentWindow(uid);
 	
 	if(currWindow) {
 		var url = currWindow.document.URL;
@@ -12,19 +11,19 @@
 		window.Firebug.Debugger.setBreakpoint(url, 30);
 	}
 	
-	//doesnt work right now
 	function getCurrentWindow(uid) {
 		for(var i = 0; i < getBrowser().browsers.length; i++) {
 			var b = getBrowser().browsers[i];
-			if (b.contentWindow) {
-				//document.writeln(b.contentWindow.window.document.URL);
-				//document.writeln(b.contentWindow.window.pow_server_loc);
-				if (b.contentWindow.window._rehearse_uid == uid) {
-					return b.contentWindow.window;
-				}
+			var context = window.TabWatcher.getContextByWindow(b.contentWindow);
+			if(context != null) {
+				try {
+					var result = window.Firebug.CommandLine.evaluate("_rehearse_uid", context);
+					if (result == uid) {
+						return b.contentWindow.window;
+					}
+				} catch (exc) {}
 			}
 		}
 		return null;
 	}
-
 ?>
