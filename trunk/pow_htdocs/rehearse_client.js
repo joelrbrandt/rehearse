@@ -1,6 +1,7 @@
 addLoadEvent(setupPOW);
 
 var pow_server_loc = 'http://localhost:6670/rehearse/rehearse_setup.sjs?AJAX=true';
+var defined_functions = {};
 
 function setupPOW() {
 	var url = pow_server_loc;
@@ -26,6 +27,9 @@ function $I(functionName, parameters) {
 	if (defined_functions[functionName]) {
 		// todo: call with the right params
 	} else {
+		for(param in parameters) {
+			this[param] = parameters[param];
+		}
 		var _interactive_now = true;
 		var _interactive_now = false;
 	}

@@ -8,7 +8,7 @@
 		url = url.substring(0, url.lastIndexOf('/'));
 		url += "/rehearse_client.js";
 		document.writeln(url);
-		window.Firebug.Debugger.setBreakpoint(url, 30);
+		window.Firebug.Debugger.setBreakpoint(url, 33);
 	}
 	
 	function getCurrentWindow(uid) {

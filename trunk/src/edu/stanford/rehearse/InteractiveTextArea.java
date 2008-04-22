@@ -17,13 +17,16 @@ import org.mozilla.javascript.ContextFactory;
 public class InteractiveTextArea extends JEditTextArea {
 
 	private static final String REHEARSE_URL = "http://localhost:6670/rehearse/rehearse.sjs";
+	private static final String UNDO_URL = "http://localhost:6670/rehearse/undo.sjs";
 	
 	private String unfinishedStatements = "";
 	private int uid;
+	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
 	
 	public InteractiveTextArea(int uid) {
 		super();
 		this.uid = uid;
+		this.getPainter().addCustomHighlight(new RehearseHighlight());
 	}
 
 	public void processKeyEvent(KeyEvent evt)
@@ -68,13 +71,47 @@ public class InteractiveTextArea extends JEditTextArea {
 		}
 	}
 	
+	public void undo() {
+		try {
+			URL myURL = new URL(UNDO_URL);
+			URLConnection myUC = myURL.openConnection();
+			myUC.setDoOutput(true);
+			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			myUC.connect();
+			
+			PrintWriter out = new PrintWriter(myUC.getOutputStream());
+			String cmdEnc = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
+			out.print(cmdEnc);
+			out.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
+			String s;
+			while ((s = in.readLine()) != null) {}
+			in.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private int popSnapshotID() {
+		assert(snapshot_ids.size() != 0);
+		return snapshot_ids.remove(snapshot_ids.size()-1);
+	}
+	
 	private void executeStatement(String statement) {
 		try {
 			List<String> result = doPost(statement);
-			String text = getText();
+			String text = "";
 			for(String line : result)
 				text = text + line + "\n";
-			setText(text);
+			
+			int splitIndex = text.indexOf(' ');
+			int sid = Integer.parseInt(text.substring(0, splitIndex));
+			System.out.println("snapshot id = " + sid);
+			snapshot_ids.add(sid);
+			
+			setText(getText() + text.substring(splitIndex+1));
 			
 		} catch (Exception e) {
 			e.printStackTrace();

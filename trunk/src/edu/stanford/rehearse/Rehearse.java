@@ -23,6 +23,9 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	private static final String RESUME_EXECUTION_URL = 
 		"http://localhost:6670/rehearse/resume_execution.sjs";
+	
+	private InteractiveTextArea ta;
+
 
 	public static void main(String[] args) {
 		Rehearse SH = new Rehearse(1);
@@ -35,13 +38,21 @@ public class Rehearse extends JFrame implements ActionListener{
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 		
-		InteractiveTextArea ta = new InteractiveTextArea(uid);
+		ta = new InteractiveTextArea(uid);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta);
 		
+		JPanel bottomPanel = new JPanel();
+		
+		JButton undoButton = new JButton("Undo");
+		undoButton.addActionListener(this);
+		bottomPanel.add(undoButton);
+		
 		JButton doneButton = new JButton("Done");
 		doneButton.addActionListener(this);
-		add(doneButton, BorderLayout.SOUTH);
+		bottomPanel.add(doneButton);
+		
+		add(bottomPanel, BorderLayout.SOUTH);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 		pack();
@@ -52,6 +63,8 @@ public class Rehearse extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("Done")) {
 			resumeExecution();
+		} else if(ae.getActionCommand().equals("Undo")) {
+			ta.undo();
 		}
 	}
 	
