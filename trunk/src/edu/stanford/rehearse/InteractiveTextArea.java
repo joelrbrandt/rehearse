@@ -22,11 +22,12 @@ public class InteractiveTextArea extends JEditTextArea {
 	private String unfinishedStatements = "";
 	private int uid;
 	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
+	//private RehearseHighlight highlight = new RehearseHighlight();
 	
 	public InteractiveTextArea(int uid) {
 		super();
 		this.uid = uid;
-		this.getPainter().addCustomHighlight(new RehearseHighlight());
+		//this.getPainter().addCustomHighlight(highlight);
 	}
 
 	public void processKeyEvent(KeyEvent evt)
@@ -73,6 +74,9 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	public void undo() {
 		try {
+			if(snapshot_ids.isEmpty())
+				return;
+			
 			URL myURL = new URL(UNDO_URL);
 			URLConnection myUC = myURL.openConnection();
 			myUC.setDoOutput(true);
@@ -88,6 +92,8 @@ public class InteractiveTextArea extends JEditTextArea {
 			String s;
 			while ((s = in.readLine()) != null) {}
 			in.close();
+			
+			((InteractiveTextAreaPainter)getPainter()).markUndo();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -111,7 +117,12 @@ public class InteractiveTextArea extends JEditTextArea {
 			System.out.println("snapshot id = " + sid);
 			snapshot_ids.add(sid);
 			
+			int startLine = getCaretLine(); 
 			setText(getText() + text.substring(splitIndex+1));
+			int endLine = getCaretLine() - 1;
+			
+			((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine);
+			
 			
 		} catch (Exception e) {
 			e.printStackTrace();

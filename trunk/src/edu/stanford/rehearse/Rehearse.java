@@ -58,6 +58,7 @@ public class Rehearse extends JFrame implements ActionListener{
 		pack();
 		setVisible(true);
 		
+		ta.requestFocusInWindow();
 	}
 
 	public void actionPerformed(ActionEvent ae) {

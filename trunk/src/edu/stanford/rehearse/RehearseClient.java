@@ -56,6 +56,7 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			this.cancel();
 			Rehearse rehearseFrame = new Rehearse(uid);
 			rehearseFrame.addWindowListener(this);
+			rehearseFrame.requestFocusInWindow();
 			rehearseFrame.toFront();
 		}
 	}

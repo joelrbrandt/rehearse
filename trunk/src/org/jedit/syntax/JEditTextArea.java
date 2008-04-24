@@ -12,6 +12,9 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.*;
+
+import edu.stanford.rehearse.InteractiveTextAreaPainter;
+
 import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.awt.*;
@@ -75,7 +78,7 @@ public class JEditTextArea extends JComponent
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 
 		// Initialize some misc. stuff
-		painter = new TextAreaPainter(this,defaults);
+		painter = new InteractiveTextAreaPainter(this,defaults);
 		documentHandler = new DocumentHandler();
 		listenerList = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
