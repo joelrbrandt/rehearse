@@ -63,10 +63,15 @@ public class Rehearse extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("Done")) {
+			saveCode();
 			resumeExecution();
 		} else if(ae.getActionCommand().equals("Undo")) {
 			ta.undo();
 		}
+	}
+	
+	private void saveCode() {
+		String jsFunction = "function() {" + ta.getCode() + "}";
 	}
 	
 	private void resumeExecution() {

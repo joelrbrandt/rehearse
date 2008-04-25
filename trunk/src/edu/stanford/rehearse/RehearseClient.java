@@ -48,6 +48,9 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		if(result.equals(""))
+			return;
 
 		int uid = Integer.parseInt(result);
 		System.out.println(uid);

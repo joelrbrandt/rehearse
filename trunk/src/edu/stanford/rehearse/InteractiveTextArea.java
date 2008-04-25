@@ -22,11 +22,13 @@ public class InteractiveTextArea extends JEditTextArea {
 	private String unfinishedStatements = "";
 	private int uid;
 	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
+	private ArrayList<String> commands = new ArrayList<String>();
 	//private RehearseHighlight highlight = new RehearseHighlight();
 	
 	public InteractiveTextArea(int uid) {
 		super();
 		this.uid = uid;
+		this.setText("");
 		//this.getPainter().addCustomHighlight(highlight);
 	}
 
@@ -67,6 +69,7 @@ public class InteractiveTextArea extends JEditTextArea {
 		boolean compilable = cx.stringIsCompilableUnit(unfinishedStatements);
 		if(compilable) {
 			System.out.println(unfinishedStatements + " -- Good to go!");
+			commands.add(unfinishedStatements);
 			executeStatement(unfinishedStatements);
 			unfinishedStatements = "";
 		}
@@ -94,6 +97,7 @@ public class InteractiveTextArea extends JEditTextArea {
 			in.close();
 			
 			((InteractiveTextAreaPainter)getPainter()).markUndo();
+			commands.remove(commands.size()-1);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -111,6 +115,8 @@ public class InteractiveTextArea extends JEditTextArea {
 			String text = "";
 			for(String line : result)
 				text = text + line + "\n";
+			
+			System.out.println("Result = " + text);
 			
 			int splitIndex = text.indexOf(' ');
 			int sid = Integer.parseInt(text.substring(0, splitIndex));
@@ -152,6 +158,14 @@ public class InteractiveTextArea extends JEditTextArea {
 		in.close();
 
 		return result;
+	}
+	
+	public String getCode() {
+		String code = "";
+		for(String s : commands) {
+			code += s + "\n";
+		}
+		return code;
 	}
 
 }

@@ -1,0 +1,14 @@
+<html>
+	<head>
+		<script src="jquery.js"></script>
+		<script src="rehearse_client.js"></script>
+		<script src="snapshot.js"></script>
+	</head>
+	<body>
+		<form onsubmit="$I('dosearch', {term : $('#term').val()}); return false;">
+			<input type="text" id="term">
+			<input type="submit">
+		</form>
+		<div id="result"></div>
+	</body>
+</html>
