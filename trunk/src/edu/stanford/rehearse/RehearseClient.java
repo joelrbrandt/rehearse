@@ -30,7 +30,7 @@ public class RehearseClient extends TimerTask implements WindowListener {
 	@Override
 	public void run() {
 		
-		String result = "";
+		ArrayList<String> result = new ArrayList<String>();
 		
 		try {
 			URL myURL = new URL(REHEARSE_CHECK_BP);
@@ -42,22 +42,28 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
 			String s;
 			while ((s = in.readLine()) != null) {
-				result += s;
+				result.add(s);
 			}
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		if(result.equals(""))
+		if(result.size() == 0)
 			return;
-
-		int uid = Integer.parseInt(result);
+		
+		int uid = Integer.parseInt(result.get(0));
 		System.out.println(uid);
 		
 		if(uid != NO_STOPPED_WINDOWS) {
 			this.cancel();
-			Rehearse rehearseFrame = new Rehearse(uid);
+			
+			String functionName = result.get(1);
+			String parameters = result.get(2);
+			System.out.println("functionname: " + functionName);
+			System.out.println("parameters: " + parameters);
+			
+			Rehearse rehearseFrame = new Rehearse(uid, functionName, parameters);
 			rehearseFrame.addWindowListener(this);
 			rehearseFrame.requestFocusInWindow();
 			rehearseFrame.toFront();

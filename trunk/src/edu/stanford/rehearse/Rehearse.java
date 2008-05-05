@@ -24,23 +24,28 @@ public class Rehearse extends JFrame implements ActionListener{
 	private static final String RESUME_EXECUTION_URL = 
 		"http://localhost:6670/rehearse/resume_execution.sjs";
 	
+	private static final String INSERT_CODE_URL = 
+		"http://localhost:6670/rehearse/insert_code.sjs";
+	
 	private InteractiveTextArea ta;
 
 
 	public static void main(String[] args) {
-		Rehearse SH = new Rehearse(1);
+		Rehearse SH = new Rehearse(1, "testFunction", "");
 	}
 	
-	public Rehearse(int uid) {
+	public Rehearse(int uid, String functionName, String parameters) {
 		super("Edit that syntax...");
 		this.uid = uid;
 		
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 		
+		initializeHeader(functionName, parameters);
+		
 		ta = new InteractiveTextArea(uid);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
-		add(ta);
+		add(ta, BorderLayout.CENTER);
 		
 		JPanel bottomPanel = new JPanel();
 		
@@ -60,6 +65,13 @@ public class Rehearse extends JFrame implements ActionListener{
 		
 		ta.requestFocusInWindow();
 	}
+	
+	private void initializeHeader(String functionName, String parameters) {
+		Panel p = new Panel();
+		String prototype = functionName + "(" + parameters + ")";
+		p.add(new JLabel(prototype));
+		this.add(p, BorderLayout.NORTH);
+	}
 
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("Done")) {
@@ -71,7 +83,30 @@ public class Rehearse extends JFrame implements ActionListener{
 	}
 	
 	private void saveCode() {
-		String jsFunction = "function() {" + ta.getCode() + "}";
+		String code = ta.getCode();
+		try {
+			URL myURL = new URL(INSERT_CODE_URL);
+			URLConnection myUC = myURL.openConnection();
+			myUC.setDoOutput(true);
+			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			myUC.connect();
+			
+			PrintWriter out = new PrintWriter(myUC.getOutputStream());
+			String cmdEnc = "rehearse_uid=" + uid + "&code=" + URLEncoder.encode(code, "UTF-8");
+			out.print(cmdEnc);
+			out.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
+			String result = "";
+			String s;
+			while ((s = in.readLine()) != null) {result += s + "\n";}
+			in.close();
+
+			System.out.println("Saved Code: \n" + result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void resumeExecution() {

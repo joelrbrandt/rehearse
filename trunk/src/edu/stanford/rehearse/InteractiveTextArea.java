@@ -68,10 +68,12 @@ public class InteractiveTextArea extends JEditTextArea {
 		System.out.println("Concatted string: " + unfinishedStatements);
 		boolean compilable = cx.stringIsCompilableUnit(unfinishedStatements);
 		if(compilable) {
-			System.out.println(unfinishedStatements + " -- Good to go!");
-			commands.add(unfinishedStatements);
-			executeStatement(unfinishedStatements);
-			unfinishedStatements = "";
+			unfinishedStatements = unfinishedStatements.trim();
+			if(!unfinishedStatements.equals("")) {
+				commands.add(unfinishedStatements);
+				executeStatement(unfinishedStatements);
+				unfinishedStatements = "";
+			}
 		}
 	}
 	
@@ -111,23 +113,21 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	private void executeStatement(String statement) {
 		try {
+			System.out.println("Execute statement: " + statement);
 			List<String> result = doPost(statement);
-			String text = "";
-			for(String line : result)
-				text = text + line + "\n";
 			
-			System.out.println("Result = " + text);
-			
-			int splitIndex = text.indexOf(' ');
-			int sid = Integer.parseInt(text.substring(0, splitIndex));
+			int sid = Integer.parseInt(result.get(0));
 			System.out.println("snapshot id = " + sid);
 			snapshot_ids.add(sid);
 			
+			int errorCode = Integer.parseInt(result.get(1));
+			System.out.println("result = " + result.get(2));
+			
 			int startLine = getCaretLine(); 
-			setText(getText() + text.substring(splitIndex+1));
+			setText(getText() + result.get(2) + "\n");
 			int endLine = getCaretLine() - 1;
 			
-			((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine);
+			((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine, errorCode == 1);
 			
 			
 		} catch (Exception e) {

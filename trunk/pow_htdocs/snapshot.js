@@ -30,7 +30,7 @@ function snapshot() {
 		}
 	}
 	snapshots[snapshots.length] = s;
-	return snapshots.length - 1;
+	return snapshots.length;
 }
 
 /**
@@ -39,9 +39,9 @@ function snapshot() {
 * @param id snapshot id to load
 */
 function load(id) {
-	if(id < 0 || id >= snapshots.length) 
+	if(id <= 0 || id > snapshots.length) 
 		return false;
-	var s = snapshots[id];
+	var s = snapshots[id-1];
 	$('body').replaceWith(s.dom_body);
 	for(var prop in s) {
 		if(prop != 'dom_body') {

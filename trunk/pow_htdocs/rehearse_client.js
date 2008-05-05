@@ -23,9 +23,51 @@ function addLoadEvent(func) {
     }
 }
 
+/*
+ * Saves the defined function to be accessed later.
+ * Parameters are given as comma-separated list of parameter names.
+ */
+function addDefinedFunction(name, parameters) {
+	var newf = new Object();
+	newf["name"] = name;
+	temp = parameters.split(",");
+	newf.params = new Array(temp.length);
+	for(var i = 0; i < temp.length; i++) {
+		newf.params[i] = temp[i];
+	}
+	defined_functions[name] = newf;
+}
+
+/*
+ * Calls a defined function of the given name.
+ * Parameters are given as name-value pairs. 
+ * The bulk of work here is figuring out the right ordering of variables.
+ */
+function callDefinedFunction(name, parameters) {
+	var f = defined_functions[name];
+	if(f==null)	return;
+	var temp = new Array(f.params.length);
+	for(var pname in parameters) {
+		for(var i = 0; i < f.params.length; i++) {
+			if(pname == f.params[i]) {
+				temp[i] = parameters[pname];
+				break;
+			}
+		}
+	}
+	var callStr = name + "(";
+	for(var i = 0; i < temp.length; i++) {
+		callStr += "temp[" + i + "]";
+		if(i != temp.length-1)
+			callStr += ",";
+	}
+	callStr += ");";
+	eval(callStr);
+}
+
 function $I(functionName, parameters) {
 	if (defined_functions[functionName]) {
-		// todo: call with the right params
+		callDefinedFunction(functionName, parameters);
 	} else {
 		for(param in parameters) {
 			this[param] = parameters[param];
@@ -34,6 +76,3 @@ function $I(functionName, parameters) {
 		var _interactive_now = false;
 	}
 }
-
-
-

@@ -13,6 +13,7 @@ import org.jedit.syntax.TokenMarker;
 public class InteractiveTextAreaPainter extends TextAreaPainter {
 
 	private Set<Integer> responseLines = new HashSet<Integer>();
+	private Set<Integer> errorLines = new HashSet<Integer>();
 	private Set<Integer> undoLines = new HashSet<Integer>();
 	private List<Integer> commandBreakLines = new ArrayList<Integer>();
 	
@@ -22,9 +23,13 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		commandBreakLines.add(0);
 	}
 	
-	public void markResponse(int startLine, int endLine) {
+	public void markResponse(int startLine, int endLine, boolean noError) {
 		for(int i = startLine; i <= endLine; i++) {
-			responseLines.add(i);
+			if(noError)
+				responseLines.add(i);
+			else
+				errorLines.add(i);
+				
 		}
 		invalidateLineRange(startLine, endLine);
 		commandBreakLines.add(textArea.getCaretLine());
@@ -49,6 +54,8 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 			c = Color.lightGray;
 		} else if(responseLines.contains(line)) {
 			c = Color.blue;
+		} else if(errorLines.contains(line)) {
+			c = Color.red;
 		} else {
 			c = defaultColor;
 		}

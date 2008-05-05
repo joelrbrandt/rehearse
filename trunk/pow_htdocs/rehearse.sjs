@@ -19,9 +19,16 @@
 			}
 		}
 		if (found) {
+			var errorCode = 1;
+			var result;
 			var snapshot_id = window.Firebug.CommandLine.evaluate("snapshot();", context);
-			var result = window.Firebug.CommandLine.evaluate(command, context);
-			document.write(snapshot_id + " " + result);
+			document.writeln(snapshot_id);
+			try {
+				result = window.Firebug.CommandLine.evaluate(command, context);
+			} catch (exc) { errorCode = 2; result = exc;}
+			document.writeln(errorCode);
+			document.writeln(result);
+			
 		} else {
 			document.write("The specified uid wasn't found!");
 		}

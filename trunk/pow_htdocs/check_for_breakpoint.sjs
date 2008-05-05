@@ -5,11 +5,18 @@
 			window.TabWatcher.getContextByWindow(getBrowser().browsers[i].contentWindow);
 		if(context != null && context.stopped) {
 			var result = window.Firebug.CommandLine.evaluate("_rehearse_uid", context);
-			document.write(result);
+			var functionName = window.Firebug.CommandLine.evaluate("functionName", context);
+			var parameters = window.Firebug.CommandLine.evaluate("ry='';for(rx in parameters) ry = ry + rx + '=' + parameters[rx] + ',';", context);
+			if(parameters != null && parameters != "")
+			parameters = parameters.substring(0, parameters.length - 1);
+			document.writeln(result);
+			document.writeln(functionName);
+			document.writeln(parameters);
 			found = true;
 			break;
 		}
 	}
+	
 	if(!found)
-		document.write(-1);
+		document.writeln(-1);
 ?>
