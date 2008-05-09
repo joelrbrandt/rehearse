@@ -68,7 +68,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	private void initializeHeader(String functionName, String parameters) {
 		Panel p = new Panel();
-		String prototype = functionName + "(" + parameters + ")";
+		String prototype = "function " + functionName + " ( " + parameters + " ) ";
 		p.add(new JLabel(prototype));
 		this.add(p, BorderLayout.NORTH);
 	}

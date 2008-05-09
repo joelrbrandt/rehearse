@@ -23,13 +23,11 @@ public class InteractiveTextArea extends JEditTextArea {
 	private int uid;
 	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
 	private ArrayList<String> commands = new ArrayList<String>();
-	//private RehearseHighlight highlight = new RehearseHighlight();
 	
 	public InteractiveTextArea(int uid) {
 		super();
 		this.uid = uid;
 		this.setText("");
-		//this.getPainter().addCustomHighlight(highlight);
 	}
 
 	public void processKeyEvent(KeyEvent evt)
@@ -121,10 +119,18 @@ public class InteractiveTextArea extends JEditTextArea {
 			snapshot_ids.add(sid);
 			
 			int errorCode = Integer.parseInt(result.get(1));
-			System.out.println("result = " + result.get(2));
+			
+			String response = "";
+			for(int i = 2; i < result.size(); i++) {
+				response += result.get(i);
+				if(i != result.size()-1)
+					response += "\n";
+			}
+			
+			System.out.println("result = " + response);
 			
 			int startLine = getCaretLine(); 
-			setText(getText() + result.get(2) + "\n");
+			setText(getText() + response);
 			int endLine = getCaretLine() - 1;
 			
 			((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine, errorCode == 1);

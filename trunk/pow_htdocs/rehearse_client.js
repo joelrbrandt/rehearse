@@ -2,6 +2,7 @@ addLoadEvent(setupPOW);
 
 var pow_server_loc = 'http://localhost:6670/rehearse/rehearse_setup.sjs?AJAX=true';
 var defined_functions = {};
+var _interactive_now;
 
 function setupPOW() {
 	var url = pow_server_loc;
@@ -66,13 +67,21 @@ function callDefinedFunction(name, parameters) {
 }
 
 function $I(functionName, parameters) {
+	console.log("$I Called!");
 	if (defined_functions[functionName]) {
 		callDefinedFunction(functionName, parameters);
+	}
+	else if (_interactive_now) {
+		var closure = function() { // needed to keep the params around
+     		$I(functionName, parameters);
+   		}
+   		setTimeout(closure, 500);
+   		return;
 	} else {
 		for(param in parameters) {
 			this[param] = parameters[param];
 		}
-		var _interactive_now = true;
-		var _interactive_now = false;
+		_interactive_now = true;
+		_interactive_now = false;
 	}
 }
