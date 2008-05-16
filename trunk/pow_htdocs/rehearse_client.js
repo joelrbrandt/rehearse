@@ -4,6 +4,28 @@ var pow_server_loc = 'http://localhost:6670/rehearse/rehearse_setup.sjs?AJAX=tru
 var defined_functions = {};
 var _interactive_now;
 
+var rehearse_helpers = new Array(10);
+
+for(var i = 0; i < rehearse_helpers.length; i++) {
+	rehearse_helpers[i] = new Object();
+	rehearse_helpers[i].functionNum = i;
+	rehearse_helpers[i].inUse = false;
+	rehearse_helpers[i].finishedEditing = false;
+	rehearse_helpers[i].commandQueue = new Array();
+	rehearse_helpers[i].func = function(functionNum, functionName, parameters) {
+		var last_var;
+		while(true) {
+			if(rehearse_helpers[functionNum].commandQueue.length > 0) {
+				eval(rehearse_helpers[functionNum].commandQueue.shift());
+			} else if(rehearse_helpers[functionNum].finishedEditing) {
+				return last_var;
+			} else {
+				1+1; //breakpoint here
+			}
+		}
+	}
+}
+
 function setupPOW() {
 	var url = pow_server_loc;
 	window._rehearse_uid = Math.ceil(10000*Math.random());
@@ -66,11 +88,25 @@ function callDefinedFunction(name, parameters) {
 	eval(callStr);
 }
 
+function getRehearseHelper() {
+	for(var i = 0; i < rehearse_helpers.length; i++) {
+		if(!rehearse_helpers[i].inUse) {
+			return i;
+		}
+	}
+	alert("no more helpers!");
+}
+
 function $I(functionName, parameters) {
 	console.log("$I Called!");
 	if (defined_functions[functionName]) {
 		callDefinedFunction(functionName, parameters);
+	} else {
+		var num = getRehearseHelper();
+		var f = rehearse_helpers[num].func;
+		return f(num, functionName, parameters);
 	}
+	/*
 	else if (_interactive_now) {
 		var closure = function() { // needed to keep the params around
      		$I(functionName, parameters);
@@ -83,5 +119,5 @@ function $I(functionName, parameters) {
 		}
 		_interactive_now = true;
 		_interactive_now = false;
-	}
+	}*/
 }

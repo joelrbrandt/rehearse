@@ -37,6 +37,7 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			URLConnection myUC = myURL.openConnection();
 			myUC.setDoOutput(true);
 			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			myUC.setReadTimeout(5000);
 			myUC.connect();
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
@@ -53,13 +54,16 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			return;
 		
 		int uid = Integer.parseInt(result.get(0));
-		System.out.println(uid);
+		System.out.println("rehearse id: " + uid);
 		
 		if(uid != NO_STOPPED_WINDOWS) {
 			this.cancel();
 			
-			String functionName = result.get(1);
-			String parameters = result.get(2);
+			int functionNum = Integer.parseInt(result.get(1));
+			System.out.println("function num: " + functionNum);
+			
+			String functionName = result.get(2);
+			String parameters = result.get(3);
 			System.out.println("functionname: " + functionName);
 			System.out.println("parameters: " + parameters);
 			

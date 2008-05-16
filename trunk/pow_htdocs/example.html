@@ -11,7 +11,7 @@
 <form>
 	<input type="text" id="term">
 	<input type="button" value="Stylize!" 
-			onclick="$I('stylize', {term : $('#term').val()});">
+			onclick="setTimeout('$I(\'stylize\', {term : $(\'#term\').val()});', 2000);">
 </form>
 <div id="empty"></div>
 </body>
