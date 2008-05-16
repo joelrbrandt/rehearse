@@ -13,7 +13,7 @@
 			if(parameters != null && parameters != "")
 				parameters = parameters.substring(0, parameters.length - 1);
 			document.writeln(result);
-			document.writeln(functionNum);
+			document.writeln(functionNum + "");
 			document.writeln(functionName);
 			document.writeln(parameters);
 			found = true;

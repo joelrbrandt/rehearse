@@ -20,6 +20,7 @@ import org.jedit.syntax.JavaScriptTokenMarker;
 public class Rehearse extends JFrame implements ActionListener{
 	
 	private int uid;
+	private int functionNum;
 	
 	private static final String RESUME_EXECUTION_URL = 
 		"http://localhost:6670/rehearse/resume_execution.sjs";
@@ -31,12 +32,13 @@ public class Rehearse extends JFrame implements ActionListener{
 
 
 	public static void main(String[] args) {
-		Rehearse SH = new Rehearse(1, "testFunction", "");
+		Rehearse SH = new Rehearse(1, 0, "testFunction", "");
 	}
 	
-	public Rehearse(int uid, String functionName, String parameters) {
+	public Rehearse(int uid, int functionNum, String functionName, String parameters) {
 		super("Edit that syntax...");
 		this.uid = uid;
+		this.functionNum = functionNum;
 		
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);

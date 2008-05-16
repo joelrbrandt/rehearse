@@ -21,6 +21,8 @@ public class RehearseClient extends TimerTask implements WindowListener {
 	
 	private static Timer timer;
 	
+	private static Rehearse[] rehearseWindows = new Rehearse[100];
+	
 	public static void main(String[] args) {
 		timer = new Timer();
 		TimerTask pollingTask = new RehearseClient();
@@ -67,10 +69,15 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			System.out.println("functionname: " + functionName);
 			System.out.println("parameters: " + parameters);
 			
-			Rehearse rehearseFrame = new Rehearse(uid, functionName, parameters);
-			rehearseFrame.addWindowListener(this);
-			rehearseFrame.requestFocusInWindow();
-			rehearseFrame.toFront();
+			if(rehearseWindows[functionNum] == null) {
+				rehearseWindows[functionNum] = new Rehearse(uid, functionNum, functionName, parameters);
+				//rehearseWindows[functionNum].addWindowListener(this);
+				rehearseWindows[functionNum].requestFocusInWindow();
+				rehearseWindows[functionNum].toFront();
+			} else {
+				//call scripts to put stuff on the queue for all & to mark done ones
+				//resume execution
+			}
 		}
 	}
 	public void windowClosed(WindowEvent arg0) {

@@ -91,6 +91,7 @@ function callDefinedFunction(name, parameters) {
 function getRehearseHelper() {
 	for(var i = 0; i < rehearse_helpers.length; i++) {
 		if(!rehearse_helpers[i].inUse) {
+			rehearse_helpers[i].inUse = true;
 			return i;
 		}
 	}
@@ -98,13 +99,15 @@ function getRehearseHelper() {
 }
 
 function $I(functionName, parameters) {
-	console.log("$I Called!");
+	//console.log("$I Called!");
 	if (defined_functions[functionName]) {
 		callDefinedFunction(functionName, parameters);
 	} else {
 		var num = getRehearseHelper();
 		var f = rehearse_helpers[num].func;
-		return f(num, functionName, parameters);
+		var ret = f(num, functionName, parameters);
+		rehearse_helpers[num].inUse = false;
+		return ret;
 	}
 	/*
 	else if (_interactive_now) {
