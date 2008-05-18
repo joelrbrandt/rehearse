@@ -1,17 +1,13 @@
 <?sjs
 	var uid = pow_server.POST['rehearse_uid'];
-	
-	var currWindow = getCurrentWindow(uid);
-	
-	if(currWindow) {
-		var url = currWindow.document.URL;
-		url = url.substring(0, url.lastIndexOf('/'));
-		url += "/rehearse_client.js";
-		document.writeln(url);
-		window.Firebug.Debugger.setBreakpoint(url, 38);
+	var functionNum = pow_server.POST['function_num'];
+	var context = getContextById(uid);
+	if(context != null) {
+		window.Firebug.CommandLine.evaluate("markDone(" + functionNum + ");", context);
 	}
+	document.write(1);
 	
-	function getCurrentWindow(uid) {
+	function getContextById(uid) {
 		for(var i = 0; i < getBrowser().browsers.length; i++) {
 			var b = getBrowser().browsers[i];
 			var context = window.TabWatcher.getContextByWindow(b.contentWindow);
@@ -19,7 +15,7 @@
 				try {
 					var result = window.Firebug.CommandLine.evaluate("_rehearse_uid", context);
 					if (result == uid) {
-						return b.contentWindow.window;
+						return context;
 					}
 				} catch (exc) {}
 			}

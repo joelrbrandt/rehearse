@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -21,6 +22,8 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	private int uid;
 	private int functionNum;
+	
+	private boolean done;
 	
 	private static final String RESUME_EXECUTION_URL = 
 		"http://localhost:6670/rehearse/resume_execution.sjs";
@@ -39,13 +42,14 @@ public class Rehearse extends JFrame implements ActionListener{
 		super("Edit that syntax...");
 		this.uid = uid;
 		this.functionNum = functionNum;
+		this.done = false;
 		
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 		
 		initializeHeader(functionName, parameters);
 		
-		ta = new InteractiveTextArea(uid);
+		ta = new InteractiveTextArea(uid, functionNum);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta, BorderLayout.CENTER);
 		
@@ -68,17 +72,42 @@ public class Rehearse extends JFrame implements ActionListener{
 		ta.requestFocusInWindow();
 	}
 	
+	public int getUid() {
+		return uid;
+	}
+
+	public void setUid(int uid) {
+		this.uid = uid;
+	}
+
+	public int getFunctionNum() {
+		return functionNum;
+	}
+
+	public void setFunctionNum(int functionNum) {
+		this.functionNum = functionNum;
+	}
+
 	private void initializeHeader(String functionName, String parameters) {
 		Panel p = new Panel();
 		String prototype = "function " + functionName + " ( " + parameters + " ) ";
 		p.add(new JLabel(prototype));
 		this.add(p, BorderLayout.NORTH);
 	}
+	
+	public ArrayList<String> getQueuedCode() {
+		return ta.getQueuedCode();
+	}
+	
+	public boolean isDone() {
+		return done;
+	}
 
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("Done")) {
 			saveCode();
-			resumeExecution();
+			done = true;
+			this.dispose();
 		} else if(ae.getActionCommand().equals("Undo")) {
 			ta.undo();
 		}
@@ -87,54 +116,16 @@ public class Rehearse extends JFrame implements ActionListener{
 	private void saveCode() {
 		String code = ta.getCode();
 		try {
-			URL myURL = new URL(INSERT_CODE_URL);
-			URLConnection myUC = myURL.openConnection();
-			myUC.setDoOutput(true);
-			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			myUC.connect();
-			
-			PrintWriter out = new PrintWriter(myUC.getOutputStream());
-			String cmdEnc = "rehearse_uid=" + uid + "&code=" + URLEncoder.encode(code, "UTF-8");
-			out.print(cmdEnc);
-			out.close();
-			
-			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
-			String result = "";
-			String s;
-			while ((s = in.readLine()) != null) {result += s + "\n";}
-			in.close();
-
-			System.out.println("Saved Code: \n" + result);
-
-		} catch (Exception e) {
-			e.printStackTrace();
+			String params = "rehearse_uid=" + uid + "&code=" + URLEncoder.encode(code, "UTF-8");
+			ArrayList<String> savedCode = POWUtils.callPOWScript(POWUtils.INSERT_CODE_URL, params);
+			System.out.println("Saved code: " + savedCode);
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
 		}
 	}
 	
-	private void resumeExecution() {
-		try {
-			URL myURL = new URL(RESUME_EXECUTION_URL);
-			URLConnection myUC = myURL.openConnection();
-			myUC.setDoOutput(true);
-			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			myUC.connect();
-			
-			PrintWriter out = new PrintWriter(myUC.getOutputStream());
-			String cmdEnc = "rehearse_uid=" + uid;
-			out.print(cmdEnc);
-			out.close();
-			
-			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
-			String s;
-			while ((s = in.readLine()) != null) {}
-			in.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		//dispose the window
-		this.dispose();
+	public void appendResponse(int snapshotID, int errorCode, String response) {
+		ta.appendResponse(snapshotID, errorCode, response);
 	}
 }
 

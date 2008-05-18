@@ -3,6 +3,7 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -10,24 +11,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jedit.syntax.JEditTextArea;
+import org.jedit.syntax.SyntaxDocument;
 import org.jedit.syntax.TextAreaDefaults;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 
 public class InteractiveTextArea extends JEditTextArea {
 
-	private static final String REHEARSE_URL = "http://localhost:6670/rehearse/rehearse.sjs";
-	private static final String UNDO_URL = "http://localhost:6670/rehearse/undo.sjs";
-	
+
 	private String unfinishedStatements = "";
 	private int uid;
+	private int functionNum;
 	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
 	private ArrayList<String> commands = new ArrayList<String>();
 	
-	public InteractiveTextArea(int uid) {
+	private ArrayList<String> codeQueue = new ArrayList<String>();
+	
+	public InteractiveTextArea(int uid, int functionNum) {
 		super();
+		this.setDocument(new SyntaxDocument());
 		this.uid = uid;
-		this.setText("");
+		this.functionNum = functionNum;
+		setText("");
 	}
 
 	public void processKeyEvent(KeyEvent evt)
@@ -69,44 +74,48 @@ public class InteractiveTextArea extends JEditTextArea {
 			unfinishedStatements = unfinishedStatements.trim();
 			if(!unfinishedStatements.equals("")) {
 				commands.add(unfinishedStatements);
-				executeStatement(unfinishedStatements);
+				//executeStatement(unfinishedStatements);
+				addCommandToQueue(unfinishedStatements);
 				unfinishedStatements = "";
 			}
 		}
 	}
 	
 	public void undo() {
-		try {
-			if(snapshot_ids.isEmpty())
-				return;
-			
-			URL myURL = new URL(UNDO_URL);
-			URLConnection myUC = myURL.openConnection();
-			myUC.setDoOutput(true);
-			myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			myUC.connect();
-			
-			PrintWriter out = new PrintWriter(myUC.getOutputStream());
-			String cmdEnc = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
-			out.print(cmdEnc);
-			out.close();
-			
-			BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
-			String s;
-			while ((s = in.readLine()) != null) {}
-			in.close();
-			
-			((InteractiveTextAreaPainter)getPainter()).markUndo();
-			commands.remove(commands.size()-1);
+		if(snapshot_ids.isEmpty())
+			return;
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String params = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
+		POWUtils.callPOWScript(POWUtils.UNDO_URL, params);
+
+
+		((InteractiveTextAreaPainter)getPainter()).markUndo();
+		commands.remove(commands.size()-1);
+
 	}
 	
 	private int popSnapshotID() {
 		assert(snapshot_ids.size() != 0);
 		return snapshot_ids.remove(snapshot_ids.size()-1);
+	}
+	
+	private void addCommandToQueue(String command) {
+		try {
+			String params = "command=" + URLEncoder.encode(command, "UTF-8") +
+			"&rehearse_uid=" + uid + "&function_num=" + functionNum;
+			ArrayList<String> r = POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void appendResponse(int snapshotID, int errorCode, String response) {
+		snapshot_ids.add(snapshotID);
+		
+		int startLine = getCaretLine(); 
+		setText(getText() + response + "\n");
+		int endLine = getCaretLine() - 1;
+		((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine, errorCode == 1);
 	}
 	
 	private void executeStatement(String statement) {
@@ -142,28 +151,14 @@ public class InteractiveTextArea extends JEditTextArea {
 		
 	}
 	
+	public ArrayList<String> getQueuedCode() {
+		return codeQueue;
+	}
+	
 	private List<String> doPost(String command) throws Exception {
-		URL myURL = new URL(REHEARSE_URL);
-		URLConnection myUC = myURL.openConnection();
-		myUC.setDoOutput(true);
-		myUC.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		myUC.connect();
-
-		PrintWriter out = new PrintWriter(myUC.getOutputStream());
-		String cmdEnc = "command=" + URLEncoder.encode(command, "UTF-8") +
-						"&rehearse_uid=" + uid;
-		out.print(cmdEnc);
-		out.close();
-
-		BufferedReader in = new BufferedReader(new InputStreamReader(myUC.getInputStream()));
-		ArrayList<String> result = new ArrayList<String>();
-		String s;
-		while ((s = in.readLine()) != null) {
-			result.add(s);
-		}
-		in.close();
-
-		return result;
+		String params = "command=" + URLEncoder.encode(command, "UTF-8") +
+							"&rehearse_uid=" + uid;
+		return POWUtils.callPOWScript(POWUtils.REHEARSE_URL, params);
 	}
 	
 	public String getCode() {

@@ -12,11 +12,26 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 	rehearse_helpers[i].inUse = false;
 	rehearse_helpers[i].finishedEditing = false;
 	rehearse_helpers[i].commandQueue = new Array();
+	rehearse_helpers[i].responseQueue = new Array();
 	rehearse_helpers[i].func = function(functionNum, functionName, parameters) {
+		for(param in parameters) {
+			this[param] = parameters[param];
+		}
 		var last_var;
 		while(true) {
 			if(rehearse_helpers[functionNum].commandQueue.length > 0) {
-				eval(rehearse_helpers[functionNum].commandQueue.shift());
+				var response = new Object();
+				response.sid = snapshot();
+				try {
+					response.text = eval(rehearse_helpers[functionNum].commandQueue.shift());
+					response.type = 1;
+				} catch(e) {
+					response.text = e;
+					response.type = 2;
+				} finally {
+					queue = rehearse_helpers[functionNum].responseQueue;
+					queue[queue.length] = response;
+				}
 			} else if(rehearse_helpers[functionNum].finishedEditing) {
 				return last_var;
 			} else {
@@ -24,6 +39,18 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 			}
 		}
 	}
+}
+
+function addCodeToQueue(functionNum, code) {
+	var queue = rehearse_helpers[functionNum].commandQueue;
+	queue[queue.length] = code;
+}
+
+function getResponseFromQueue(functionNum) {
+	if(rehearse_helpers[functionNum].responseQueue.length == 0)
+		return null;
+	var r = rehearse_helpers[functionNum].responseQueue.shift();
+	return r;
 }
 
 function setupPOW() {
@@ -92,10 +119,15 @@ function getRehearseHelper() {
 	for(var i = 0; i < rehearse_helpers.length; i++) {
 		if(!rehearse_helpers[i].inUse) {
 			rehearse_helpers[i].inUse = true;
+			rehearse_helpers[i].finishedEditing = false;
 			return i;
 		}
 	}
 	alert("no more helpers!");
+}
+
+function markDone(functionNum) {
+	rehearse_helpers[functionNum].finishedEditing = true;
 }
 
 function $I(functionName, parameters) {
