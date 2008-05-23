@@ -75,7 +75,7 @@ public class InteractiveTextArea extends JEditTextArea {
 			if(!unfinishedStatements.equals("")) {
 				commands.add(unfinishedStatements);
 				//executeStatement(unfinishedStatements);
-				addCommandToQueue(unfinishedStatements);
+				addCommandToQueue(unfinishedStatements, false);
 				unfinishedStatements = "";
 			}
 		}
@@ -85,9 +85,12 @@ public class InteractiveTextArea extends JEditTextArea {
 		if(snapshot_ids.isEmpty())
 			return;
 
+		String command = "load(" + popSnapshotID() + ");";
+		addCommandToQueue(command, true);
+		/*
 		String params = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
 		POWUtils.callPOWScript(POWUtils.UNDO_URL, params);
-
+		 */
 
 		((InteractiveTextAreaPainter)getPainter()).markUndo();
 		commands.remove(commands.size()-1);
@@ -99,11 +102,13 @@ public class InteractiveTextArea extends JEditTextArea {
 		return snapshot_ids.remove(snapshot_ids.size()-1);
 	}
 	
-	private void addCommandToQueue(String command) {
+	private void addCommandToQueue(String command, boolean isUndo) {
+		System.out.println("Adding command to queue: " + command);
 		try {
 			String params = "command=" + URLEncoder.encode(command, "UTF-8") +
-			"&rehearse_uid=" + uid + "&function_num=" + functionNum;
-			ArrayList<String> r = POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params);
+			"&rehearse_uid=" + uid + "&function_num=" + functionNum
+			+ "&is_undo=" + isUndo;
+			System.out.println("UPDATECODE: " + POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -116,6 +121,25 @@ public class InteractiveTextArea extends JEditTextArea {
 		setText(getText() + response + "\n");
 		int endLine = getCaretLine() - 1;
 		((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine, errorCode == 1);
+	}
+	
+	public ArrayList<String> getQueuedCode() {
+		return codeQueue;
+	}
+	
+	public String getCode() {
+		String code = "";
+		for(String s : commands) {
+			code += s + "\n";
+		}
+		return code;
+	}
+	
+/*
+	private List<String> doPost(String command) throws Exception {
+		String params = "command=" + URLEncoder.encode(command, "UTF-8") +
+							"&rehearse_uid=" + uid;
+		return POWUtils.callPOWScript(POWUtils.REHEARSE_URL, params);
 	}
 	
 	private void executeStatement(String statement) {
@@ -150,23 +174,5 @@ public class InteractiveTextArea extends JEditTextArea {
 		}
 		
 	}
-	
-	public ArrayList<String> getQueuedCode() {
-		return codeQueue;
-	}
-	
-	private List<String> doPost(String command) throws Exception {
-		String params = "command=" + URLEncoder.encode(command, "UTF-8") +
-							"&rehearse_uid=" + uid;
-		return POWUtils.callPOWScript(POWUtils.REHEARSE_URL, params);
-	}
-	
-	public String getCode() {
-		String code = "";
-		for(String s : commands) {
-			code += s + "\n";
-		}
-		return code;
-	}
-
+*/
 }

@@ -18,19 +18,23 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 			this[param] = parameters[param];
 		}
 		var last_var;
+		console.log("Rehearse helper #" + functionNum + " called, with name=" + functionName);
 		while(true) {
 			if(rehearse_helpers[functionNum].commandQueue.length > 0) {
 				var response = new Object();
+				var o = rehearse_helpers[functionNum].commandQueue.shift();
 				response.sid = snapshot();
 				try {
-					response.text = eval(rehearse_helpers[functionNum].commandQueue.shift());
+					response.text = eval(o.code);
 					response.type = 1;
 				} catch(e) {
 					response.text = e;
 					response.type = 2;
 				} finally {
-					queue = rehearse_helpers[functionNum].responseQueue;
-					queue[queue.length] = response;
+					if (!o.isUndo) {
+						queue = rehearse_helpers[functionNum].responseQueue;
+						queue[queue.length] = response;
+					}
 				}
 			} else if(rehearse_helpers[functionNum].finishedEditing) {
 				return last_var;
@@ -41,15 +45,20 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 	}
 }
 
-function addCodeToQueue(functionNum, code) {
+function addCodeToQueue(functionNum, code, isUndo) {
+	console.log("code: " + code);
 	var queue = rehearse_helpers[functionNum].commandQueue;
-	queue[queue.length] = code;
+	o = new Object();
+	o.code = code;
+	o.isUndo = isUndo;
+	queue[queue.length] = o;
 }
 
 function getResponseFromQueue(functionNum) {
 	if(rehearse_helpers[functionNum].responseQueue.length == 0)
 		return null;
 	var r = rehearse_helpers[functionNum].responseQueue.shift();
+	console.log("response sent: " + r.text);
 	return r;
 }
 
@@ -131,7 +140,7 @@ function markDone(functionNum) {
 }
 
 function $I(functionName, parameters) {
-	//console.log("$I Called!");
+	console.log("$I Called!");
 	if (defined_functions[functionName]) {
 		callDefinedFunction(functionName, parameters);
 	} else {

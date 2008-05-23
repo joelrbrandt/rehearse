@@ -25,12 +25,6 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	private boolean done;
 	
-	private static final String RESUME_EXECUTION_URL = 
-		"http://localhost:6670/rehearse/resume_execution.sjs";
-	
-	private static final String INSERT_CODE_URL = 
-		"http://localhost:6670/rehearse/insert_code.sjs";
-	
 	private InteractiveTextArea ta;
 
 
@@ -90,6 +84,8 @@ public class Rehearse extends JFrame implements ActionListener{
 
 	private void initializeHeader(String functionName, String parameters) {
 		Panel p = new Panel();
+		if(parameters == null) parameters = "";
+		parameters = parameters.trim();
 		String prototype = "function " + functionName + " ( " + parameters + " ) ";
 		p.add(new JLabel(prototype));
 		this.add(p, BorderLayout.NORTH);

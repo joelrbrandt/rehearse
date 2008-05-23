@@ -79,7 +79,11 @@ public class RehearseClient extends TimerTask implements WindowListener {
 	}
 	
 	private void addCodeToQueue(Rehearse rehearse) {
-		
+		ArrayList<String> codeQueue = rehearse.getQueuedCode();
+		if(!codeQueue.isEmpty()) {
+			String cmd = codeQueue.remove(0);
+			
+		}
 	}
 	
 	private void markDone(Rehearse rehearse) {

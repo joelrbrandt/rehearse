@@ -14,7 +14,7 @@
 			document.writeln(result);
 			document.writeln(functionNum + "");
 			document.writeln(functionName);
-			document.writeln(parameters);
+			document.writeln(parameters + " ");
 			if(response != null)
 				document.write(response.sid + "," + response.type + "," + response.text);
 			found = true;
