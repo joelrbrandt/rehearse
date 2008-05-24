@@ -57,7 +57,6 @@ public class RehearseClient extends TimerTask implements WindowListener {
 			} else {
 				if(result.size() >= 5)
 					processResponses(rehearseWindows[functionNum], result.get(4));
-				addCodeToQueue(rehearseWindows[functionNum]);
 				if(rehearseWindows[functionNum].isDone()) {
 					markDone(rehearseWindows[functionNum]);
 					rehearseWindows[functionNum] = null;
@@ -78,13 +77,6 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		rehearse.appendResponse(sid, errorCode, responseText);
 	}
 	
-	private void addCodeToQueue(Rehearse rehearse) {
-		ArrayList<String> codeQueue = rehearse.getQueuedCode();
-		if(!codeQueue.isEmpty()) {
-			String cmd = codeQueue.remove(0);
-			
-		}
-	}
 	
 	private void markDone(Rehearse rehearse) {
 		String params = "rehearse_uid=" + rehearse.getUid() + "&function_num="

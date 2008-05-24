@@ -45,6 +45,7 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 	}
 }
 
+
 function addCodeToQueue(functionNum, code, isUndo) {
 	console.log("code: " + code);
 	var queue = rehearse_helpers[functionNum].commandQueue;
