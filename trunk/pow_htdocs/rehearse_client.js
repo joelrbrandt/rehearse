@@ -12,18 +12,18 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 	rehearse_helpers[i].inUse = false;
 	rehearse_helpers[i].finishedEditing = false;
 	rehearse_helpers[i].commandQueue = new Array();
-	rehearse_helpers[i].responseQueue = new Array();
+	rehearse_helpers[i].responseQueue = new Array();	
 	rehearse_helpers[i].func = function(functionNum, functionName, parameters) {
 		for(param in parameters) {
 			this[param] = parameters[param];
 		}
 		var last_var;
+		var initial_snapshot = snapshot();
 		console.log("Rehearse helper #" + functionNum + " called, with name=" + functionName);
 		while(true) {
 			if(rehearse_helpers[functionNum].commandQueue.length > 0) {
 				var response = new Object();
 				var o = rehearse_helpers[functionNum].commandQueue.shift();
-				response.sid = snapshot();
 				try {
 					response.text = eval(o.code);
 					response.type = 1;
@@ -31,6 +31,7 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 					response.text = e;
 					response.type = 2;
 				} finally {
+					response.sid = snapshot();
 					if (!o.isUndo) {
 						queue = rehearse_helpers[functionNum].responseQueue;
 						queue[queue.length] = response;
@@ -42,7 +43,7 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 				1+1; //breakpoint here
 			}
 		}
-	}
+	} 
 }
 
 
@@ -165,4 +166,18 @@ function $I(functionName, parameters) {
 		_interactive_now = true;
 		_interactive_now = false;
 	}*/
+}
+
+function rehearse_ajax_get(url, successfn_name) {
+	successfn = function(msg) {
+		$I(successfn_name, {response: msg});
+	};
+	$.ajax({type: "GET", url: url, success: successfn, async: false});
+}
+
+function rehearse_ajax_post(url, data, success) {
+	successfn = function(msg) {
+		$I(successfn_name, {response: msg});
+	};
+	$.ajax({type: "POST", url: url, data: data, success: successfn, async: false});
 }

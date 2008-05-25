@@ -1,5 +1,7 @@
 package edu.stanford.rehearse;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -22,17 +24,30 @@ public class InteractiveTextArea extends JEditTextArea {
 	private String unfinishedStatements = "";
 	private int uid;
 	private int functionNum;
-	private ArrayList<Integer> snapshot_ids = new ArrayList<Integer>();
-	private ArrayList<String> commands = new ArrayList<String>();
+	private CodeList codeList;
 	
 	private ArrayList<String> codeQueue = new ArrayList<String>();
 	
-	public InteractiveTextArea(int uid, int functionNum) {
+	private RehearseHighlight highlight;
+	
+	public InteractiveTextArea(int uid, int functionNum, int initialSnapshot) {
 		super();
 		this.setDocument(new SyntaxDocument());
 		this.uid = uid;
 		this.functionNum = functionNum;
+		this.codeList = new CodeList(initialSnapshot);
 		setText("");
+		highlight = new RehearseHighlight();
+		this.getPainter().addCustomHighlight(highlight);
+		this.getPainter().addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("CLICK ON LINE: " + getCaretLine());
+				if(getCaretLine() != getLineCount()-1) {
+					redo(getCaretLine());
+					setCaretPosition(getDocumentLength());
+				}
+			}
+		});
 	}
 
 	public void processKeyEvent(KeyEvent evt)
@@ -73,8 +88,10 @@ public class InteractiveTextArea extends JEditTextArea {
 		if(compilable) {
 			unfinishedStatements = unfinishedStatements.trim();
 			if(!unfinishedStatements.equals("")) {
-				commands.add(unfinishedStatements);
+				//commands.add(unfinishedStatements);
 				//executeStatement(unfinishedStatements);
+				codeList.addNewCode(getCaretLine()-1, unfinishedStatements);
+				highlight.setRedoLines(codeList.getRedoLineNums());
 				addCommandToQueue(unfinishedStatements, false);
 				unfinishedStatements = "";
 			}
@@ -82,24 +99,35 @@ public class InteractiveTextArea extends JEditTextArea {
 	}
 	
 	public void undo() {
-		if(snapshot_ids.isEmpty())
-			return;
+		int lineNum = codeList.getCurrentCommandLine();
+		int snapshotId = codeList.undo();
+		highlight.setRedoLines(codeList.getRedoLineNums());
+		if(snapshotId == -1) return;
 
-		String command = "load(" + popSnapshotID() + ");";
+		String command = "load(" + snapshotId + ");";
 		addCommandToQueue(command, true);
 		/*
 		String params = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
 		POWUtils.callPOWScript(POWUtils.UNDO_URL, params);
 		 */
 
-		((InteractiveTextAreaPainter)getPainter()).markUndo();
-		commands.remove(commands.size()-1);
-
+		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true);
+		//commands.remove(commands.size()-1);
 	}
-	
+	/*
 	private int popSnapshotID() {
 		assert(snapshot_ids.size() != 0);
 		return snapshot_ids.remove(snapshot_ids.size()-1);
+	}*/
+	
+	public void redo(int lineNum) {
+		int snapshotId = codeList.redo(lineNum);
+		highlight.setRedoLines(codeList.getRedoLineNums());
+		if(snapshotId == -1) return;
+
+		String command = "load(" + snapshotId + ");";
+		addCommandToQueue(command, true);
+		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
 	}
 	
 	private void addCommandToQueue(String command, boolean isUndo) {
@@ -115,7 +143,8 @@ public class InteractiveTextArea extends JEditTextArea {
 	}
 	
 	public void appendResponse(int snapshotID, int errorCode, String response) {
-		snapshot_ids.add(snapshotID);
+		//snapshot_ids.add(snapshotID);
+		codeList.setCurrentSnapshotId(snapshotID);
 		
 		int startLine = getCaretLine(); 
 		setText(getText() + response + "\n");
@@ -128,51 +157,7 @@ public class InteractiveTextArea extends JEditTextArea {
 	}
 	
 	public String getCode() {
-		String code = "";
-		for(String s : commands) {
-			code += s + "\n";
-		}
-		return code;
+		return codeList.getCode();
 	}
 	
-/*
-	private List<String> doPost(String command) throws Exception {
-		String params = "command=" + URLEncoder.encode(command, "UTF-8") +
-							"&rehearse_uid=" + uid;
-		return POWUtils.callPOWScript(POWUtils.REHEARSE_URL, params);
-	}
-	
-	private void executeStatement(String statement) {
-		try {
-			System.out.println("Execute statement: " + statement);
-			List<String> result = doPost(statement);
-			
-			int sid = Integer.parseInt(result.get(0));
-			System.out.println("snapshot id = " + sid);
-			snapshot_ids.add(sid);
-			
-			int errorCode = Integer.parseInt(result.get(1));
-			
-			String response = "";
-			for(int i = 2; i < result.size(); i++) {
-				response += result.get(i);
-				if(i != result.size()-1)
-					response += "\n";
-			}
-			
-			System.out.println("result = " + response);
-			
-			int startLine = getCaretLine(); 
-			setText(getText() + response);
-			int endLine = getCaretLine() - 1;
-			
-			((InteractiveTextAreaPainter)getPainter()).markResponse(startLine, endLine, errorCode == 1);
-			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
-*/
 }

@@ -3,7 +3,7 @@ var empty_window_props = ['__scope__', 'window', 'navigator', 'document', '__fir
   'scrollbars', 'frames', 'self', 'screen', 'history', 'content', 'menubar', 'toolbar',
    'locationbar', 'personalbar', 'statusbar', 'directories', 'crypto', 'pkcs11',
     'controllers', 'opener', 'frameElement', 'sessionStorage', 'globalStorage', '$', 'jQuery',
-	'snapshots', 'empty_window_props'];
+	'snapshots', 'curr_snapshot', 'empty_window_props', 'XPCNativeWrapper', 'console', 'rehearse_helpers'];
 
 var snapshots = new Array();
 
@@ -42,9 +42,9 @@ function load(id) {
 	if(id <= 0 || id > snapshots.length) 
 		return false;
 	var s = snapshots[id-1];
-	$('body').replaceWith(s.dom_body);
+	$('body').replaceWith(s.dom_body.clone(true));
 	for(var prop in s) {
-		if(prop != 'dom_body') {
+		if(prop != null && prop != 'dom_body') {
 			if(typeof s[prop] == 'object') {
 				window[prop] = clone_obj(s[prop]);
 			} else {

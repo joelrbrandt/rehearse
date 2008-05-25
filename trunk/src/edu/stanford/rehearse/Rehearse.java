@@ -25,14 +25,17 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	private boolean done;
 	
-	private InteractiveTextArea ta;
+	protected InteractiveTextArea ta;
+	
+	protected JPanel bottomPanel;
 
 
 	public static void main(String[] args) {
-		Rehearse SH = new Rehearse(1, 0, "testFunction", "");
+		Rehearse SH = new Rehearse(1, 0, "testFunction", "", 0);
 	}
 	
-	public Rehearse(int uid, int functionNum, String functionName, String parameters) {
+	public Rehearse(int uid, int functionNum, String functionName, String parameters,
+			int initialSnapshot) {
 		super("Edit that syntax...");
 		this.uid = uid;
 		this.functionNum = functionNum;
@@ -43,20 +46,22 @@ public class Rehearse extends JFrame implements ActionListener{
 		
 		initializeHeader(functionName, parameters);
 		
-		ta = new InteractiveTextArea(uid, functionNum);
+		ta = new InteractiveTextArea(uid, functionNum, initialSnapshot);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta, BorderLayout.CENTER);
 		
-		JPanel bottomPanel = new JPanel();
+		bottomPanel = new JPanel(new BorderLayout());
 		
+		JPanel buttons = new JPanel();
 		JButton undoButton = new JButton("Undo");
 		undoButton.addActionListener(this);
-		bottomPanel.add(undoButton);
+		buttons.add(undoButton);
 		
 		JButton doneButton = new JButton("Done");
 		doneButton.addActionListener(this);
-		bottomPanel.add(doneButton);
+		buttons.add(doneButton);
 		
+		bottomPanel.add(buttons, BorderLayout.SOUTH);
 		add(bottomPanel, BorderLayout.SOUTH);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	

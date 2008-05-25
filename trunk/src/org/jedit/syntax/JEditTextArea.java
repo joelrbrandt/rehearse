@@ -20,7 +20,6 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
 import java.util.Vector;
-
 /**
  * jEdit's text area component. It is more suited for editing program
  * source code than JEditorPane, because it drops the unnecessary features

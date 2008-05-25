@@ -12,7 +12,7 @@
 		document.writeln(temp);
 		window.Firebug.CommandLine.evaluate(temp, context);
 	} else {
-		document.write("Error! Command or uid not valid.");
+		document.write("Error! Command or uid not valid: uid was " + uid);
 	}
 	
 	function getContextById(uid) {

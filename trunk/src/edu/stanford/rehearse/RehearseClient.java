@@ -42,21 +42,24 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		if(uid != NO_STOPPED_WINDOWS) {
 			
 			int functionNum = Integer.parseInt(result.get(1));
-			System.out.println("function num: " + functionNum);
+			System.out.print("function num: " + functionNum + "\t");
 			
 			String functionName = result.get(2);
-			System.out.println("functionname: " + functionName);
+			System.out.println("name: " + functionName);
 			String parameters = "";
 			if(result.size() >= 4)
 				parameters = result.get(3);
 			
+			int initialSnapshot = Integer.parseInt(result.get(4));
+			
 			if(rehearseWindows[functionNum] == null) {
-				rehearseWindows[functionNum] = new Rehearse(uid, functionNum, functionName, parameters);
+				rehearseWindows[functionNum] = 
+					new Rehearse(uid, functionNum, functionName, parameters, initialSnapshot);
 				rehearseWindows[functionNum].requestFocusInWindow();
 				rehearseWindows[functionNum].toFront();
 			} else {
-				if(result.size() >= 5)
-					processResponses(rehearseWindows[functionNum], result.get(4));
+				if(result.size() >= 6)
+					processResponses(rehearseWindows[functionNum], result.get(5));
 				if(rehearseWindows[functionNum].isDone()) {
 					markDone(rehearseWindows[functionNum]);
 					rehearseWindows[functionNum] = null;

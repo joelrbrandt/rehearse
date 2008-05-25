@@ -45,6 +45,23 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		commandBreakLines.remove(commandBreakLines.size()-1);
 	}
 	
+	public void mark(int cmdLine, boolean undo) {
+		int index = commandBreakLines.indexOf(cmdLine);
+		int endLine = 0;
+		if(index == commandBreakLines.size() -1) {
+			endLine = textArea.getCaretLine();
+		} else {
+			endLine = commandBreakLines.get(index+1);
+		}
+		for(int i = cmdLine; i < endLine; i++) {
+			if(undo)
+				undoLines.add(i);
+			else
+				undoLines.remove(i);
+		}
+		invalidateLineRange(cmdLine, endLine-1);
+	}
+	
 	@Override
 	protected void paintSyntaxLine(Graphics gfx, TokenMarker tokenMarker,
 			int line, Font defaultFont, Color defaultColor, int x, int y) {
@@ -65,8 +82,4 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		else
 			super.paintPlainLine(gfx, line, defaultFont, c, x, y);
 	}
-
-	
-	
-
 }

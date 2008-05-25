@@ -11,10 +11,12 @@
 			if(parameters != null && parameters != "")
 				parameters = parameters.substring(0, parameters.length - 1);
 			var response = window.Firebug.CommandLine.evaluate("getResponseFromQueue(" + functionNum + ");", context);
+			var initialSnapshot = window.Firebug.CommandLine.evaluate("initial_snapshot", context);
 			document.writeln(result);
 			document.writeln(functionNum + "");
 			document.writeln(functionName);
 			document.writeln(parameters + " ");
+			document.writeln(initialSnapshot + "");
 			if(response != null)
 				document.write(response.sid + "," + response.type + "," + response.text);
 			found = true;
