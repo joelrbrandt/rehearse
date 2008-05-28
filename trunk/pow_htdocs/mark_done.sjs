@@ -1,7 +1,12 @@
 <?sjs
 	var uid = pow_server.POST['rehearse_uid'];
 	var functionNum = pow_server.POST['function_num'];
+	var trycount = 0;
 	var context = getContextById(uid);
+	while(context == null && trycount < 2500) {
+		context = getContextById(uid);
+		trycount++;
+	}
 	if(context != null) {
 		window.Firebug.CommandLine.evaluate("markDone(" + functionNum + ");", context);
 	}

@@ -23,6 +23,44 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		commandBreakLines.add(0);
 	}
 	
+	public void shiftLines(int startIndex, int delta) {
+		Set<Integer> newResponseLines = new HashSet<Integer>();
+		for(int i : responseLines) {
+			if(i >= startIndex)
+				newResponseLines.add(i+delta);
+			else
+				newResponseLines.add(i);
+		}
+		responseLines = newResponseLines;
+		
+		Set<Integer> newErrorLines = new HashSet<Integer>();
+		for(int i : errorLines) {
+			if(i >= startIndex)
+				newErrorLines.add(i+delta);
+			else
+				newErrorLines.add(i);
+		}
+		errorLines = newErrorLines;
+		
+		Set<Integer> newUndoLines = new HashSet<Integer>();
+		for(int i : undoLines) {
+			if(i >= startIndex)
+				newUndoLines.add(i+delta);
+			else
+				newUndoLines.add(i);
+		}
+		undoLines = newUndoLines;
+		
+		List<Integer> newBreakLines = new ArrayList<Integer>();
+		for(int i : commandBreakLines) {
+			if(i >= startIndex)
+				newBreakLines.add(i+delta);
+			else
+				newBreakLines.add(i);
+		}
+		commandBreakLines = newBreakLines;
+	}
+	
 	public void markResponse(int startLine, int endLine, boolean noError) {
 		for(int i = startLine; i <= endLine; i++) {
 			if(noError)
@@ -33,16 +71,6 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		}
 		invalidateLineRange(startLine, endLine);
 		commandBreakLines.add(textArea.getCaretLine());
-	}
-	
-	public void markUndo() {
-		int lastCommandStart = commandBreakLines.get(commandBreakLines.size()-2);
-		int caretLine = textArea.getCaretLine();
-		for(int i = lastCommandStart; i <= caretLine-1; i++) {
-			undoLines.add(i);
-		}
-		invalidateLineRange(lastCommandStart, caretLine-1);
-		commandBreakLines.remove(commandBreakLines.size()-1);
 	}
 	
 	public void mark(int cmdLine, boolean undo) {

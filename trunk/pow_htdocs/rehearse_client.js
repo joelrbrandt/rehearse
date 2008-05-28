@@ -168,14 +168,15 @@ function $I(functionName, parameters) {
 	}*/
 }
 
-function rehearse_ajax_get(url, successfn_name) {
+
+function rehearse_ajax_get(url, data, successfn_name) {
 	successfn = function(msg) {
 		$I(successfn_name, {response: msg});
 	};
-	$.ajax({type: "GET", url: url, success: successfn, async: false});
+	$.ajax({type: "GET", url: url, data: data, success: successfn, async: false});
 }
 
-function rehearse_ajax_post(url, data, success) {
+function rehearse_ajax_post(url, data, successfn_name) {
 	successfn = function(msg) {
 		$I(successfn_name, {response: msg});
 	};

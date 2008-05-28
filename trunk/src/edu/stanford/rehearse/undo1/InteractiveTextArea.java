@@ -1,4 +1,4 @@
-package edu.stanford.rehearse;
+package edu.stanford.rehearse.undo1;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,27 +18,37 @@ import org.jedit.syntax.TextAreaDefaults;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 
+import edu.stanford.rehearse.CodeTree;
+import edu.stanford.rehearse.InteractiveTextAreaPainter;
+import edu.stanford.rehearse.POWUtils;
+import edu.stanford.rehearse.RehearseClient;
+import edu.stanford.rehearse.RehearseHighlight;
+
 public class InteractiveTextArea extends JEditTextArea {
 
 
-	private String unfinishedStatements = "";
-	private int uid;
-	private int functionNum;
-	private CodeList codeList;
+	protected String unfinishedStatements = "";
+	protected int uid;
+	protected int functionNum;
+	protected CodeTree codeTree;
 	
-	private ArrayList<String> codeQueue = new ArrayList<String>();
+	protected ArrayList<String> codeQueue = new ArrayList<String>();
 	
-	private RehearseHighlight highlight;
+	protected RehearseHighlight highlight;
 	
 	public InteractiveTextArea(int uid, int functionNum, int initialSnapshot) {
 		super();
 		this.setDocument(new SyntaxDocument());
 		this.uid = uid;
 		this.functionNum = functionNum;
-		this.codeList = new CodeList(initialSnapshot);
+		this.codeTree = new CodeTree(initialSnapshot);
 		setText("");
 		highlight = new RehearseHighlight();
 		this.getPainter().addCustomHighlight(highlight);
+		setupMouseListener();
+	}
+	
+	protected void setupMouseListener() {
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("CLICK ON LINE: " + getCaretLine());
@@ -88,41 +98,36 @@ public class InteractiveTextArea extends JEditTextArea {
 		if(compilable) {
 			unfinishedStatements = unfinishedStatements.trim();
 			if(!unfinishedStatements.equals("")) {
-				//commands.add(unfinishedStatements);
-				//executeStatement(unfinishedStatements);
-				codeList.addNewCode(getCaretLine()-1, unfinishedStatements);
-				highlight.setRedoLines(codeList.getRedoLineNums());
-				addCommandToQueue(unfinishedStatements, false);
-				unfinishedStatements = "";
+				executeStatement();
 			}
 		}
 	}
 	
+	protected void executeStatement() {
+		codeTree.addNewCode(getCaretLine()-1, unfinishedStatements);
+		updateRedoLines();
+		addCommandToQueue(unfinishedStatements, false);
+		unfinishedStatements = "";
+	}
+	
+	protected void updateRedoLines() {
+		highlight.setRedoLines(codeTree.getRedoLineNums());
+	}
+	
 	public void undo() {
-		int lineNum = codeList.getCurrentCommandLine();
-		int snapshotId = codeList.undo();
-		highlight.setRedoLines(codeList.getRedoLineNums());
+		int lineNum = codeTree.getCurrentCommandLine();
+		int snapshotId = codeTree.undo();
+		updateRedoLines();
 		if(snapshotId == -1) return;
 
 		String command = "load(" + snapshotId + ");";
 		addCommandToQueue(command, true);
-		/*
-		String params = "rehearse_uid=" + uid + "&snapshot_id=" + popSnapshotID();
-		POWUtils.callPOWScript(POWUtils.UNDO_URL, params);
-		 */
-
 		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true);
-		//commands.remove(commands.size()-1);
 	}
-	/*
-	private int popSnapshotID() {
-		assert(snapshot_ids.size() != 0);
-		return snapshot_ids.remove(snapshot_ids.size()-1);
-	}*/
 	
 	public void redo(int lineNum) {
-		int snapshotId = codeList.redo(lineNum);
-		highlight.setRedoLines(codeList.getRedoLineNums());
+		int snapshotId = codeTree.redo(lineNum);
+		updateRedoLines();
 		if(snapshotId == -1) return;
 
 		String command = "load(" + snapshotId + ");";
@@ -130,21 +135,30 @@ public class InteractiveTextArea extends JEditTextArea {
 		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
 	}
 	
-	private void addCommandToQueue(String command, boolean isUndo) {
+	protected void addCommandToQueue(String command, boolean isUndo) {
 		System.out.println("Adding command to queue: " + command);
 		try {
 			String params = "command=" + URLEncoder.encode(command, "UTF-8") +
 			"&rehearse_uid=" + uid + "&function_num=" + functionNum
 			+ "&is_undo=" + isUndo;
-			System.out.println("UPDATECODE: " + POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params));
+			List<String> result;
+			do {
+				result = POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params);
+				System.out.println("update trying again");
+			} while(result.get(0).startsWith("Error"));
+			
+			System.out.println("UPDATECODE: " + result);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		RehearseClient.reschedule();
 	}
 	
 	public void appendResponse(int snapshotID, int errorCode, String response) {
-		//snapshot_ids.add(snapshotID);
-		codeList.setCurrentSnapshotId(snapshotID);
+		codeTree.setCurrentSnapshotId(snapshotID);
+		codeTree.getCurr().setResponse(response);
 		
 		int startLine = getCaretLine(); 
 		setText(getText() + response + "\n");
@@ -157,7 +171,7 @@ public class InteractiveTextArea extends JEditTextArea {
 	}
 	
 	public String getCode() {
-		return codeList.getCode();
+		return codeTree.getCode();
 	}
 	
 }

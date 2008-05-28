@@ -8,27 +8,50 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.TimerTask;
-import java.util.Timer;
+import java.util.*;
 
-public class RehearseClient extends TimerTask implements WindowListener {
+import edu.stanford.rehearse.undo1.Rehearse;
+import edu.stanford.rehearse.undo2.Rehearse2;
+import edu.stanford.rehearse.undo3.Rehearse3;
+import edu.stanford.rehearse.undo4.Rehearse4;
+
+public class RehearseClient extends TimerTask {
 	
 	private static final int DELAY = 1000;
 	private static final int NO_STOPPED_WINDOWS = -1;
 	
+	private static int numFasterTimerIters = 0;
+	private static TimerTask pollingTask;
 	private static Timer timer;
 	
 	private static Rehearse[] rehearseWindows = new Rehearse[100];
+	private static Set<String> definedFunctionNames = new HashSet<String>();
+	
 	
 	public static void main(String[] args) {
 		timer = new Timer();
-		TimerTask pollingTask = new RehearseClient();
+		pollingTask = new RehearseClient();
 		timer.scheduleAtFixedRate(pollingTask, 0, DELAY);
+	}
+	
+	public static void reschedule() {
+		timer.cancel();
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new RehearseClient(), 0, DELAY / 10);
+		numFasterTimerIters = 15;
 	}
 
 	@Override
 	public void run() {
+		
+		if(numFasterTimerIters > 0) {
+			numFasterTimerIters--;
+			if(numFasterTimerIters == 0) {
+				timer.cancel();
+				timer = new Timer();
+				timer.scheduleAtFixedRate(new RehearseClient(), 0, DELAY);
+			}
+		}
 		
 		ArrayList<String> result = 
 			POWUtils.callPOWScript(POWUtils.REHEARSE_CHECK_BP, "");
@@ -51,17 +74,19 @@ public class RehearseClient extends TimerTask implements WindowListener {
 				parameters = result.get(3);
 			
 			int initialSnapshot = Integer.parseInt(result.get(4));
-			
 			if(rehearseWindows[functionNum] == null) {
-				rehearseWindows[functionNum] = 
-					new Rehearse(uid, functionNum, functionName, parameters, initialSnapshot);
-				rehearseWindows[functionNum].requestFocusInWindow();
-				rehearseWindows[functionNum].toFront();
+				if(!definedFunctionNames.contains(functionName)) {
+					rehearseWindows[functionNum] = 
+						new Rehearse4(uid, functionNum, functionName, parameters, initialSnapshot);
+					rehearseWindows[functionNum].requestFocusInWindow();
+					rehearseWindows[functionNum].toFront();
+				}
 			} else {
 				if(result.size() >= 6)
 					processResponses(rehearseWindows[functionNum], result.get(5));
 				if(rehearseWindows[functionNum].isDone()) {
 					markDone(rehearseWindows[functionNum]);
+					definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
 					rehearseWindows[functionNum] = null;
 				}
 			}
@@ -92,16 +117,4 @@ public class RehearseClient extends TimerTask implements WindowListener {
 		POWUtils.callPOWScript(POWUtils.RESUME_EXECUTION_URL, params);
 	}
 	
-	public void windowClosed(WindowEvent arg0) {
-		TimerTask pollingTask = new RehearseClient();
-		timer.scheduleAtFixedRate(pollingTask, 0, DELAY);
-	}
-	
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosing(WindowEvent e) {}
-	public void windowDeactivated(WindowEvent e) {}
-	public void windowDeiconified(WindowEvent e) {}
-	public void windowIconified(WindowEvent e) {}
-	public void windowOpened(WindowEvent e) {}
-
 }

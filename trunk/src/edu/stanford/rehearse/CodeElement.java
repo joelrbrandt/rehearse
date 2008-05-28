@@ -6,6 +6,7 @@ public class CodeElement {
 	
 	private int lineNum;
 	private String code;
+	private String response;
 	private CodeElement parent;
 	private ArrayList<CodeElement> children;
 	private boolean isActive;
@@ -86,5 +87,15 @@ public class CodeElement {
 		}
 		return null;
 	}
+
+	public String getResponse() {
+		return response;
+	}
+
+	public void setResponse(String response) {
+		this.response = response;
+	}
+	
+	
 	
 }
