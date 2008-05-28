@@ -18,7 +18,7 @@
 		result = window.Firebug.CommandLine.evaluate("addDefinedFunction(\"" + functionName + "\",\"" + parameters + "\");", context);
 		document.writeln(result);
 	} else {
-		document.write("The specified uid (" + uid + ") wasn't found!");
+		document.write("Error! The specified uid (" + uid + ") wasn't found!");
 	}
 	
 	function getContextById(uid) {

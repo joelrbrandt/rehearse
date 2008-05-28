@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -141,8 +142,12 @@ public class Rehearse extends JFrame implements ActionListener{
 		String code = ta.getCode();
 		try {
 			String params = "rehearse_uid=" + uid + "&code=" + URLEncoder.encode(code, "UTF-8");
-			ArrayList<String> savedCode = POWUtils.callPOWScript(POWUtils.INSERT_CODE_URL, params);
-			System.out.println("Saved code: " + savedCode);
+			List<String> result;
+			do {
+				result = POWUtils.callPOWScript(POWUtils.INSERT_CODE_URL, params);
+				System.out.println("save code trying again");
+			} while(result.get(0).startsWith("Error"));
+			System.out.println("Saved code: " + result);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}
