@@ -40,9 +40,12 @@ public class RehearseHighlight implements Highlight {
 	}*/
 	
 	public void setRedoLines(Set<Integer> redoLines) {
+		Set<Integer> oldLines = this.redoLines;
 		this.redoLines = redoLines;
-		System.out.println("REDOLINES: " + redoLines);
 		for(int line : redoLines) {
+			textArea.getPainter().invalidateLine(line);
+		}
+		for(int line : oldLines) {
 			textArea.getPainter().invalidateLine(line);
 		}
 	}

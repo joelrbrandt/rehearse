@@ -32,7 +32,7 @@ public class Rehearse4 extends Rehearse  {
 	public Rehearse4(int uid, int functionNum, String functionName,
 			String parameters, int initialSnapshot) {
 		super(uid, functionNum, functionName, parameters, initialSnapshot);
-		this.setTitle("Rehearse Option2");
+		this.setTitle("Rehearse Option4");
 	}
 		
 	protected void initTextArea() {

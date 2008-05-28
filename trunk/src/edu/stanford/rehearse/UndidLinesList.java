@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 public class UndidLinesList extends JList {
 
@@ -65,6 +66,7 @@ public class UndidLinesList extends JList {
 			setEnabled(list.isEnabled());
 			setFont(list.getFont());
 			setOpaque(true);
+			setBorder(new LineBorder(Color.gray));
 			return this;
 		}
 	}
