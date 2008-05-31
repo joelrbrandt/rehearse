@@ -20,7 +20,7 @@ public class RehearseClient extends TimerTask {
 	private static final int DELAY = 1000;
 	private static final int NO_STOPPED_WINDOWS = -1;
 
-	private static final int REHEARSE_OPTION = 2;
+	private static final int REHEARSE_OPTION = 2; // 1: treeundo or 2: flatundo
 
 	private static int numFasterTimerIters = 0;
 	private static TimerTask pollingTask;
