@@ -8,10 +8,9 @@
 <div id="p1">Here is the first paragraph</div>
 <div id="p2">Here is the second paragraph</div>
 <br />
-<form>
+<form onsubmit="$I('stylize', {color : $('#term').val()}); return false;">
 	<input type="text" id="term">
-	<input type="button" value="Stylize!" 
-			onclick="$I('stylize', {color : $('#term').val()});">
+	<input type="submit" value="Stylize!">
 </form>
 <div id="empty"></div>
 </body>
