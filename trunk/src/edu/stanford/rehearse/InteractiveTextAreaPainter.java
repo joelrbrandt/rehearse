@@ -110,4 +110,10 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		else
 			super.paintPlainLine(gfx, line, defaultFont, c, x, y);
 	}
+	
+	public int getLastResponseLine() {
+		if(responseLines.isEmpty())
+			return -1;
+		return Collections.max(responseLines);
+	}
 }

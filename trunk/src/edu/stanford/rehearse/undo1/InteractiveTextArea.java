@@ -18,11 +18,13 @@ import org.jedit.syntax.TextAreaDefaults;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 
+import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.CodeTree;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.POWUtils;
 import edu.stanford.rehearse.RehearseClient;
 import edu.stanford.rehearse.RehearseHighlight;
+import edu.stanford.rehearse.undo2.InteractiveTextArea2;
 
 public class InteractiveTextArea extends JEditTextArea {
 
@@ -36,6 +38,8 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	protected RehearseHighlight highlight;
 	
+	protected InteractiveTextArea pairTextArea = null;
+	
 	public InteractiveTextArea(int uid, int functionNum, int initialSnapshot) {
 		super();
 		this.setDocument(new SyntaxDocument());
@@ -48,12 +52,16 @@ public class InteractiveTextArea extends JEditTextArea {
 		setupMouseListener();
 	}
 	
+	public void setPairTextArea(InteractiveTextArea ta) {
+		pairTextArea = ta;
+	}
+	
 	protected void setupMouseListener() {
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("CLICK ON LINE: " + getCaretLine());
 				if(getCaretLine() != getLineCount()-1) {
-					redo(getCaretLine());
+					redo(codeTree.getChildByLineNum(getCaretLine()), true);
 					setCaretPosition(getDocumentLength());
 				}
 			}
@@ -91,51 +99,97 @@ public class InteractiveTextArea extends JEditTextArea {
 		toEvaluate = getLineText(currLine);
 		System.out.println("Original string:" + toEvaluate);
 		
-		unfinishedStatements += " " + toEvaluate;
+		if(!unfinishedStatements.equals("")) unfinishedStatements += "\n";
+		unfinishedStatements += toEvaluate;
 		
 		System.out.println("Concatted string: " + unfinishedStatements);
 		boolean compilable = cx.stringIsCompilableUnit(unfinishedStatements);
 		if(compilable) {
-			unfinishedStatements = unfinishedStatements.trim();
-			if(!unfinishedStatements.equals("")) {
-				executeStatement();
+			if(!unfinishedStatements.trim().equals("")) {
+				executeStatement(unfinishedStatements, true);
+				unfinishedStatements = "";
 			}
 		}
 	}
 	
-	protected void executeStatement() {
-		codeTree.addNewCode(getCaretLine()-1, unfinishedStatements);
-		updateRedoLines();
-		addCommandToQueue(unfinishedStatements, false);
-		unfinishedStatements = "";
+	protected int countLines(String statement) {
+		int count = 1;
+		for(int i = 0; i < statement.length(); i++) {
+			if(statement.charAt(i) == '\n')
+				count++;
+		}
+		return count;
 	}
+	
+	protected void executeStatement(String statement, boolean actual) {
+		
+		if(!actual){
+			int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
+			setText(getText(0, getLineStartOffset(lastResponseLine+1)) + statement + "\n");
+			codeTree.addNewCode(lastResponseLine+1, statement);
+		} else {
+			codeTree.addNewCode(getCaretLine()-countLines(statement), statement);
+		}
+		updateRedoLines();
+		if(actual) {
+			addCommandToQueue(statement, false);
+			if(pairTextArea != null)
+				pairTextArea.executeStatement(statement, false);
+		}
+	}
+	
 	
 	protected void updateRedoLines() {
 		highlight.setRedoLines(codeTree.getRedoLineNums());
 	}
 	
-	public void undo() {
+	public void undo(boolean actual) {
 		int lineNum = codeTree.getCurrentCommandLine();
 		int snapshotId = codeTree.undo();
 		updateRedoLines();
 		if(snapshotId == -1) return;
-
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
 		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true);
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				pairTextArea.undo(false);
+		}
 	}
 	
-	public void redo(int lineNum) {
+	public void redo(CodeElement codeElem, boolean actual) {
+		if(codeElem == null)
+			return;
+		
+		int snapshotId = codeTree.redo(codeElem);
+		int lineNum = codeTree.getCurr().getLineNum();
+		updateRedoLines();
+		if(snapshotId == -1) return;
+		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				((InteractiveTextArea2)pairTextArea).redo(codeTree.getCurr(), false);
+		}
+	}
+	
+	/*
+	public void redo(int lineNum, boolean actual) {
 		int snapshotId = codeTree.redo(lineNum);
 		updateRedoLines();
 		if(snapshotId == -1) return;
-
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
 		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
-	}
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				((InteractiveTextArea2)pairTextArea).redo(codeTree.getCurr(), false);
+		}
+	}*/
 	
 	protected void addCommandToQueue(String command, boolean isUndo) {
+		command = command.replace('\n', ' ');
 		System.out.println("Adding command to queue: " + command);
 		try {
 			String params = "command=" + URLEncoder.encode(command, "UTF-8") +
@@ -172,6 +226,14 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	public String getCode() {
 		return codeTree.getCode();
+	}
+	
+
+	public void pasteCode(String code) {
+		if(code != null) {
+			setText(getText() + code);
+		}
+		setCaretPosition(getDocumentLength());
 	}
 	
 }

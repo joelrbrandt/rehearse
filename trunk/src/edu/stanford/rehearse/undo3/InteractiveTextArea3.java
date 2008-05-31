@@ -9,6 +9,7 @@ import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.undo1.InteractiveTextArea;
+import edu.stanford.rehearse.undo4.InteractiveTextArea4;
 
 public class InteractiveTextArea3 extends InteractiveTextArea {
 	
@@ -19,8 +20,9 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 		codeMap = new CodeMap();
 	}
 	
-	protected void executeStatement() {
-		super.executeStatement();
+	protected void executeStatement(String statement, boolean actual) {
+		
+		super.executeStatement(statement, actual);
 		codeMap.add(codeTree.getCurr());
 	}
 	
@@ -28,15 +30,22 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 		//override and do nothing
 	}
 	
-	public void undo(int lineNum) {
-		int snapshotId = codeTree.undo(lineNum, (InteractiveTextAreaPainter)getPainter());
+	public void undoToLine(int lineNum, boolean actual) {
+		int numUndoSteps = codeTree.stepsToLine(lineNum);
+		if(numUndoSteps != -1)
+			undo(numUndoSteps, actual);
+	}
+	
+	public void undo(int numUndoSteps, boolean actual) {
+		int snapshotId = codeTree.undo(numUndoSteps, (InteractiveTextAreaPainter)getPainter());
 		if(snapshotId == -1) return;
-		String code = codeTree.getLastUndidCode();
-		if(code != null)
-			setText(getText() + code);
 		setCaretPosition(getDocumentLength());
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				((InteractiveTextArea4)pairTextArea).undo(numUndoSteps, false);
+		}
 	}
 	
 	protected void setupMouseListener() {
@@ -45,17 +54,16 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 				int line = getCaretLine();
 				if(line != getLineCount()-1) {
 					if(codeMap.isLineActive(line)) {
-						undo(line);
+						undoToLine(line, true);
+						setCaretPosition(getDocumentLength());
 					} else {
 						String code = codeMap.getCodeAtLine(line);
-						if(code != null) {
-							setText(getText() + code);
-						}
+						pasteCode(code);
+						if(pairTextArea != null)
+							pairTextArea.pasteCode(code);
 					}
-					setCaretPosition(getDocumentLength());
 				}
 			}
 		});
 	}
-
 }

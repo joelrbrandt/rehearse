@@ -62,6 +62,6 @@ public class Rehearse4 extends Rehearse  {
 	}
 	
 	protected void undo() {
-		ta.undo();
+		ta.undo(true);
 	}
 }

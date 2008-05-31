@@ -10,6 +10,7 @@ import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.UndidLinesList;
 import edu.stanford.rehearse.undo1.InteractiveTextArea;
+import edu.stanford.rehearse.undo3.InteractiveTextArea3;
 
 public class InteractiveTextArea4 extends InteractiveTextArea {
 	
@@ -23,8 +24,8 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		this.undidLines = undidLines;
 	}
 	
-	protected void executeStatement() {
-		super.executeStatement();
+	protected void executeStatement(String statement, boolean active) {
+		super.executeStatement(statement, active);
 		codeMap.add(codeTree.getCurr());
 	}
 	
@@ -32,28 +33,43 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		//override and do nothing
 	}
 	
-	public void undo() {
+	public void undo(boolean active) {
 		CodeElement curr = codeTree.getCurr();
 		int lineNum = curr.getLineNum();
 		int snapshotId = codeTree.undo();
 		if(snapshotId == -1) return;
 		setText(getText(0, getLineEndOffset(lineNum)));
 
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
+		if(active) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				((InteractiveTextArea3)pairTextArea).undo(false);
+		}
 
 		undidLines.getUndidLinesListModel().addCodeElement(curr);
 	}
 	
-	public void undo(int lineNum) {
-		int snapshotId = codeTree.undo(lineNum, undidLines.getUndidLinesListModel());
+	public void undoToLine(int lineNum, boolean actual) {
+		int numUndoSteps = codeTree.stepsToLine(lineNum);
+		if(numUndoSteps != -1)
+			undo(numUndoSteps, actual);
+	}
+	
+	public void undo(int numUndoSteps, boolean actual) {
+		
+		int snapshotId = codeTree.undo(numUndoSteps, undidLines.getUndidLinesListModel());
 		if(snapshotId == -1) return;
 		
-		setText(getText(0, getLineEndOffset(getCaretLine())-1));
+		int lineNum = codeTree.getLastUndid().getLineNum();
+		setText(getText(0, getLineStartOffset(lineNum)));
 		setCaretPosition(getDocumentLength());
-		
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				((InteractiveTextArea3)pairTextArea).undo(numUndoSteps, false);
+		}
 	}
 	
 	protected void setupMouseListener() {
@@ -62,7 +78,7 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 				int line = getCaretLine();
 				if(line != getLineCount()-1) {
 					if(codeMap.isLineActive(line)) {
-						undo(line);
+						undoToLine(line, true);
 					} 
 				}
 			}

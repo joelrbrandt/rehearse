@@ -135,7 +135,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	}
 	
 	protected void undo() {
-		ta.undo();
+		ta.undo(true);
 	}
 	
 	protected void saveCode() {
@@ -146,7 +146,7 @@ public class Rehearse extends JFrame implements ActionListener{
 			do {
 				result = POWUtils.callPOWScript(POWUtils.INSERT_CODE_URL, params);
 				System.out.println("save code trying again");
-			} while(result.get(0).startsWith("Error"));
+			} while(result.size() == 0 || result.get(0).startsWith("Error"));
 			System.out.println("Saved code: " + result);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();

@@ -32,6 +32,42 @@ public class CodeTree {
 		return curr.getSnapshotId();
 	}
 	
+	public int stepsToLine(int lineNum) {
+		CodeElement temp = curr;
+		int numSteps = 0;
+		while(temp != root) {
+			numSteps++;
+			if(temp.getLineNum() == lineNum)
+				break;
+			temp = temp.getParent();
+		}
+		if(temp == root) return -1;
+		else return numSteps;
+	}
+	
+	public int undo(int numSteps, UndidLinesListModel model) {
+		while(numSteps != 0) {
+			if(model != null) model.addCodeElement(curr);
+			curr.setActive(false);
+			lastUndo = curr;
+			curr = curr.getParent();
+			numSteps--;
+		}
+		return curr.getSnapshotId();
+	}
+	
+	public int undo(int numSteps, InteractiveTextAreaPainter painter) {
+		while(numSteps != 0) {
+			if(painter != null) painter.mark(curr.getLineNum(), true);
+			curr.setActive(false);
+			lastUndo = curr;
+			curr = curr.getParent();
+			numSteps--;
+		}
+		return curr.getSnapshotId();
+	}
+	
+	/*
 	public int undo(int lineNum, UndidLinesListModel model) {
 		CodeElement temp = curr;
 		while(temp != root) {
@@ -74,9 +110,10 @@ public class CodeTree {
 		return curr.getSnapshotId();
 	}
 	
-	public String getLastUndidCode() {
-		if(lastUndo == null) return null;
-		return lastUndo.getCode();
+	*/
+	
+	public CodeElement getLastUndid() {
+		return lastUndo;
 	}
 	
 	
@@ -100,6 +137,16 @@ public class CodeTree {
 		return lineNums;
 	}
 	
+	public CodeElement getChildByLineNum(int lineNum) {
+		for(int i = 0; i < curr.getNumChildren(); i++) {
+			if(lineNum == curr.getChild(i).getLineNum()) {
+				return curr.getChild(i);
+			}
+		}
+		return null;
+	}
+	
+	/*
 	public int redo(int lineNum) {
 		for(int i = 0; i < curr.getNumChildren(); i++) {
 			if(lineNum == curr.getChild(i).getLineNum()) {
@@ -109,11 +156,11 @@ public class CodeTree {
 			}
 		}
 		return -1;
-	}
+	}*/
 	
 	public int redo(CodeElement codeElem) {
 		for(int i = 0; i < curr.getNumChildren(); i++) {
-			if(codeElem == curr.getChild(i)) {
+			if(codeElem.getCode().equals(curr.getChild(i).getCode())) {
 				curr = curr.getChild(i);
 				curr.setActive(true);
 				return curr.getSnapshotId();

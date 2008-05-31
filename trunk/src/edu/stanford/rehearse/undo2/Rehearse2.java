@@ -52,7 +52,7 @@ public class Rehearse2 extends Rehearse  {
 				if (e.getClickCount() == 2) {
 					int index = list.locationToIndex(e.getPoint());
 					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);					System.out.println("Double clicked on Item " + index);
-					((InteractiveTextArea2)ta).redo(ce);
+					((InteractiveTextArea2)ta).redo(ce, true);
 				}
 			}
 		});
@@ -61,6 +61,6 @@ public class Rehearse2 extends Rehearse  {
 	}
 	
 	protected void undo() {
-		ta.undo();
+		ta.undo(true);
 	}
 }

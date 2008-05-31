@@ -22,37 +22,44 @@ public class InteractiveTextArea2 extends InteractiveTextArea {
 	protected void updateRedoLines() {
 		undidLines.setRedoLines(codeTree.getRedoLineNums());
 	}
-
 	
-	public void undo() {
+	public void undo(boolean actual) {
 		CodeElement curr = codeTree.getCurr();
 		int lineNum = curr.getLineNum();
 		int snapshotId = codeTree.undo();
 		updateRedoLines();
 		if(snapshotId == -1) return;
 		setText(getText(0, getLineStartOffset(lineNum)) + getLineText(getCaretLine()));
-
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
-
-		//((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true);
 		undidLines.getUndidLinesListModel().addCodeElement(curr);
+
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				pairTextArea.undo(false);
+		}
 	}
 	
-	public void redo(CodeElement codeElem) {
+	public void redo(CodeElement codeElem, boolean actual) {
 		int snapshotId = codeTree.redo(codeElem);
+		codeElem = codeTree.getCurr();
 		codeElem.setLineNum(getCaretLine());
 		updateRedoLines();
 		if(snapshotId == -1) return;
 
-		((InteractiveTextAreaPainter)getPainter()).shiftLines(getCaretLine(), 2);
+		InteractiveTextAreaPainter painter = ((InteractiveTextAreaPainter)getPainter());
+		painter.shiftLines(getCaretLine(), countLines(codeElem.getCode()));
 		
 		setText(getText(0, getLineStartOffset(getCaretLine())) + codeElem.getCode()
 				+ "\n" + codeElem.getResponse() + "\n" + getLineText(getCaretLine()));
-		String command = "load(" + snapshotId + ");";
-		addCommandToQueue(command, true);
-		//((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
 		undidLines.getUndidLinesListModel().removeCodeElement(codeElem);
+		
+		if(actual) {
+			String command = "load(" + snapshotId + ");";
+			addCommandToQueue(command, true);
+			if(pairTextArea != null)
+				pairTextArea.redo(codeTree.getCurr(), false);
+		}
 	}
 	
 }

@@ -20,7 +20,7 @@ public class RehearseClient extends TimerTask {
 	private static final int DELAY = 1000;
 	private static final int NO_STOPPED_WINDOWS = -1;
 
-	private static final int REHEARSE_OPTION = 1;
+	private static final int REHEARSE_OPTION = 2;
 
 	private static int numFasterTimerIters = 0;
 	private static TimerTask pollingTask;
@@ -99,14 +99,18 @@ public class RehearseClient extends TimerTask {
 	private Rehearse getRehearseWindow(int uid, int functionNum,
 			String functionName, String parameters, int initialSnapshot) {
 		switch(REHEARSE_OPTION) {
+		case 2:
+			return new RehearseFlatUndo(uid, functionNum, functionName, parameters, initialSnapshot);
+		/*
 		  case 2:
 			return new Rehearse2(uid, functionNum, functionName, parameters, initialSnapshot);
 		  case 3:
 			return new Rehearse3(uid, functionNum, functionName, parameters, initialSnapshot);
 		  case 4:
 			return new Rehearse4(uid, functionNum, functionName, parameters, initialSnapshot);
+			*/
 		  default:
-			return new Rehearse(uid, functionNum, functionName, parameters, initialSnapshot);
+			return new RehearseTreeUndo(uid, functionNum, functionName, parameters, initialSnapshot);
 
 		}
 	}
