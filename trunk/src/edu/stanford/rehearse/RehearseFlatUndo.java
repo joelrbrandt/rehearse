@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,14 +37,14 @@ public class RehearseFlatUndo extends Rehearse {
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		
-		ta = new InteractiveTextArea3(uid, functionNum, initialSnapshot);
+		ta = new InteractiveTextArea3(uid, functionNum, initialSnapshot, this);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		tabbedPane.addTab("View 1", ta);
 		
 		JPanel panel = new JPanel(new BorderLayout());
 		undidLinesListModel = new UndidLinesListModel();
 		list = new UndidLinesList(undidLinesListModel);
-		ta2 = new InteractiveTextArea4(uid, functionNum, initialSnapshot, list);
+		ta2 = new InteractiveTextArea4(uid, functionNum, initialSnapshot, list, this);
 		ta2.setTokenMarker(new JavaScriptTokenMarker());
 		ta.setPairTextArea(ta2);
 		ta2.setPairTextArea(ta);
@@ -57,6 +58,21 @@ public class RehearseFlatUndo extends Rehearse {
 					ta.pasteCode(ce.getCode());
 					ta2.pasteCode(ce.getCode());
 				}
+			}
+			
+			public void mouseExited(MouseEvent e) {
+				updateInstructions("\t");
+			}
+		});
+		list.addMouseMotionListener( new MouseMotionAdapter()
+		{
+			public void mouseMoved(MouseEvent e)
+			{
+				int row = list.locationToIndex( e.getPoint() );
+				if(row >= 0 && row < list.getModel().getSize())
+					updateInstructions("Double-click to copy this code to current cursor line");
+				else
+					updateInstructions("\t");
 			}
 		});
 		list.setPreferredSize(new Dimension(200, 150));

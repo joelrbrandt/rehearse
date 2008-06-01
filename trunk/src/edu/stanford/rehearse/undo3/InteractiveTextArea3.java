@@ -3,6 +3,7 @@ package edu.stanford.rehearse.undo3;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,14 +11,15 @@ import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.undo1.InteractiveTextArea;
+import edu.stanford.rehearse.undo1.Rehearse;
 import edu.stanford.rehearse.undo4.InteractiveTextArea4;
 
 public class InteractiveTextArea3 extends InteractiveTextArea {
 	
 	protected CodeMap codeMap;
 
-	public InteractiveTextArea3(int uid, int functionNum, int initialSnapshot) {
-		super(uid, functionNum, initialSnapshot);
+	public InteractiveTextArea3(int uid, int functionNum, int initialSnapshot, Rehearse rehearse) {
+		super(uid, functionNum, initialSnapshot, rehearse);
 		codeMap = new CodeMap();
 	}
 	
@@ -72,6 +74,20 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 							pairTextArea.pasteCode(code);
 					}
 				}
+			}
+		});
+		
+		this.getPainter().addMouseMotionListener(new MouseMotionAdapter() {
+			public void mouseMoved(MouseEvent e) {
+				
+					int lineNum = yToLine(e.getY());
+					if(codeMap.isLineActive(lineNum)) {
+						rehearse.updateInstructions("Click to undo to this line");
+					} else if(!codeMap.getCodeAtLine(lineNum).equals("")){
+						rehearse.updateInstructions("Click to paste this code to current cursor line");
+					} else {
+						rehearse.updateInstructions("\t");
+					}
 			}
 		});
 	}

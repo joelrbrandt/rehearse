@@ -21,16 +21,6 @@ public class UndidLinesList extends JList {
 		super(model);
 		this.model = model;
 		redoLines = new HashSet<Integer>();
-		MouseListener mouseListener = new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
-					int index = UndidLinesList.this.locationToIndex(e.getPoint());
-					CodeElement ce = (CodeElement)UndidLinesList.this.getUndidLinesListModel().getElementAt(index);					System.out.println("Double clicked on Item " + index);
-					
-				}
-			}
-		};
-		addMouseListener(mouseListener);
 		this.setCellRenderer(new MyCellRenderer());
 	}
 
@@ -41,6 +31,11 @@ public class UndidLinesList extends JList {
 
 	public UndidLinesListModel getUndidLinesListModel() {
 		return model;
+	}
+	
+	public boolean isRedoLine(int index) {
+		CodeElement codeElem = (CodeElement)model.getElementAt(index);
+		return redoLines.contains(codeElem.getLineNum());
 	}
 
 	public class MyCellRenderer extends JLabel implements ListCellRenderer {

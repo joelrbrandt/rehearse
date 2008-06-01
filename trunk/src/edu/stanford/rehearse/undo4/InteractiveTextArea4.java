@@ -3,6 +3,7 @@ package edu.stanford.rehearse.undo4;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.UndidLinesList;
 import edu.stanford.rehearse.undo1.InteractiveTextArea;
+import edu.stanford.rehearse.undo1.Rehearse;
 import edu.stanford.rehearse.undo3.InteractiveTextArea3;
 
 public class InteractiveTextArea4 extends InteractiveTextArea {
@@ -19,8 +21,8 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 	private UndidLinesList undidLines;
 
 	public InteractiveTextArea4(int uid, int functionNum, int initialSnapshot,
-			UndidLinesList undidLines) {
-		super(uid, functionNum, initialSnapshot);
+			UndidLinesList undidLines, Rehearse rehearse) {
+		super(uid, functionNum, initialSnapshot, rehearse);
 		codeMap = new CodeMap();
 		this.undidLines = undidLines;
 	}
@@ -90,6 +92,18 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 						 Toolkit.getDefaultToolkit().beep();
 					}
 				}
+			}
+		});
+		
+		this.getPainter().addMouseMotionListener(new MouseMotionAdapter() {
+			public void mouseMoved(MouseEvent e) {
+				
+					int lineNum = yToLine(e.getY());
+					if(codeMap.isLineActive(lineNum)) {
+						rehearse.updateInstructions("Click to undo to this line");
+					} else {
+						rehearse.updateInstructions("\t");
+					}
 			}
 		});
 	}

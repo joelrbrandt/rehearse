@@ -33,6 +33,8 @@ public class Rehearse extends JFrame implements ActionListener{
 	protected InteractiveTextArea ta;
 	
 	protected JPanel bottomPanel;
+	
+	protected JLabel instructions = new JLabel("Instructions Bar");
 
 
 	public static void main(String[] args) {
@@ -67,7 +69,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	}
 	
 	protected void initTextArea() {
-		ta = new InteractiveTextArea(uid, functionNum, initialSnapshot);
+		ta = new InteractiveTextArea(uid, functionNum, initialSnapshot, this);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta, BorderLayout.CENTER);
 	}
@@ -84,8 +86,18 @@ public class Rehearse extends JFrame implements ActionListener{
 		buttons.add(doneButton);
 		
 		bottomPanel.add(new JLabel("   }"), BorderLayout.NORTH);
-		bottomPanel.add(buttons, BorderLayout.SOUTH);
+		bottomPanel.add(buttons, BorderLayout.CENTER);
+		instructions.setText("Instructions Bar");
+		instructions.setOpaque(true);
+		instructions.setBackground(Color.darkGray);
+		bottomPanel.add(instructions, BorderLayout.SOUTH);
 		add(bottomPanel, BorderLayout.SOUTH);
+	}
+	
+	public void updateInstructions(String text) {
+		if(text.trim().length() == 0)
+			text = "...";
+		instructions.setText("<html><font color=white size=+2>" + text + "</font></html>");
 	}
 	
 	public int getUid() {

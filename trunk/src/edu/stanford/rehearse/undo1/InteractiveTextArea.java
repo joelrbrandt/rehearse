@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -39,15 +40,17 @@ public class InteractiveTextArea extends JEditTextArea {
 	protected ArrayList<String> codeQueue = new ArrayList<String>();
 	
 	protected RehearseHighlight highlight;
+	protected Rehearse rehearse;
 	
 	protected InteractiveTextArea pairTextArea = null;
 	
-	public InteractiveTextArea(int uid, int functionNum, int initialSnapshot) {
+	public InteractiveTextArea(int uid, int functionNum, int initialSnapshot, Rehearse rehearse) {
 		super();
 		this.setDocument(new SyntaxDocument());
 		this.uid = uid;
 		this.functionNum = functionNum;
 		this.codeTree = new CodeTree(initialSnapshot);
+		this.rehearse = rehearse;
 		setText("");
 		highlight = new RehearseHighlight();
 		this.getPainter().addCustomHighlight(highlight);
@@ -95,6 +98,18 @@ public class InteractiveTextArea extends JEditTextArea {
 					 Toolkit.getDefaultToolkit().beep();
 				}
 				setCaretPosition(getDocumentLength());
+			}
+		});
+		
+		this.getPainter().addMouseMotionListener(new MouseMotionAdapter() {
+			public void mouseMoved(MouseEvent e) {
+				
+					int lineNum = yToLine(e.getY());
+					if(codeTree.getRedoLineNums().contains(lineNum)) {
+						rehearse.updateInstructions("Click to redo the line");
+					} else {
+						rehearse.updateInstructions("");
+					}
 			}
 		});
 	}

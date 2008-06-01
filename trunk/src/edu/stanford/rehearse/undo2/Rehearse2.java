@@ -39,7 +39,7 @@ public class Rehearse2 extends Rehearse  {
 
 		undidLinesListModel = new UndidLinesListModel();
 		list = new UndidLinesList(undidLinesListModel);
-		ta = new InteractiveTextArea2(uid, functionNum, initialSnapshot, list);
+		ta = new InteractiveTextArea2(uid, functionNum, initialSnapshot, list, this);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta, BorderLayout.CENTER);
 	}

@@ -28,7 +28,7 @@ public class Rehearse3 extends Rehearse  {
 	}
 	
 	protected void initTextArea() {
-		ta = new InteractiveTextArea3(uid, functionNum, initialSnapshot);
+		ta = new InteractiveTextArea3(uid, functionNum, initialSnapshot, this);
 		ta.setTokenMarker(new JavaScriptTokenMarker());
 		add(ta, BorderLayout.CENTER);
 	}

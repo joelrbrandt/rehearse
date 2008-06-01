@@ -6,14 +6,15 @@ import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.UndidLinesList;
 import edu.stanford.rehearse.UndidLinesList.UndidLinesListModel;
 import edu.stanford.rehearse.undo1.InteractiveTextArea;
+import edu.stanford.rehearse.undo1.Rehearse;
 
 public class InteractiveTextArea2 extends InteractiveTextArea {
 
 	private UndidLinesList undidLines;
 	
 	public InteractiveTextArea2(int uid, int functionNum, int initialSnapshot, 
-			UndidLinesList undidLines) {
-		super(uid, functionNum, initialSnapshot);
+			UndidLinesList undidLines, Rehearse rehearse) {
+		super(uid, functionNum, initialSnapshot, rehearse);
 		this.undidLines = undidLines;
 	}
 	
