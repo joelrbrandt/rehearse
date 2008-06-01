@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -36,6 +37,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	
 	protected JLabel instructions = new JLabel("Instructions Bar");
 
+	private static final String SAVE_FILE = "C:\\xampp\\htdocs\\study\\test\\rehearse_saves.js";
 
 	public static void main(String[] args) {
 		Rehearse SH = new Rehearse(1, 0, "testFunction", "", 0);
@@ -177,6 +179,34 @@ public class Rehearse extends JFrame implements ActionListener{
 				System.out.println("save code trying again");
 			} while(result.size() == 0 || result.get(0).startsWith("Error"));
 			System.out.println("Saved code: " + result);
+			
+			boolean started = false;
+			String codeToSave = "";
+			for (String s : result) {
+				if (started) {
+					if (s.contains("ENDSAVE")) {
+						break;
+					} else {
+						codeToSave = codeToSave + s + "\n"; 
+					}
+				}
+				else if (!started && s.contains("STARTSAVE")) {
+					started = true;
+				}
+			}
+			
+			System.out.println("CODE TO PUT IN THE FILE:");
+			System.out.println(codeToSave);
+			
+			try {
+				FileWriter fw = new FileWriter(SAVE_FILE, true); // second param says to append to file
+				fw.write(codeToSave);
+				fw.close();
+			} catch (Exception e) {
+				System.out.println("Error writing to the save file!");
+				e.printStackTrace();
+			}
+			
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}
