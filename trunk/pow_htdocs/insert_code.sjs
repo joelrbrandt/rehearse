@@ -17,6 +17,10 @@
 		document.writeln(result);
 		result = window.Firebug.CommandLine.evaluate("addDefinedFunction(\"" + functionName + "\",\"" + parameters + "\");", context);
 		document.writeln(result);
+		document.writeln("STARTSAVE");
+		document.writeln(functionStr);
+		document.writeln("addDefinedFunction(\"" + functionName + "\",\"" + parameters + "\");");
+		document.writeln("ENDSAVE");
 	} else {
 		document.write("Error! The specified uid (" + uid + ") wasn't found!");
 	}
