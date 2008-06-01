@@ -46,24 +46,29 @@ public class CodeTree {
 	}
 	
 	public int undo(int numSteps, UndidLinesListModel model) {
-		while(numSteps != 0) {
+		if(curr == root) return -1;
+		while(numSteps != 0 && curr != null) {
 			if(model != null) model.addCodeElement(curr);
 			curr.setActive(false);
 			lastUndo = curr;
 			curr = curr.getParent();
 			numSteps--;
 		}
+		if(curr == null)
+			return -1;
 		return curr.getSnapshotId();
 	}
 	
 	public int undo(int numSteps, InteractiveTextAreaPainter painter) {
-		while(numSteps != 0) {
+		if(curr == root) return -1;
+		while(numSteps != 0 && curr != null) {
 			if(painter != null) painter.mark(curr.getLineNum(), true);
 			curr.setActive(false);
 			lastUndo = curr;
 			curr = curr.getParent();
 			numSteps--;
 		}
+		if(curr == null) return -1;
 		return curr.getSnapshotId();
 	}
 	

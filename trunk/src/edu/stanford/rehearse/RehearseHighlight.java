@@ -37,6 +37,8 @@ public class RehearseHighlight implements Highlight {
 		int height = textArea.getPainter().getFontMetrics().getHeight() + 1;
 		if(redoLines.contains(line)) {
 			gfx.setColor(new Color(255, 250, 205));
+		} else if(textArea.getCaretLine() == line) {
+			gfx.setColor(new Color(240, 240, 240));
 		} else {
 			gfx.setColor(Color.white);
 		}

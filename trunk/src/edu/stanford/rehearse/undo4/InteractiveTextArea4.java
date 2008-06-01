@@ -1,5 +1,6 @@
 package edu.stanford.rehearse.undo4;
 
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -34,6 +35,8 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 	}
 	
 	public void undo(boolean active) {
+		undo(1, active);
+		/*
 		CodeElement curr = codeTree.getCurr();
 		int lineNum = curr.getLineNum();
 		int snapshotId = codeTree.undo();
@@ -48,6 +51,7 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		}
 
 		undidLines.getUndidLinesListModel().addCodeElement(curr);
+		*/
 	}
 	
 	public void undoToLine(int lineNum, boolean actual) {
@@ -64,6 +68,7 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		int lineNum = codeTree.getLastUndid().getLineNum();
 		setText(getText(0, getLineStartOffset(lineNum)));
 		setCaretPosition(getDocumentLength());
+		((InteractiveTextAreaPainter)getPainter()).setCeiling(getLineCount());
 		if(actual) {
 			String command = "load(" + snapshotId + ");";
 			addCommandToQueue(command, true);
@@ -73,13 +78,16 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 	}
 	
 	protected void setupMouseListener() {
+		//removeAllMouseListeners();
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int line = getCaretLine();
 				if(line != getLineCount()-1) {
 					if(codeMap.isLineActive(line)) {
 						undoToLine(line, true);
-					} 
+					} else {
+						 Toolkit.getDefaultToolkit().beep();
+					}
 				}
 			}
 		});

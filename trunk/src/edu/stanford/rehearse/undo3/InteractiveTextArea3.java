@@ -1,5 +1,6 @@
 package edu.stanford.rehearse.undo3;
 
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -36,6 +37,10 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 			undo(numUndoSteps, actual);
 	}
 	
+	public void undo(boolean actual) {
+		undo(1, actual);
+	}
+	
 	public void undo(int numUndoSteps, boolean actual) {
 		int snapshotId = codeTree.undo(numUndoSteps, (InteractiveTextAreaPainter)getPainter());
 		if(snapshotId == -1) return;
@@ -58,6 +63,7 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 						setCaretPosition(getDocumentLength());
 					} else {
 						String code = codeMap.getCodeAtLine(line);
+						if(code.equals(""))  Toolkit.getDefaultToolkit().beep();
 						pasteCode(code);
 						if(pairTextArea != null)
 							pairTextArea.pasteCode(code);

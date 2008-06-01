@@ -83,6 +83,7 @@ public class Rehearse extends JFrame implements ActionListener{
 		doneButton.addActionListener(this);
 		buttons.add(doneButton);
 		
+		bottomPanel.add(new JLabel("   }"), BorderLayout.NORTH);
 		bottomPanel.add(buttons, BorderLayout.SOUTH);
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
@@ -111,9 +112,25 @@ public class Rehearse extends JFrame implements ActionListener{
 		Panel p = new Panel();
 		if(parameters == null) parameters = "";
 		parameters = parameters.trim();
-		String prototype = "function " + functionName + " ( " + parameters + " ) ";
-		p.add(new JLabel(prototype));
-		this.add(p, BorderLayout.NORTH);
+		String styleParam = "   ";
+		String[] param_parts = parameters.split(",");
+		for(String s: param_parts) {
+			int index = s.indexOf('=');
+			if(index != -1) {
+				styleParam += "<b>" + s.substring(0, index) + "</b>";
+				styleParam += "=";
+				styleParam += "<font color=blue>" + s.substring(index+1) + "</font>";
+			} else {
+				styleParam += s;
+			}
+		}
+		
+		String prototype = "<html><font color=green>function</font> "
+			+ functionName + " ( " + styleParam + " ) {</html>";
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		panel.add(new JLabel(prototype));
+		this.add(panel, BorderLayout.NORTH);
+		
 	}
 	
 	public ArrayList<String> getQueuedCode() {

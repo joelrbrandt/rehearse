@@ -20,7 +20,10 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 	public InteractiveTextAreaPainter(JEditTextArea textArea,
 			TextAreaDefaults defaults) {
 		super(textArea, defaults);
+		setEOLMarkersPainted(false);
+		setInvalidLinesPainted(false);
 		commandBreakLines.add(0);
+		System.out.println("NEW PAINTER SIZE:" + responseLines.size());
 	}
 	
 	public void shiftLines(int startIndex, int delta) {
@@ -95,10 +98,12 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 			int line, Font defaultFont, Color defaultColor, int x, int y) {
 		
 		Color c;
+		Font f = defaultFont;
 		if(undoLines.contains(line)) {
 			c = Color.lightGray;
 		} else if(responseLines.contains(line)) {
 			c = Color.blue;
+			f = defaultFont.deriveFont(Font.ITALIC);
 		} else if(errorLines.contains(line)) {
 			c = Color.red;
 		} else {
@@ -106,14 +111,23 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		}
 		
 		if(c == defaultColor)
-			super.paintSyntaxLine(gfx, tokenMarker, line, defaultFont, c, x, y);
+			super.paintSyntaxLine(gfx, tokenMarker, line, f, c, x, y);
 		else
-			super.paintPlainLine(gfx, line, defaultFont, c, x, y);
+			super.paintPlainLine(gfx, line, f, c, x, y);
 	}
 	
 	public int getLastResponseLine() {
-		if(responseLines.isEmpty())
-			return -1;
-		return Collections.max(responseLines);
+		Set<Integer> c = new HashSet<Integer>();
+		c.addAll(responseLines);
+		c.addAll(errorLines);
+		if(c.isEmpty()) return -1;
+		return Collections.max(c);
+	}
+	
+	public void setCeiling(int lineNum) {
+		for(int r: responseLines) {
+			if(r >= lineNum)
+				responseLines.remove(r);
+		}
 	}
 }

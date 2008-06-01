@@ -1,4 +1,6 @@
 package edu.stanford.rehearse.undo2;
+import java.awt.Toolkit;
+
 import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.UndidLinesList;
@@ -17,6 +19,7 @@ public class InteractiveTextArea2 extends InteractiveTextArea {
 	
 	protected void setupMouseListener() {
 		// override and do nothing
+		 Toolkit.getDefaultToolkit().beep();
 	}
 	
 	protected void updateRedoLines() {

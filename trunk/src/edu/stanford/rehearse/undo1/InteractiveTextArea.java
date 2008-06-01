@@ -1,7 +1,9 @@
 package edu.stanford.rehearse.undo1;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -49,11 +51,29 @@ public class InteractiveTextArea extends JEditTextArea {
 		setText("");
 		highlight = new RehearseHighlight();
 		this.getPainter().addCustomHighlight(highlight);
+		constrainMouseListeners();
+		
 		setupMouseListener();
+		setEnabled(true);
 	}
 	
 	public void setPairTextArea(InteractiveTextArea ta) {
 		pairTextArea = ta;
+	}
+	
+	protected void constrainMouseListeners() {
+		MouseListener[] listeners = this.getPainter().getMouseListeners();
+		for(MouseListener listener: listeners)
+			getPainter().removeMouseListener(listener);
+		
+		this.getPainter().addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				requestFocus();
+				setCaretVisible(true);
+				focusedComponent = InteractiveTextArea.this;
+				setCaretPosition(getDocumentLength());
+			}
+		});
 	}
 	
 	protected void setupMouseListener() {
@@ -62,8 +82,10 @@ public class InteractiveTextArea extends JEditTextArea {
 				System.out.println("CLICK ON LINE: " + getCaretLine());
 				if(getCaretLine() != getLineCount()-1) {
 					redo(codeTree.getChildByLineNum(getCaretLine()), true);
-					setCaretPosition(getDocumentLength());
+				} else {
+					 Toolkit.getDefaultToolkit().beep();
 				}
+				setCaretPosition(getDocumentLength());
 			}
 		});
 	}
@@ -79,13 +101,34 @@ public class InteractiveTextArea extends JEditTextArea {
 			inputHandler.keyTyped(evt);
 			break;
 		case KeyEvent.KEY_PRESSED:
-			inputHandler.keyPressed(evt);
+			if(isMovementAllowed(evt))
+				inputHandler.keyPressed(evt);
 			break;
 		case KeyEvent.KEY_RELEASED:
-			inputHandler.keyReleased(evt);
-			if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
+			if(evt.getKeyCode() == KeyEvent.VK_Z &&
+					(evt.isControlDown() || evt.isMetaDown())) {
+				undo(true);
+			} else if(isMovementAllowed(evt)) {
+				
+				inputHandler.keyReleased(evt);
+				if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
+			}
 			break;
 		}
+	}
+	
+	private boolean isMovementAllowed(KeyEvent evt) {
+		if(evt.getKeyCode() == KeyEvent.VK_DOWN || evt.getKeyCode() == KeyEvent.VK_UP)
+			return false;
+		
+		int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
+		if(evt.getKeyCode() == KeyEvent.VK_LEFT &&
+			getCaretPosition() == getLineStartOffset(lastResponseLine+1))
+			return false;
+		if(evt.getKeyCode() == KeyEvent.VK_RIGHT &&
+				getCaretPosition() == getLineEndOffset(getLineCount()-1))
+			return false;
+		return true;
 	}
 	
 	public void parseLastLine() {
@@ -124,8 +167,14 @@ public class InteractiveTextArea extends JEditTextArea {
 	protected void executeStatement(String statement, boolean actual) {
 		
 		if(!actual){
+			//TODO: fix this
 			int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
-			setText(getText(0, getLineStartOffset(lastResponseLine+1)) + statement + "\n");
+			if(lastResponseLine < 0) lastResponseLine = -1;
+			String currText = getText(0, getLineStartOffset(lastResponseLine+1));
+			if(currText != null)
+				setText(currText + statement + "\n");
+			else
+				setText(statement + "\n");
 			codeTree.addNewCode(lastResponseLine+1, statement);
 		} else {
 			codeTree.addNewCode(getCaretLine()-countLines(statement), statement);
