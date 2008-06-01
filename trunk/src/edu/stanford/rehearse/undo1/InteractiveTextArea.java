@@ -51,9 +51,10 @@ public class InteractiveTextArea extends JEditTextArea {
 		setText("");
 		highlight = new RehearseHighlight();
 		this.getPainter().addCustomHighlight(highlight);
-		constrainMouseListeners();
+		
 		
 		setupMouseListener();
+		//constrainMouseListeners();
 		setEnabled(true);
 	}
 	
