@@ -65,10 +65,10 @@ function getResponseFromQueue(functionNum) {
 }
 
 function setupPOW() {
-	var url = pow_server_loc;
 	window._rehearse_uid = Math.ceil(10000*Math.random());
+	var url = pow_server_loc + "&rehearse_uid=" + window._rehearse_uid;
 	
-	$.post(url, {rehearse_uid : window._rehearse_uid});
+	$.get(url);
 }
 
 function addLoadEvent(func) {

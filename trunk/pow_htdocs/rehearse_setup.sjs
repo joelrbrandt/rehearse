@@ -1,5 +1,5 @@
 <?sjs
-	var uid = pow_server.POST['rehearse_uid'];
+	var uid = pow_server.GET['rehearse_uid'];
 	
 	var currWindow = getCurrentWindow(uid);
 	
