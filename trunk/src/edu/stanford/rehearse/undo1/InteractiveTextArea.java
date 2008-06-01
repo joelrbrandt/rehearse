@@ -52,37 +52,45 @@ public class InteractiveTextArea extends JEditTextArea {
 		highlight = new RehearseHighlight();
 		this.getPainter().addCustomHighlight(highlight);
 		
-		
+		removeAllMouseListeners();
 		setupMouseListener();
-		//constrainMouseListeners();
+		
+		this.getPainter().addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				giveFocus();
+				setCaretPosition(getDocumentLength());
+			}
+		});
+		
 		setEnabled(true);
+		giveFocus();
+	}
+	
+	public void giveFocus() {
+		requestFocus();
+		setCaretVisible(true);
+		focusedComponent = this;
 	}
 	
 	public void setPairTextArea(InteractiveTextArea ta) {
 		pairTextArea = ta;
 	}
 	
-	protected void constrainMouseListeners() {
+	protected void removeAllMouseListeners() {
 		MouseListener[] listeners = this.getPainter().getMouseListeners();
 		for(MouseListener listener: listeners)
 			getPainter().removeMouseListener(listener);
-		
-		this.getPainter().addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				requestFocus();
-				setCaretVisible(true);
-				focusedComponent = InteractiveTextArea.this;
-				setCaretPosition(getDocumentLength());
-			}
-		});
 	}
 	
 	protected void setupMouseListener() {
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("CLICK ON LINE: " + getCaretLine());
-				if(getCaretLine() != getLineCount()-1) {
-					redo(codeTree.getChildByLineNum(getCaretLine()), true);
+				int lineNum = yToLine(e.getY());
+
+				System.out.println("LINE CLICKED: " + lineNum);
+				if(lineNum != getLineCount() -1) {
+				//if(getCaretLine() != getLineCount()-1) {
+					redo(codeTree.getChildByLineNum(lineNum), true);
 				} else {
 					 Toolkit.getDefaultToolkit().beep();
 				}

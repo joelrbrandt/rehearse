@@ -54,6 +54,7 @@ public class Rehearse4 extends Rehearse  {
 					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);
 					ta.setText(ta.getText() + ce.getCode());
 					ta.setCaretPosition(ta.getDocumentLength());
+					ta.giveFocus();
 				}
 			}
 		});

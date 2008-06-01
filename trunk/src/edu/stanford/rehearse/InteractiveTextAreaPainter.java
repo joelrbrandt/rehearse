@@ -125,9 +125,11 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 	}
 	
 	public void setCeiling(int lineNum) {
+		HashSet<Integer> newSet = new HashSet<Integer>();
 		for(int r: responseLines) {
-			if(r >= lineNum)
-				responseLines.remove(r);
+			if(r < lineNum)
+				newSet.add(r);
 		}
+		responseLines = newSet;
 	}
 }

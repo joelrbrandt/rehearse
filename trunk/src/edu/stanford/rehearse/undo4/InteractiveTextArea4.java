@@ -81,7 +81,8 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		//removeAllMouseListeners();
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				int line = getCaretLine();
+				//int line = getCaretLine();
+				int line = yToLine(e.getY());
 				if(line != getLineCount()-1) {
 					if(codeMap.isLineActive(line)) {
 						undoToLine(line, true);
