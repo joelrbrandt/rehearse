@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.*;
@@ -28,6 +29,8 @@ public class Rehearse extends JFrame implements ActionListener{
 	protected int uid;
 	protected int functionNum;
 	protected String functionName;
+	protected ArrayList<String> paramNames = new ArrayList<String>();
+	
 	protected int initialSnapshot;
 	
 	protected boolean done;
@@ -39,6 +42,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	protected JLabel instructions = new JLabel("Instructions Bar");
 
 	private static final String SAVE_FILE = "C:\\xampp\\htdocs\\study\\test\\rehearse_saves.js";
+	private static final String LOG_FILE = "C:\\xampp\\htdocs\\study\test\\rehearse_log";
 
 	public static void main(String[] args) {
 		Rehearse SH = new Rehearse(1, 0, "testFunction", "", 0);
@@ -136,7 +140,9 @@ public class Rehearse extends JFrame implements ActionListener{
 		for(String s: param_parts) {
 			int index = s.indexOf('=');
 			if(index != -1) {
-				styleParam += "<b>" + s.substring(0, index) + "</b>";
+				String paramName = s.substring(0, index);
+				paramNames.add(paramName);
+				styleParam += "<b>" + paramName + "</b>";
 				styleParam += "=";
 				styleParam += "<font color=blue>" + s.substring(index+1) + "</font>";
 			} else {
@@ -174,6 +180,7 @@ public class Rehearse extends JFrame implements ActionListener{
 	}
 
 	protected void doneHandler() {
+		writeCodeToLog();
 		saveCode();
 		done = true;
 		RehearseClient.markDone(this, functionNum);
@@ -185,8 +192,49 @@ public class Rehearse extends JFrame implements ActionListener{
 		ta.undo(true);
 	}
 	
+	public void writeCodeToLog() {
+		String output = "[ " + new Date() + "]\nfunction(";
+		for(int i = 0; i < paramNames.size(); i++) {
+			if(i == paramNames.size() - 1)
+				output += paramNames.get(i);
+			else
+				output += paramNames.get(i) + ", ";
+		}
+		output += ") {\n";
+
+		ArrayList<String> codeList = ta.getCode();
+		String code = "";
+		for(int i = 0; i < codeList.size(); i++) {
+			if(i == codeList.size() - 1) {
+				code += "return " + codeList.get(i) + "\n";
+			} else {
+				code += codeList.get(i) + "\n";
+			}
+		}
+		
+		output += code + "} \n\n";
+		
+		try {
+			FileWriter fw = new FileWriter(LOG_FILE, true); // second param says to append to file
+			fw.write(output);
+			fw.close();
+		} catch (Exception e) {
+			System.out.println("Error writing to the log file!");
+			e.printStackTrace();
+		}
+	}
+	
 	protected void saveCode() {
-		String code = ta.getCode();
+		ArrayList<String> codeList = ta.getCode();
+		String code = "";
+		for(int i = 0; i < codeList.size(); i++) {
+			if(i == codeList.size() - 1) {
+				code += "return " + codeList.get(i) + "\n";
+			} else {
+				code += codeList.get(i) + "\n";
+			}
+		}
+	
 		try {
 			String params = "rehearse_uid=" + uid + "&code=" + URLEncoder.encode(code, "UTF-8");
 			List<String> result;

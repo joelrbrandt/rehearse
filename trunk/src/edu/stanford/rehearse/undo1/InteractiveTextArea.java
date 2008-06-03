@@ -212,6 +212,7 @@ public class InteractiveTextArea extends JEditTextArea {
 		}
 		updateRedoLines();
 		if(actual) {
+			rehearse.writeCodeToLog();
 			addCommandToQueue(statement, false);
 			if(pairTextArea != null)
 				pairTextArea.executeStatement(statement, false);
@@ -308,7 +309,7 @@ public class InteractiveTextArea extends JEditTextArea {
 		return codeQueue;
 	}
 	
-	public String getCode() {
+	public ArrayList<String> getCode() {
 		return codeTree.getCode();
 	}
 	
