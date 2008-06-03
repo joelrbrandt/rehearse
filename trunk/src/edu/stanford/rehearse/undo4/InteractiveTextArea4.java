@@ -7,6 +7,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
@@ -17,19 +19,12 @@ import edu.stanford.rehearse.undo3.InteractiveTextArea3;
 
 public class InteractiveTextArea4 extends InteractiveTextArea {
 	
-	protected CodeMap codeMap;
 	private UndidLinesList undidLines;
 
 	public InteractiveTextArea4(int uid, int functionNum, int initialSnapshot,
 			UndidLinesList undidLines, Rehearse rehearse) {
 		super(uid, functionNum, initialSnapshot, rehearse);
-		codeMap = new CodeMap();
 		this.undidLines = undidLines;
-	}
-	
-	protected void executeStatement(String statement, boolean active) {
-		super.executeStatement(statement, active);
-		codeMap.add(codeTree.getCurr());
 	}
 	
 	protected void updateRedoLines() {
@@ -83,12 +78,13 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 		//removeAllMouseListeners();
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)) return;
 				//int line = getCaretLine();
 				int line = yToLine(e.getY());
 				if(line != getLineCount()-1) {
 					if(codeMap.isLineActive(line)) {
 						undoToLine(line, true);
-					} else {
+					} else{
 						 Toolkit.getDefaultToolkit().beep();
 					}
 				}
@@ -102,7 +98,7 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 					if(codeMap.isLineActive(lineNum)) {
 						rehearse.updateInstructions("Click to undo to this line");
 					} else {
-						rehearse.updateInstructions("\t");
+						rehearse.updateInstructions("");
 					}
 			}
 		});

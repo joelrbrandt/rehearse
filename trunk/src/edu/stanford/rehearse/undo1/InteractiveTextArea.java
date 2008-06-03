@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -15,6 +16,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import org.jedit.syntax.JEditTextArea;
 import org.jedit.syntax.SyntaxDocument;
 import org.jedit.syntax.TextAreaDefaults;
@@ -22,6 +25,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 
 import edu.stanford.rehearse.CodeElement;
+import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.CodeTree;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
 import edu.stanford.rehearse.POWUtils;
@@ -36,6 +40,8 @@ public class InteractiveTextArea extends JEditTextArea {
 	protected int uid;
 	protected int functionNum;
 	protected CodeTree codeTree;
+
+	protected CodeMap codeMap;
 	
 	protected ArrayList<String> codeQueue = new ArrayList<String>();
 	
@@ -50,6 +56,7 @@ public class InteractiveTextArea extends JEditTextArea {
 		this.uid = uid;
 		this.functionNum = functionNum;
 		this.codeTree = new CodeTree(initialSnapshot);
+		this.codeMap = new CodeMap();
 		this.rehearse = rehearse;
 		setText("");
 		highlight = new RehearseHighlight();
@@ -60,6 +67,16 @@ public class InteractiveTextArea extends JEditTextArea {
 		
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
+				int line = yToLine(e.getY());
+				if(SwingUtilities.isRightMouseButton(e) && line != getLineCount()-1) {
+					System.out.println("RIGHT CLICK ON LINE " + line);
+					String code = codeMap.getCodeAtLine(line);
+					if(code.equals(""))  Toolkit.getDefaultToolkit().beep();
+					pasteCode(code);
+					if(pairTextArea != null)
+						pairTextArea.pasteCode(code);
+				}
+				
 				giveFocus();
 				setCaretPosition(getDocumentLength());
 			}
@@ -83,18 +100,23 @@ public class InteractiveTextArea extends JEditTextArea {
 		MouseListener[] listeners = this.getPainter().getMouseListeners();
 		for(MouseListener listener: listeners)
 			getPainter().removeMouseListener(listener);
+		
+		MouseMotionListener[] mmListeners = this.getPainter().getMouseMotionListeners();
+		for(MouseMotionListener listener: mmListeners)
+			getPainter().removeMouseMotionListener(listener);
 	}
 	
 	protected void setupMouseListener() {
 		this.getPainter().addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
+			public void mousePressed(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)) return;
 				int lineNum = yToLine(e.getY());
 
-				System.out.println("LINE CLICKED: " + lineNum);
-				if(lineNum != getLineCount() -1) {
-				//if(getCaretLine() != getLineCount()-1) {
+				System.out.println("LINE CLICKED: " + lineNum + " LINE COUNT: " + getLineCount());
+				//if(lineNum != getLineCount() -1) {
+				if(codeTree.getRedoLineNums().contains(lineNum)) {
 					redo(codeTree.getChildByLineNum(lineNum), true);
-				} else {
+				} else if(lineNum != getLineCount() - 1) {
 					 Toolkit.getDefaultToolkit().beep();
 				}
 				setCaretPosition(getDocumentLength());
@@ -198,7 +220,6 @@ public class InteractiveTextArea extends JEditTextArea {
 	protected void executeStatement(String statement, boolean actual) {
 		
 		if(!actual){
-			//TODO: fix this
 			int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
 			if(lastResponseLine < 0) lastResponseLine = -1;
 			String currText = getText(0, getLineStartOffset(lastResponseLine+1));
@@ -217,6 +238,7 @@ public class InteractiveTextArea extends JEditTextArea {
 			if(pairTextArea != null)
 				pairTextArea.executeStatement(statement, false);
 		}
+		codeMap.add(codeTree.getCurr());
 	}
 	
 	
@@ -320,5 +342,6 @@ public class InteractiveTextArea extends JEditTextArea {
 		}
 		setCaretPosition(getDocumentLength());
 	}
+	
 	
 }

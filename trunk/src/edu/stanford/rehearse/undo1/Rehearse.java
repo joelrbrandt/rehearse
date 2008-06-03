@@ -15,8 +15,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 
 import org.jedit.syntax.JavaScriptTokenMarker;
@@ -38,6 +40,8 @@ public class Rehearse extends JFrame implements ActionListener{
 	protected InteractiveTextArea ta;
 	
 	protected JPanel bottomPanel;
+	
+	private Random random = new Random();
 	
 	protected JLabel instructions = new JLabel("Instructions Bar");
 
@@ -97,18 +101,23 @@ public class Rehearse extends JFrame implements ActionListener{
 		doneButton.addActionListener(this);
 		buttons.add(doneButton);
 		
-		bottomPanel.add(new JLabel("   }"), BorderLayout.NORTH);
+		JLabel bottomLabel = new JLabel("<html>  }<br>" +
+			"   -At any point, right-click on a line of command to paste it to cursor position.<br>" +
+			"   -The last line is executed as a return statement. Do not directly write return statements.</html>");
+		bottomLabel.setBorder(new EmptyBorder(10, 20, 10, 20));
+		bottomPanel.add(bottomLabel, BorderLayout.NORTH);
 		bottomPanel.add(buttons, BorderLayout.CENTER);
-		instructions.setText("Instructions Bar");
 		instructions.setOpaque(true);
 		instructions.setBackground(Color.darkGray);
+		updateInstructions("");
 		bottomPanel.add(instructions, BorderLayout.SOUTH);
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	public void updateInstructions(String text) {
-		if(text.trim().length() == 0)
+		if(text.trim().length() == 0) {
 			text = "...";
+		}
 		instructions.setText("<html><font color=white size=+2>" + text + "</font></html>");
 	}
 	

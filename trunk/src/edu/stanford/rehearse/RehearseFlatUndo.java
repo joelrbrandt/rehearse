@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.jedit.syntax.JavaScriptTokenMarker;
 
@@ -58,10 +59,17 @@ public class RehearseFlatUndo extends Rehearse {
 					ta.pasteCode(ce.getCode());
 					ta2.pasteCode(ce.getCode());
 				}
+				
+				if(SwingUtilities.isRightMouseButton(e)) {
+					int index = list.locationToIndex(e.getPoint());
+					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);
+					ta.pasteCode(ce.getCode());
+					ta2.pasteCode(ce.getCode());
+				}
 			}
 			
 			public void mouseExited(MouseEvent e) {
-				updateInstructions("\t");
+				updateInstructions("");
 			}
 		});
 		list.addMouseMotionListener( new MouseMotionAdapter()
@@ -72,7 +80,7 @@ public class RehearseFlatUndo extends Rehearse {
 				if(row >= 0 && row < list.getModel().getSize())
 					updateInstructions("Double-click to copy this code to current cursor line");
 				else
-					updateInstructions("\t");
+					updateInstructions("");
 			}
 		});
 		list.setPreferredSize(new Dimension(200, 150));

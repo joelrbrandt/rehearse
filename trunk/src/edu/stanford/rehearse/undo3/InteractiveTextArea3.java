@@ -7,6 +7,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import edu.stanford.rehearse.CodeElement;
 import edu.stanford.rehearse.CodeMap;
 import edu.stanford.rehearse.InteractiveTextAreaPainter;
@@ -16,17 +18,9 @@ import edu.stanford.rehearse.undo4.InteractiveTextArea4;
 
 public class InteractiveTextArea3 extends InteractiveTextArea {
 	
-	protected CodeMap codeMap;
 
 	public InteractiveTextArea3(int uid, int functionNum, int initialSnapshot, Rehearse rehearse) {
 		super(uid, functionNum, initialSnapshot, rehearse);
-		codeMap = new CodeMap();
-	}
-	
-	protected void executeStatement(String statement, boolean actual) {
-		
-		super.executeStatement(statement, actual);
-		codeMap.add(codeTree.getCurr());
 	}
 	
 	protected void updateRedoLines() {
@@ -58,6 +52,7 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 	protected void setupMouseListener() {
 		this.getPainter().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)) return;
 				//int line = getCaretLine();
 				int line = yToLine(e.getY());
 
@@ -86,7 +81,7 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 					} else if(!codeMap.getCodeAtLine(lineNum).equals("")){
 						rehearse.updateInstructions("Click to paste this code to current cursor line");
 					} else {
-						rehearse.updateInstructions("\t");
+						rehearse.updateInstructions("");
 					}
 			}
 		});

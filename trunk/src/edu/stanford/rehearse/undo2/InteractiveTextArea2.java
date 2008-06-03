@@ -20,7 +20,6 @@ public class InteractiveTextArea2 extends InteractiveTextArea {
 	
 	protected void setupMouseListener() {
 		// override and do nothing
-		 Toolkit.getDefaultToolkit().beep();
 	}
 	
 	protected void updateRedoLines() {

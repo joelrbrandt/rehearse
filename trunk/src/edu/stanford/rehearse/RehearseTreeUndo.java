@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.jedit.syntax.JavaScriptTokenMarker;
 
@@ -52,13 +53,20 @@ public class RehearseTreeUndo extends Rehearse {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					int index = list.locationToIndex(e.getPoint());
-					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);					System.out.println("Double clicked on Item " + index);
+					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);
 					((InteractiveTextArea2)ta2).redo(ce, true);
+				}
+				
+				if(SwingUtilities.isRightMouseButton(e)) {
+					int index = list.locationToIndex(e.getPoint());
+					CodeElement ce = (CodeElement)list.getUndidLinesListModel().getElementAt(index);
+					ta.pasteCode(ce.getCode());
+					ta2.pasteCode(ce.getCode());
 				}
 			}
 			
 			public void mouseExited(MouseEvent e) {
-				updateInstructions("\t");
+				updateInstructions("");
 			}
 		});
 		list.addMouseMotionListener( new MouseMotionAdapter()
@@ -69,7 +77,7 @@ public class RehearseTreeUndo extends Rehearse {
 				if(row >= 0 && row < list.getModel().getSize() && list.isRedoLine(row))
 					updateInstructions("Double-click to redo");
 				else
-					updateInstructions("\t");
+					updateInstructions("");
 			}
 		});
 		list.setPreferredSize(new Dimension(200, 150));
