@@ -25,7 +25,7 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 				var response = new Object();
 				var o = rehearse_helpers[functionNum].commandQueue.shift();
 				try {
-					response.text = eval(o.code);
+					console.log("code evaluated: " + o.code); response.text = eval(o.code);
 					response.type = 1;
 				} catch(e) {
 					response.text = e;
@@ -39,9 +39,9 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 				}
 			} else if(rehearse_helpers[functionNum].finishedEditing) {
 				return last_var;
-			} else {
-				1+1; //breakpoint here
-			}
+			}  console.log("about to hit the breakpoint");
+				console.log('breakpoint');  //breakpoint here
+			console.log("resumed");
 		}
 	} 
 }
@@ -54,6 +54,7 @@ function addCodeToQueue(functionNum, code, isUndo) {
 	o.code = code;
 	o.isUndo = isUndo;
 	queue[queue.length] = o;
+	console.log("code added to queue: "  + queue[queue.length-1].code + " length: " + queue.length);
 }
 
 function getResponseFromQueue(functionNum) {

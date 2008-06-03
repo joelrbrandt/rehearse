@@ -21,6 +21,7 @@ import javax.swing.table.*;
 import org.jedit.syntax.JavaScriptTokenMarker;
 
 import edu.stanford.rehearse.POWUtils;
+import edu.stanford.rehearse.RehearseClient;
 
 public class Rehearse extends JFrame implements ActionListener{
 	
@@ -159,6 +160,8 @@ public class Rehearse extends JFrame implements ActionListener{
 		if(ae.getActionCommand().equals("Done")) {
 			saveCode();
 			done = true;
+			RehearseClient.markDone(this, functionNum);
+			RehearseClient.reschedule(uid);
 			this.dispose();
 		} else if(ae.getActionCommand().equals("Undo")) {
 			undo();

@@ -262,6 +262,8 @@ public class InteractiveTextArea extends JEditTextArea {
 	}*/
 	
 	protected void addCommandToQueue(String command, boolean isUndo) {
+		System.out.println("add command acquire");
+		RehearseClient.lock.lock();
 		command = command.replace('\n', ' ');
 		System.out.println("Adding command to queue: " + command);
 		try {
@@ -272,7 +274,7 @@ public class InteractiveTextArea extends JEditTextArea {
 			do {
 				result = POWUtils.callPOWScript(POWUtils.UPDATE_CODE_URL, params);
 				System.out.println("update trying again");
-			} while(result.get(0).startsWith("Error"));
+			} while(result.get(0).contains("Error"));
 			
 			System.out.println("UPDATECODE: " + result);
 			
@@ -280,7 +282,9 @@ public class InteractiveTextArea extends JEditTextArea {
 			e.printStackTrace();
 		}
 		
-		RehearseClient.reschedule();
+		RehearseClient.reschedule(uid);
+		RehearseClient.lock.unlock();
+		System.out.println("add command release");
 	}
 	
 	public void appendResponse(int snapshotID, int errorCode, String response) {

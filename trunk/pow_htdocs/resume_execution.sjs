@@ -6,8 +6,12 @@
 		context = getContextById(uid);
 		trycount++;
 	}
-	window.Firebug.Debugger.resume(context);
-	document.write(1);
+	if(context != null) {
+		window.Firebug.Debugger.resume(context);
+		document.write("POW resumed");
+	} else {
+		document.write("Error: POW DIDNOT resume");
+	}
 	
 	function getContextById(uid) {
 		for(var i = 0; i < getBrowser().browsers.length; i++) {

@@ -9,6 +9,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.stanford.rehearse.undo1.Rehearse;
 import edu.stanford.rehearse.undo2.Rehearse2;
@@ -20,7 +22,7 @@ public class RehearseClient extends TimerTask {
 	private static final int DELAY = 1000;
 	private static final int NO_STOPPED_WINDOWS = -1;
 
-	private static final int REHEARSE_OPTION = 2; // 1: treeundo or 2: flatundo
+	private static final int REHEARSE_OPTION = 1; // 1: treeundo or 2: flatundo
 
 	private static int numFasterTimerIters = 0;
 	private static TimerTask pollingTask;
@@ -29,6 +31,8 @@ public class RehearseClient extends TimerTask {
 	private static Rehearse[] rehearseWindows = new Rehearse[100];
 	private static Set<String> definedFunctionNames = new HashSet<String>();
 
+	public static Lock lock = new ReentrantLock();
+
 
 	public static void main(String[] args) {
 		timer = new Timer();
@@ -36,80 +40,100 @@ public class RehearseClient extends TimerTask {
 		timer.scheduleAtFixedRate(pollingTask, 0, DELAY);
 	}
 
-	public static void reschedule() {
-		timer.cancel();
+	public static void reschedule(int uid) {
+		System.out.println("RESCHEDULED");
+		resumeExecution(uid);
+		
+		//timer.cancel();
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new RehearseClient(), 0, DELAY / 10);
-		numFasterTimerIters = 15;
+		numFasterTimerIters = 5;
 	}
 
 	@Override
 	public void run() {
 
-		if(numFasterTimerIters > 0) {
-			numFasterTimerIters--;
-			if(numFasterTimerIters == 0) {
+		System.out.println("run thread acquire");
+		lock.lock();
+		try {
+
+			if(numFasterTimerIters > 0) {
+				numFasterTimerIters--;
+				if(numFasterTimerIters <= 0) {
+					timer.cancel();
+					timer = new Timer();
+					timer.scheduleAtFixedRate(new RehearseClient(), 0, DELAY);
+				}
+			}
+
+			ArrayList<String> result = 
+				POWUtils.callPOWScript(POWUtils.REHEARSE_CHECK_BP, "");
+
+			if(result.size() == 0) {
+				lock.unlock();
+				System.out.println("run release early");
+				return;
+			}
+
+			int uid = Integer.parseInt(result.get(0));
+			System.out.println(uid);
+
+			if(uid != NO_STOPPED_WINDOWS) {
+
+				int functionNum = Integer.parseInt(result.get(1));
+				System.out.print("function num: " + functionNum + "\t");
+
+				String functionName = result.get(2);
+				System.out.println("name: " + functionName);
+				String parameters = "";
+				if(result.size() >= 4)
+					parameters = result.get(3);
+
+				int initialSnapshot = Integer.parseInt(result.get(4));
+				if(rehearseWindows[functionNum] == null) {
+					if(!definedFunctionNames.contains(functionName)) {
+						rehearseWindows[functionNum] = 
+							getRehearseWindow(uid, functionNum, functionName, parameters, initialSnapshot);
+						rehearseWindows[functionNum].requestFocusInWindow();
+						rehearseWindows[functionNum].toFront();
+					}
+				} else {
+					if(result.size() >= 6)
+						processResponses(rehearseWindows[functionNum], result.get(5));
+//					if(rehearseWindows[functionNum].isDone()) {
+//					markDone(rehearseWindows[functionNum]);
+//					definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
+//					rehearseWindows[functionNum] = null;
+//					}
+				}
+
 				timer.cancel();
-				timer = new Timer();
-				timer.scheduleAtFixedRate(new RehearseClient(), 0, DELAY);
+				//resumeExecution(uid);
 			}
-		}
 
-		ArrayList<String> result = 
-			POWUtils.callPOWScript(POWUtils.REHEARSE_CHECK_BP, "");
-
-		if(result.size() == 0)
-			return;
-
-		int uid = Integer.parseInt(result.get(0));
-		System.out.println(uid);
-
-		if(uid != NO_STOPPED_WINDOWS) {
-
-			int functionNum = Integer.parseInt(result.get(1));
-			System.out.print("function num: " + functionNum + "\t");
-
-			String functionName = result.get(2);
-			System.out.println("name: " + functionName);
-			String parameters = "";
-			if(result.size() >= 4)
-				parameters = result.get(3);
-
-			int initialSnapshot = Integer.parseInt(result.get(4));
-			if(rehearseWindows[functionNum] == null) {
-				if(!definedFunctionNames.contains(functionName)) {
-					rehearseWindows[functionNum] = 
-						getRehearseWindow(uid, functionNum, functionName, parameters, initialSnapshot);
-					rehearseWindows[functionNum].requestFocusInWindow();
-					rehearseWindows[functionNum].toFront();
-				}
-			} else {
-				if(result.size() >= 6)
-					processResponses(rehearseWindows[functionNum], result.get(5));
-				if(rehearseWindows[functionNum].isDone()) {
-					markDone(rehearseWindows[functionNum]);
-					definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
-					rehearseWindows[functionNum] = null;
-				}
-			}
-			resumeExecution(uid);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			lock.unlock();
+			System.out.println("run thread release in finally");
 		}
 	}
+
 
 	private Rehearse getRehearseWindow(int uid, int functionNum,
 			String functionName, String parameters, int initialSnapshot) {
 		switch(REHEARSE_OPTION) {
 		case 2:
 			return new RehearseFlatUndo(uid, functionNum, functionName, parameters, initialSnapshot);
-		/*
+			/*
 		  case 2:
 			return new Rehearse2(uid, functionNum, functionName, parameters, initialSnapshot);
 		  case 3:
 			return new Rehearse3(uid, functionNum, functionName, parameters, initialSnapshot);
 		  case 4:
 			return new Rehearse4(uid, functionNum, functionName, parameters, initialSnapshot);
-			*/
-		  default:
+			 */
+		default:
 			return new RehearseTreeUndo(uid, functionNum, functionName, parameters, initialSnapshot);
 
 		}
@@ -127,15 +151,28 @@ public class RehearseClient extends TimerTask {
 	}
 
 
-	private void markDone(Rehearse rehearse) {
-		String params = "rehearse_uid=" + rehearse.getUid() + "&function_num="
-		+ rehearse.getFunctionNum();
-		POWUtils.callPOWScript(POWUtils.MARK_DONE_URL, params);
+	public static void markDone(Rehearse rehearse, int functionNum) {
+
+		if(rehearseWindows[functionNum].isDone()) {
+
+			String params = "rehearse_uid=" + rehearse.getUid() + "&function_num="
+			+ rehearse.getFunctionNum();
+			POWUtils.callPOWScript(POWUtils.MARK_DONE_URL, params);
+
+			definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
+			rehearseWindows[functionNum] = null;
+		}
+
 	}
 
-	private void resumeExecution(int uid) {
+	private static void resumeExecution(int uid) {
 		String params = "rehearse_uid=" + uid;
-		POWUtils.callPOWScript(POWUtils.RESUME_EXECUTION_URL, params);
+		ArrayList<String> result;
+		do {
+			result = POWUtils.callPOWScript(POWUtils.RESUME_EXECUTION_URL, params);
+			System.out.println("resume trying again");
+		} while(result.get(0).contains("Error"));
+		
 	}
 
 }

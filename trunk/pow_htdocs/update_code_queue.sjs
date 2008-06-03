@@ -13,8 +13,8 @@
 		command = command.replace(/"/g, "\\\"");
 		var temp = "addCodeToQueue(" + functionNum + ", \"" + command + 
 					"\", " + isUndo + ");";
-		document.writeln(temp);
-		window.Firebug.CommandLine.evaluate(temp, context);
+		var result = window.Firebug.CommandLine.evaluate(temp, context);
+		document.writeln(temp + " " + result);
 	} else {
 		document.write("Error! Command or uid not valid: uid was " + uid + " [trycount: " + trycount +"]");
 	}
