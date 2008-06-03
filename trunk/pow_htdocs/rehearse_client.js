@@ -17,35 +17,35 @@ for(var i = 0; i < rehearse_helpers.length; i++) {
 		for(param in parameters) {
 			this[param] = parameters[param];
 		}
-		var last_var;
+		var _last_var;
 		var initial_snapshot = snapshot();
 		console.log("Rehearse helper #" + functionNum + " called, with name=" + functionName);
 		while(true) {
 			if(rehearse_helpers[functionNum].commandQueue.length > 0) {
-				var response = new Object();
-				var o = rehearse_helpers[functionNum].commandQueue.shift();
+				var _code_response = new Object();
+				var _o = rehearse_helpers[functionNum].commandQueue.shift();
 				try {
-					console.log("code evaluated: " + o.code); response.text = eval(o.code);
-					response.type = 1;
+					console.log("code evaluated: " + _o.code);
+					_code_response.text = _last_var= eval(_o.code);
+					_code_response.type = 1;
 				} catch(e) {
-					response.text = e;
-					response.type = 2;
+					_code_response.text = e;
+					_code_response.type = 2;
 				} finally {
-					response.sid = snapshot();
-					if (!o.isUndo) {
+					_code_response.sid = snapshot();
+					if (!_o.isUndo) {
 						queue = rehearse_helpers[functionNum].responseQueue;
-						queue[queue.length] = response;
+						queue[queue.length] = _code_response;
 					}
 				}
 			} else if(rehearse_helpers[functionNum].finishedEditing) {
-				return last_var;
-			}  console.log("about to hit the breakpoint");
-				console.log('breakpoint');  //breakpoint here
+				return _last_var;
+			} 
+			console.log('about to hit the breakpoint');  //breakpoint here
 			console.log("resumed");
 		}
 	} 
 }
-
 
 function addCodeToQueue(functionNum, code, isUndo) {
 	console.log("code: " + code);

@@ -122,10 +122,11 @@ public class InteractiveTextArea extends JEditTextArea {
 		switch(evt.getID())
 		{
 		case KeyEvent.KEY_TYPED:
-			inputHandler.keyTyped(evt);
+			if(evt.getKeyCode() != KeyEvent.VK_ENTER)
+				inputHandler.keyTyped(evt);
 			break;
 		case KeyEvent.KEY_PRESSED:
-			if(isMovementAllowed(evt))
+			if(isMovementAllowed(evt) && evt.getKeyCode() != KeyEvent.VK_ENTER)
 				inputHandler.keyPressed(evt);
 			break;
 		case KeyEvent.KEY_RELEASED:
@@ -133,9 +134,12 @@ public class InteractiveTextArea extends JEditTextArea {
 					(evt.isControlDown() || evt.isMetaDown())) {
 				undo(true);
 			} else if(isMovementAllowed(evt)) {
-				
-				inputHandler.keyReleased(evt);
-				if(evt.getKeyCode() == KeyEvent.VK_ENTER) parseLastLine();
+				if(evt.getKeyCode() == KeyEvent.VK_ENTER) 
+					parseLastLine();
+				else 
+					inputHandler.keyReleased(evt);
+			} else {
+				Toolkit.getDefaultToolkit().beep();
 			}
 			break;
 		}
@@ -146,7 +150,8 @@ public class InteractiveTextArea extends JEditTextArea {
 			return false;
 		
 		int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
-		if(evt.getKeyCode() == KeyEvent.VK_LEFT &&
+		if((evt.getKeyCode() == KeyEvent.VK_LEFT || evt.getKeyCode() == KeyEvent.VK_DELETE
+				|| evt.getKeyCode() == KeyEvent.VK_BACK_SPACE) &&
 			getCaretPosition() == getLineStartOffset(lastResponseLine+1))
 			return false;
 		if(evt.getKeyCode() == KeyEvent.VK_RIGHT &&
@@ -156,6 +161,8 @@ public class InteractiveTextArea extends JEditTextArea {
 	}
 	
 	public void parseLastLine() {
+		
+		setText(getText() + "\n");
 		
 		Context cx = ContextFactory.getGlobal().enterContext();
 
@@ -289,7 +296,7 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	public void appendResponse(int snapshotID, int errorCode, String response) {
 		codeTree.setCurrentSnapshotId(snapshotID);
-		codeTree.getCurr().setResponse(response);
+		codeTree.getCurr().setResponse(response, errorCode != 1);
 		
 		int startLine = getCaretLine(); 
 		setText(getText() + response + "\n");

@@ -3,14 +3,15 @@
 	var functionNum = pow_server.POST['function_num'];
 	var trycount = 0;
 	var context = getContextById(uid);
-	while(context == null && trycount < 2500) {
+	while(context == null && trycount < 500) {
 		context = getContextById(uid);
 		trycount++;
 	}
 	if(context != null) {
 		window.Firebug.CommandLine.evaluate("markDone(" + functionNum + ");", context);
+		document.writeln("Marked done!");
 	}
-	document.write(1);
+	document.writeln("Error: couldn't mark done");
 	
 	function getContextById(uid) {
 		for(var i = 0; i < getBrowser().browsers.length; i++) {

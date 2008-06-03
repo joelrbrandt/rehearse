@@ -10,6 +10,7 @@ public class CodeElement {
 	private CodeElement parent;
 	private ArrayList<CodeElement> children;
 	private boolean isActive;
+	private boolean isError;
 	private int snapshotId;
 
 	public CodeElement(int lineNum, String code, CodeElement parent) {
@@ -19,6 +20,7 @@ public class CodeElement {
 		this.isActive = true;
 		this.children = new ArrayList<CodeElement>();
 		this.snapshotId = -1;
+		this.isError = false;
 	}
 
 	public String getCode() {
@@ -92,8 +94,17 @@ public class CodeElement {
 		return response;
 	}
 
-	public void setResponse(String response) {
+	public void setResponse(String response, boolean isError) {
 		this.response = response;
+		this.isError = isError;
+	}
+	
+	public boolean isError() {
+		return isError;
+	}
+	
+	public void setError(boolean isError) {
+		this.isError = isError;
 	}
 	
 	

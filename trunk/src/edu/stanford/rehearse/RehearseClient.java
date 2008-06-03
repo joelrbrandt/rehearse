@@ -29,7 +29,7 @@ public class RehearseClient extends TimerTask {
 	private static Timer timer;
 
 	private static Rehearse[] rehearseWindows = new Rehearse[100];
-	private static Set<String> definedFunctionNames = new HashSet<String>();
+	//private static Set<String> definedFunctionNames = new HashSet<String>();
 
 	public static Lock lock = new ReentrantLock();
 
@@ -91,7 +91,7 @@ public class RehearseClient extends TimerTask {
 
 				int initialSnapshot = Integer.parseInt(result.get(4));
 				if(rehearseWindows[functionNum] == null) {
-					if(!definedFunctionNames.contains(functionName)) {
+					if(true) { //if(!definedFunctionNames.contains(functionName)) {
 						rehearseWindows[functionNum] = 
 							getRehearseWindow(uid, functionNum, functionName, parameters, initialSnapshot);
 						rehearseWindows[functionNum].requestFocusInWindow();
@@ -157,9 +157,12 @@ public class RehearseClient extends TimerTask {
 
 			String params = "rehearse_uid=" + rehearse.getUid() + "&function_num="
 			+ rehearse.getFunctionNum();
-			POWUtils.callPOWScript(POWUtils.MARK_DONE_URL, params);
-
-			definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
+			ArrayList<String> result;
+			do {
+				result = POWUtils.callPOWScript(POWUtils.MARK_DONE_URL, params);
+				System.out.println("mark done trying again");
+			} while(result.get(0).contains("Error"));
+			//definedFunctionNames.add(rehearseWindows[functionNum].getFunctionName());
 			rehearseWindows[functionNum] = null;
 		}
 

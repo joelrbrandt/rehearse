@@ -121,11 +121,11 @@ public class CodeTree {
 		return lastUndo;
 	}
 	
-	
 	public String getCode() {
 		String code = "";
 		for(CodeElement c = root.getActiveChild(); c != null; c = c.getActiveChild()) {
-			code += c.getCode() + "\n";
+			if(!c.isError())
+				code += c.getCode() + "\n";
 		}
 		return code;
 	}

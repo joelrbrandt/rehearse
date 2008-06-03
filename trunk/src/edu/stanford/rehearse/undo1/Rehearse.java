@@ -64,7 +64,12 @@ public class Rehearse extends JFrame implements ActionListener{
 		initTextArea();
 		initBottomPanel();
 		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosed(WindowEvent e) {
+				dispose();
+			}
+		});
 		pack();
 		setVisible(true);
 		
@@ -124,7 +129,6 @@ public class Rehearse extends JFrame implements ActionListener{
 	}
 
 	protected void initializeHeader(String functionName, String parameters) {
-		Panel p = new Panel();
 		if(parameters == null) parameters = "";
 		parameters = parameters.trim();
 		String styleParam = "   ";
@@ -138,12 +142,17 @@ public class Rehearse extends JFrame implements ActionListener{
 			} else {
 				styleParam += s;
 			}
+			styleParam += ", ";
 		}
+		if(styleParam.endsWith(", "))
+			styleParam = styleParam.substring(0, styleParam.length()-2);
 		
 		String prototype = "<html><font color=green>function</font> "
 			+ functionName + " ( " + styleParam + " ) {</html>";
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		panel.add(new JLabel(prototype));
+		System.out.println("Params Label: " + styleParam);
+		JLabel label = new JLabel(prototype);
+		panel.add(label);
 		this.add(panel, BorderLayout.NORTH);
 		
 	}
@@ -158,14 +167,18 @@ public class Rehearse extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("Done")) {
-			saveCode();
-			done = true;
-			RehearseClient.markDone(this, functionNum);
-			RehearseClient.reschedule(uid);
-			this.dispose();
+			doneHandler();
 		} else if(ae.getActionCommand().equals("Undo")) {
 			undo();
 		}
+	}
+
+	protected void doneHandler() {
+		saveCode();
+		done = true;
+		RehearseClient.markDone(this, functionNum);
+		RehearseClient.reschedule(uid);
+		this.dispose();
 	}
 	
 	protected void undo() {

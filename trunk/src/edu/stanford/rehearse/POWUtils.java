@@ -17,9 +17,9 @@ public class POWUtils {
 	
 	public static final String INSERT_CODE_URL = BASE_URL + "insert_code.sjs";
 	
-	public static final String REHEARSE_URL = BASE_URL + "rehearse.sjs";
+	//public static final String REHEARSE_URL = BASE_URL + "rehearse.sjs";
 	
-	public static final String UNDO_URL = BASE_URL + "undo.sjs";
+	//public static final String UNDO_URL = BASE_URL + "undo.sjs";
 	
 	public static final String MARK_DONE_URL = BASE_URL + "mark_done.sjs";
 	
