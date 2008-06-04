@@ -73,12 +73,11 @@ public class InteractiveTextArea extends JEditTextArea {
 					String code = codeMap.getCodeAtLine(line);
 					if(code.equals(""))  Toolkit.getDefaultToolkit().beep();
 					pasteCode(code);
+					setCaretPosition(getDocumentLength());
 					if(pairTextArea != null)
 						pairTextArea.pasteCode(code);
 				}
-				
 				giveFocus();
-				setCaretPosition(getDocumentLength());
 			}
 		});
 		
@@ -115,11 +114,16 @@ public class InteractiveTextArea extends JEditTextArea {
 				System.out.println("LINE CLICKED: " + lineNum + " LINE COUNT: " + getLineCount());
 				//if(lineNum != getLineCount() -1) {
 				if(codeTree.getRedoLineNums().contains(lineNum)) {
-					redo(codeTree.getChildByLineNum(lineNum), true);
+					if(e.getClickCount() == 2)
+						redo(codeTree.getChildByLineNum(lineNum), true);
 				} else if(lineNum != getLineCount() - 1) {
 					 Toolkit.getDefaultToolkit().beep();
+				} else {
+					int offset = xToOffset(lineNum, e.getX());
+					int dot = getLineStartOffset(lineNum) + offset;
+					setCaretPosition(dot);
 				}
-				setCaretPosition(getDocumentLength());
+				//setCaretPosition(getDocumentLength());
 			}
 		});
 		
@@ -128,7 +132,7 @@ public class InteractiveTextArea extends JEditTextArea {
 				
 					int lineNum = yToLine(e.getY());
 					if(codeTree.getRedoLineNums().contains(lineNum)) {
-						rehearse.updateInstructions("Click to redo the line");
+						rehearse.updateInstructions("Double-click to redo the line");
 					} else {
 						rehearse.updateInstructions("");
 					}
@@ -222,7 +226,10 @@ public class InteractiveTextArea extends JEditTextArea {
 		if(!actual){
 			int lastResponseLine = ((InteractiveTextAreaPainter)getPainter()).getLastResponseLine();
 			if(lastResponseLine < 0) lastResponseLine = -1;
-			String currText = getText(0, getLineStartOffset(lastResponseLine+1));
+			System.out.println("LAST RESPONSE LINE: " + lastResponseLine);
+			int lineStart = getLineStartOffset(lastResponseLine+1);
+			if(lineStart < 0) lineStart = 0;
+			String currText = getText(0, lineStart);
 			if(currText != null)
 				setText(currText + statement + "\n");
 			else
@@ -248,10 +255,11 @@ public class InteractiveTextArea extends JEditTextArea {
 	
 	public void undo(boolean actual) {
 		int lineNum = codeTree.getCurrentCommandLine();
+		boolean isError = codeTree.getCurr().isError();
 		int snapshotId = codeTree.undo();
 		updateRedoLines();
 		if(snapshotId == -1) return;
-		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true);
+		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, true, isError);
 		if(actual) {
 			String command = "load(" + snapshotId + ");";
 			addCommandToQueue(command, true);
@@ -268,7 +276,7 @@ public class InteractiveTextArea extends JEditTextArea {
 		int lineNum = codeTree.getCurr().getLineNum();
 		updateRedoLines();
 		if(snapshotId == -1) return;
-		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false);
+		((InteractiveTextAreaPainter)getPainter()).mark(lineNum, false, codeTree.getCurr().isError());
 		if(actual) {
 			String command = "load(" + snapshotId + ");";
 			addCommandToQueue(command, true);
@@ -334,7 +342,6 @@ public class InteractiveTextArea extends JEditTextArea {
 	public ArrayList<String> getCode() {
 		return codeTree.getCode();
 	}
-	
 
 	public void pasteCode(String code) {
 		if(code != null) {
@@ -342,6 +349,5 @@ public class InteractiveTextArea extends JEditTextArea {
 		}
 		setCaretPosition(getDocumentLength());
 	}
-	
 	
 }

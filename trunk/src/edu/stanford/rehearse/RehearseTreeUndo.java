@@ -90,6 +90,13 @@ public class RehearseTreeUndo extends Rehearse {
 	public void appendResponse(int snapshotID, int errorCode, String response) {
 		ta.appendResponse(snapshotID, errorCode, response);
 		ta2.appendResponse(snapshotID, errorCode, response);
+		if(errorCode != 1) {
+			RehearseClient.timer.cancel();
+			RehearseClient.lock.unlock();
+			System.out.println("lock released early in appendResponse");
+			undo();	
+			RehearseClient.lock.lock();
+		}
 	}
 	
 }

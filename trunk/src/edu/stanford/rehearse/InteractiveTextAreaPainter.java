@@ -26,7 +26,7 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		System.out.println("NEW PAINTER SIZE:" + responseLines.size());
 	}
 	
-	public void shiftLines(int startIndex, int delta) {
+	public void shiftLines2(int startIndex, int delta) {
 		Set<Integer> newResponseLines = new HashSet<Integer>();
 		for(int i : responseLines) {
 			if(i >= startIndex)
@@ -76,7 +76,11 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 		commandBreakLines.add(textArea.getCaretLine());
 	}
 	
-	public void mark(int cmdLine, boolean undo) {
+	public void markCommandBreak() {
+		commandBreakLines.add(textArea.getCaretLine());
+	}
+	
+	public void mark(int cmdLine, boolean undo, boolean error) {
 		int index = commandBreakLines.indexOf(cmdLine);
 		int endLine = 0;
 		if(index == commandBreakLines.size() -1) {
@@ -85,10 +89,23 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 			endLine = commandBreakLines.get(index+1);
 		}
 		for(int i = cmdLine; i < endLine; i++) {
-			if(undo)
+			if(undo) {
 				undoLines.add(i);
-			else
+				if(i == endLine - 1) {
+					if(error)
+						errorLines.remove(i);
+					else
+						responseLines.remove(i);
+				}
+			} else {
 				undoLines.remove(i);
+				if(i == endLine - 1) {
+					if(error)
+						errorLines.add(i);
+					else
+						responseLines.add(i);
+				}
+			}
 		}
 		invalidateLineRange(cmdLine, endLine-1);
 	}
@@ -106,9 +123,11 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 			f = defaultFont.deriveFont(Font.ITALIC);
 		} else if(errorLines.contains(line)) {
 			c = Color.red;
+			f = defaultFont.deriveFont(Font.ITALIC);
 		} else {
 			c = defaultColor;
 		}
+		
 		
 		if(c == defaultColor)
 			super.paintSyntaxLine(gfx, tokenMarker, line, f, c, x, y);
@@ -131,5 +150,19 @@ public class InteractiveTextAreaPainter extends TextAreaPainter {
 				newSet.add(r);
 		}
 		responseLines = newSet;
+		
+		HashSet<Integer> newSet2 = new HashSet<Integer>();
+		for(int r: errorLines) {
+			if(r < lineNum)
+				newSet2.add(r);
+		}
+		errorLines = newSet2;
+		
+		List<Integer> list = new ArrayList<Integer>();
+		for(int r: commandBreakLines) {
+			if(r < lineNum)
+				list.add(r);
+		}
+		commandBreakLines = list;
 	}
 }

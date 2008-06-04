@@ -62,7 +62,7 @@ public class CodeTree {
 	public int undo(int numSteps, InteractiveTextAreaPainter painter) {
 		if(curr == root) return -1;
 		while(numSteps != 0 && curr != null) {
-			if(painter != null) painter.mark(curr.getLineNum(), true);
+			if(painter != null) painter.mark(curr.getLineNum(), true, curr.isError());
 			curr.setActive(false);
 			lastUndo = curr;
 			curr = curr.getParent();

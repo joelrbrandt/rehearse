@@ -32,9 +32,12 @@ public class InteractiveTextArea2 extends InteractiveTextArea {
 		int snapshotId = codeTree.undo();
 		updateRedoLines();
 		if(snapshotId == -1) return;
-		setText(getText(0, getLineStartOffset(lineNum)) + getLineText(getCaretLine()));
+		int lineStart = getLineStartOffset(lineNum);
+		if(lineStart < 0) lineStart = 0;
+		setText(getText(0, lineStart) + getLineText(getCaretLine()));
 		undidLines.getUndidLinesListModel().addCodeElement(curr);
 
+		((InteractiveTextAreaPainter)getPainter()).setCeiling(getLineCount());
 		if(actual) {
 			String command = "load(" + snapshotId + ");";
 			addCommandToQueue(command, true);
@@ -51,11 +54,16 @@ public class InteractiveTextArea2 extends InteractiveTextArea {
 		if(snapshotId == -1) return;
 
 		InteractiveTextAreaPainter painter = ((InteractiveTextAreaPainter)getPainter());
-		painter.shiftLines(getCaretLine(), countLines(codeElem.getCode()));
+		//painter.shiftLines(getCaretLine(), countLines(codeElem.getCode()));
 		
-		setText(getText(0, getLineStartOffset(getCaretLine())) + codeElem.getCode()
+		int lineStart = getLineStartOffset(getCaretLine());
+		if(lineStart < 0) lineStart = 0;
+		setText(getText(0, lineStart) + codeElem.getCode()
 				+ "\n" + codeElem.getResponse() + "\n" + getLineText(getCaretLine()));
 		undidLines.getUndidLinesListModel().removeCodeElement(codeElem);
+		
+		painter.markCommandBreak();
+		painter.mark(codeElem.getLineNum(), false, codeElem.isError());
 		
 		if(actual) {
 			String command = "load(" + snapshotId + ");";

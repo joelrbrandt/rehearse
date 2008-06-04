@@ -56,18 +56,22 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 				//int line = getCaretLine();
 				int line = yToLine(e.getY());
 
-				System.out.println("LINE CLICKED 3: " + line);
 				if(line != getLineCount()-1) {
-					if(codeMap.isLineActive(line)) {
+					if(codeMap.isLineActive(line) && e.getClickCount() == 2) {
 						undoToLine(line, true);
-						setCaretPosition(getDocumentLength());
+						//setCaretPosition(getDocumentLength());
 					} else {
+						/*
 						String code = codeMap.getCodeAtLine(line);
 						if(code.equals(""))  Toolkit.getDefaultToolkit().beep();
 						pasteCode(code);
 						if(pairTextArea != null)
-							pairTextArea.pasteCode(code);
+							pairTextArea.pasteCode(code); */
 					}
+				} else {
+					int offset = xToOffset(line, e.getX());
+					int dot = getLineStartOffset(line) + offset;
+					setCaretPosition(dot);
 				}
 			}
 		});
@@ -77,9 +81,9 @@ public class InteractiveTextArea3 extends InteractiveTextArea {
 				
 					int lineNum = yToLine(e.getY());
 					if(codeMap.isLineActive(lineNum)) {
-						rehearse.updateInstructions("Click to undo to this line");
+						rehearse.updateInstructions("Double-click to undo to this line");
 					} else if(!codeMap.getCodeAtLine(lineNum).equals("")){
-						rehearse.updateInstructions("Click to paste this code to current cursor line");
+						rehearse.updateInstructions("Right-click to paste this code to current cursor line");
 					} else {
 						rehearse.updateInstructions("");
 					}

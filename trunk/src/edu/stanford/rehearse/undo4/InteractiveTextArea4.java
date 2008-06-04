@@ -81,12 +81,16 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 				if(SwingUtilities.isRightMouseButton(e)) return;
 				//int line = getCaretLine();
 				int line = yToLine(e.getY());
-				if(line != getLineCount()-1) {
-					if(codeMap.isLineActive(line)) {
+				if(line != getLineCount()-1 ) {
+					if(codeMap.isLineActive(line) && e.getClickCount() == 2) {
 						undoToLine(line, true);
 					} else{
 						 Toolkit.getDefaultToolkit().beep();
 					}
+				} else {
+					int offset = xToOffset(line, e.getX());
+					int dot = getLineStartOffset(line) + offset;
+					setCaretPosition(dot);
 				}
 			}
 		});
@@ -96,7 +100,7 @@ public class InteractiveTextArea4 extends InteractiveTextArea {
 				
 					int lineNum = yToLine(e.getY());
 					if(codeMap.isLineActive(lineNum)) {
-						rehearse.updateInstructions("Click to undo to this line");
+						rehearse.updateInstructions("Double-click to undo to this line");
 					} else {
 						rehearse.updateInstructions("");
 					}

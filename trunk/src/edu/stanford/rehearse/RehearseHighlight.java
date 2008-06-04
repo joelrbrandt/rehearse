@@ -34,7 +34,9 @@ public class RehearseHighlight implements Highlight {
 	}
 
 	public void paintHighlight(Graphics gfx, int line, int y) {
-		int height = textArea.getPainter().getFontMetrics().getHeight() + 1;
+		//int height = textArea.getPainter().getFontMetrics().getHeight() + 1;
+		int height = gfx.getFontMetrics().getHeight();
+		y += gfx.getFontMetrics().getLeading() + gfx.getFontMetrics().getMaxDescent();
 		if(redoLines.contains(line)) {
 			gfx.setColor(new Color(255, 250, 205));
 		} else if(textArea.getCaretLine() == line) {
@@ -42,7 +44,7 @@ public class RehearseHighlight implements Highlight {
 		} else {
 			gfx.setColor(Color.white);
 		}
-		gfx.fillRect(0,y + 3, textArea.getWidth(), height);
+		gfx.fillRect(0, y, textArea.getWidth(), height);
 	}
 
 }

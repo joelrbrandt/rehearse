@@ -82,6 +82,7 @@ public class Rehearse extends JFrame implements ActionListener{
 		setVisible(true);
 		
 		ta.requestFocusInWindow();
+		ta.giveFocus();
 	}
 	
 	protected void initTextArea() {
