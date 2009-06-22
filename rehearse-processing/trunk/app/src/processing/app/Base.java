@@ -26,12 +26,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 import javax.swing.*;
 
 import processing.app.debug.Compiler;
 import processing.core.*;
-
 
 /**
  * The base class for the main processing application.
@@ -1812,6 +1812,9 @@ public class Base {
     Toolkit tk = Toolkit.getDefaultToolkit();
 
     File imageLocation = new File(getContentFile("lib"), name);
+    if (!imageLocation.exists()) { // if running in an Eclipse project environment...
+      imageLocation = new File(getContentFile("../build/shared/lib"), name);
+    }
     image = tk.getImage(imageLocation.getAbsolutePath());
     MediaTracker tracker = new MediaTracker(who);
     tracker.addImage(image, 0);
@@ -1826,7 +1829,11 @@ public class Base {
    * Return an InputStream for a file inside the Processing lib folder.
    */
   static public InputStream getLibStream(String filename) throws IOException {
-    return new FileInputStream(new File(getContentFile("lib"), filename));
+    try {
+      return new FileInputStream(new File(getContentFile("lib"), filename));
+    } catch (IOException e) {
+      return new FileInputStream(new File(getContentFile("../build/shared/lib"), filename));
+    }
   }
 
 
