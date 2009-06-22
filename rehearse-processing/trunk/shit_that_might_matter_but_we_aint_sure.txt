@@ -1,0 +1,4 @@
+* [5/5/09 JRB] We currently parse 3.4d as a float literal. Processing fails to parse this at all. We could also either fail, or parse it as a double. Who knows.
+* [5/10/09 JRB] BeanShell won't parse array declarations like "int i[]". Instead, it will only parse "int[] i". Processing parses both. So does Java.
+* [5/30/09 BH] Does Processing support imports? Relevant code is in eval() in Interpreter.
+* [6/5/09 JRB] We apparently are building off of Processing svn revision 5570
