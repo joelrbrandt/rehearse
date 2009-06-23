@@ -1,0 +1,17 @@
+Here's how to get Rehearse up and running in Eclipse:
+
+1. Download the latest revision and import the following directories as Eclipse projects.  They can be found under rehearse/rehearse-processing/trunk.
+  * build
+  * core
+  * dxf
+  * net
+  * opengl
+  * pdf
+  * app (processing)
+  * serial
+  * video
+
+2. Add all of the above directories to the "processing" classpath.  To do this, right-click on "processing" in the Package Explorer and select "Properties".  Under "Java Build Path" make sure the checkboxes next to all the above projects are checked.
+
+3. To run Rehearse, run the following file as a Java application:
+  processing/src/edu/stanford/hci/processing/RehearseBase.java
