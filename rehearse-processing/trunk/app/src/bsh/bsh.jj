@@ -710,6 +710,13 @@ void ImportDeclaration()                    :
 /*@egen*/
 }
 
+int DimensionCount() :
+{ int count = 0; }
+{
+  ( "[" "]" { ++count; } )*
+  { return count; }
+}
+
 void VariableDeclarator()                     :
 {/*@bgen(jjtree) VariableDeclarator */
         BSHVariableDeclarator jjtn000 = new BSHVariableDeclarator(JJTVARIABLEDECLARATOR);
@@ -718,11 +725,13 @@ void VariableDeclarator()                     :
         jjtreeOpenNodeScope(jjtn000);
 /*@egen*/
 	Token t;
+	int dimensionCount;	
 }
 {/*@bgen(jjtree) VariableDeclarator */
         try {
 /*@egen*/
-	t=<IDENTIFIER> [ "=" VariableInitializer() ]/*@bgen(jjtree)*/
+
+	t=<IDENTIFIER> dimensionCount=DimensionCount() [ "=" VariableInitializer() ]/*@bgen(jjtree)*/
         {
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
@@ -731,6 +740,7 @@ void VariableDeclarator()                     :
 /*@egen*/
 	{
   		jjtn000.name = t.image;
+  		jjtn000.numDimensions = dimensionCount;
 	}/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
           if (jjtc000) {

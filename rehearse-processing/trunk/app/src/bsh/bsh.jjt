@@ -576,14 +576,33 @@ void ImportDeclaration() #ImportDeclaration :
 	}
 }
 
+/*
+We added this method because the parser wasn't able to interpret postfix
+array annotations correctly.  For example: "int i[];" was invalid.
+To fix this, we added the DimensionCount call to VariableDeclarator,
+which simply checks after each variable declaration for any additional
+brackets.  This count is then used to add additional array dimensions
+at a later time.
+*/
+
+int DimensionCount() :
+{ int count = 0; }
+{
+  ( "[" "]" { ++count; } )*
+  { return count; }
+}
+
 void VariableDeclarator() #VariableDeclarator :
 {
 	Token t;
+	int dimensionCount;	
 }
 {
-	t=<IDENTIFIER> [ "=" VariableInitializer() ]
+
+	t=<IDENTIFIER> dimensionCount=DimensionCount() [ "=" VariableInitializer() ]
 	{
   		jjtThis.name = t.image;
+  		jjtThis.numDimensions = dimensionCount;
 	}
 }
 

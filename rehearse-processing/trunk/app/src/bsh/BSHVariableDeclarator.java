@@ -43,6 +43,8 @@ class BSHVariableDeclarator extends SimpleNode
 	// The token.image text of the name... never changes.
     public String name;
 
+    public int numDimensions;
+    
     BSHVariableDeclarator(int id) { super(id); }
 
 	/**
