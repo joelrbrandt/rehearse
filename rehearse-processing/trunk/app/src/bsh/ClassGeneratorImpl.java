@@ -205,13 +205,16 @@ public class ClassGeneratorImpl extends ClassGenerator
 					(BSHTypedVariableDeclaration)node;
 				Modifiers modifiers = tvd.modifiers;
 
+				/*
 				String type = tvd.getTypeDescriptor( 
 					callstack, interpreter, defaultPackage );
+					*/
 
 				BSHVariableDeclarator [] vardec = tvd.getDeclarators();
 				for( int i = 0; i< vardec.length; i++)
 				{
 					String name = vardec[i].name;
+					String type = tvd.getTypeDescriptor(callstack, interpreter, defaultPackage, vardec[i].numDimensions);
 					try {
 						Variable var = new Variable( 
 							name, type, null/*value*/, modifiers );

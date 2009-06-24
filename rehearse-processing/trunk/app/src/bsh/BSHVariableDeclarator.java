@@ -44,6 +44,7 @@ class BSHVariableDeclarator extends SimpleNode
     public String name;
 
     public int numDimensions;
+    public BSHType type;
     
     BSHVariableDeclarator(int id) { super(id); }
 
@@ -82,7 +83,7 @@ class BSHVariableDeclarator extends SimpleNode
 				&& initializer instanceof BSHArrayInitializer 
 			)
             	value = ((BSHArrayInitializer)initializer).eval( 
-					typeNode.getBaseType(), typeNode.getArrayDims(), 
+					typeNode.getBaseType(), typeNode.getArrayDims() + numDimensions, 
 					callstack, interpreter);
 			else
 				value = initializer.eval( callstack, interpreter);

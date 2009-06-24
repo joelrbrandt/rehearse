@@ -43,12 +43,14 @@ class BSHTypedVariableDeclaration extends SimpleNode
 		return ((BSHType)jjtGetChild(0));
 	}
 
+	/** NOTHING CALLS THIS!
 	Class evalType( CallStack callstack, Interpreter interpreter )
 		throws EvalError
 	{
 		BSHType typeNode = getTypeNode();
 		return typeNode.getType( callstack, interpreter );
 	}
+	*/
 
 	BSHVariableDeclarator [] getDeclarators() 
 	{
@@ -72,12 +74,13 @@ class BSHTypedVariableDeclaration extends SimpleNode
 		try {
 			NameSpace namespace = callstack.top();
 			BSHType typeNode = getTypeNode();
-			Class type = typeNode.getType( callstack, interpreter );
 
 			BSHVariableDeclarator [] bvda = getDeclarators();
 			for (int i = 0; i < bvda.length; i++)
 			{
 				BSHVariableDeclarator dec = bvda[i];
+				
+				Class type = typeNode.getType( callstack, interpreter, dec.numDimensions );
 
 				// Type node is passed down the chain for array initializers
 				// which need it under some circumstances
@@ -98,9 +101,10 @@ class BSHTypedVariableDeclaration extends SimpleNode
     }
 
 	public String getTypeDescriptor( 
-		CallStack callstack, Interpreter interpreter, String defaultPackage ) 
+		CallStack callstack, Interpreter interpreter, String defaultPackage, int incDims) 
 	{ 
-		return getTypeNode().getTypeDescriptor( 
-			callstack, interpreter, defaultPackage );
+	  BSHType type = getTypeNode();
+		return type.getTypeDescriptor( 
+			callstack, interpreter, defaultPackage, incDims );
 	}
 }
