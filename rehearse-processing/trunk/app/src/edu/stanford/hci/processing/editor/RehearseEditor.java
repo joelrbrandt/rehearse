@@ -147,6 +147,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		//canvasFrame.setDefaultCloseOperation();
 		//ProcessingMethods methods = new ProcessingMethods(canvas);
 
+		// NOTE: If this line fails with java.lang.NoSuchMethodError you probably have a the BeanShell bshXXX.jar 
+		// in the classpath, e.g., /Library/Java/Extensions on OSX
+		// to test, run "java bsh.Console" from terminal - if the beanshell console pops up, you'll have this problem
+		// @see http://www.beanshell.org/manual/quickstart.html#Download_and_Run_BeanShell
 		interpreter = new Interpreter(this, applet);
 
 		/* No longer sure this is needed, I think just setting the package solves all problems
