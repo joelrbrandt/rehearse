@@ -26,5 +26,5 @@ When prompted for your password, get it from here (it's *not* your usual google 
 and place the resulting "examples" directory here:
   app > examples
 
-4. To run Rehearse, run the following file as a Java application:
+5. To run Rehearse, run the following file as a Java application:
   processing/src/edu/stanford/hci/processing/RehearseBase.java
