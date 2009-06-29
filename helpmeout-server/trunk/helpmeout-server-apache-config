@@ -1,0 +1,7 @@
+<Location /helpmeout>
+	SetHandler mod_python
+	PythonHandler helpmeout
+	PythonPath "['/project/helpmeout-server'] + sys.path"
+	PythonAutoReload On
+	PythonDebug On
+</Location>
