@@ -21,7 +21,7 @@ When prompted for your password, get it from here (it's *not* your usual google 
 
 3. Add all of the above directories to the "processing" project's classpath in Eclipse.  To do this, right-click on "processing" in the Package Explorer and select "Properties".  Under "Java Build Path" make sure the checkboxes next to all the above projects are checked.
 
-4. To include the Processing examples in the IDE you must manually unzip the file:
+4. To include the Processing examples in the IDE you must (currently) manually unzip the file:
   build > shared > examples.zip
 and place the resulting "examples" directory here:
   app > examples
