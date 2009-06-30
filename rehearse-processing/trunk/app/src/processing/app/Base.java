@@ -310,6 +310,9 @@ public class Base {
     // Get paths for the libraries and examples in the Processing folder
     //String workingDirectory = System.getProperty("user.dir");
     examplesFolder = getContentFile("examples");
+    if (!examplesFolder.exists()) { // assume we are working from source project
+      examplesFolder = getContentFile("../misc/examples");
+    }
     librariesFolder = getContentFile("libraries");
     toolsFolder = getContentFile("tools");
 
