@@ -79,7 +79,7 @@ class HelpMeOutService(object):
     def store2(self,error,file1,file2):
         diff_obj = difflib.ndiff(file1.splitlines(1),file2.splitlines(1))
         diff_str = ''.join(diff_obj)
-        return store(error,diff_str)
+        return self.store(error,diff_str)
     
     #query the database
     @ServiceMethod
