@@ -49,6 +49,10 @@ else
   cp -X ../../app/lib/ecj.jar "$RESOURCES/"
   cp -X ../../app/lib/jna.jar "$RESOURCES/"
 
+  # added for HelpMeOut
+  cp -X ../../app/lib/jj1.0.1.jar "$RESOURCES/"
+  cp -X ../../app/lib/stringtree-json-2.0.5.jar "$RESOURCES/"
+  
   echo Extracting examples...
   unzip -q -d "$RESOURCES/" ../shared/examples.zip
 
@@ -135,7 +139,7 @@ mkdir ../build/macosx/work/classes
 javac \
     -Xlint:deprecation \
     -source 1.5 -target 1.5 \
-    -classpath "$RESOURCES/core.jar:$RESOURCES/antlr.jar:$RESOURCES/ecj.jar:$RESOURCES/jna.jar" \
+    -classpath "$RESOURCES/core.jar:$RESOURCES/antlr.jar:$RESOURCES/ecj.jar:$RESOURCES/jna.jar:$RESOURCES/jj1.0.1.jar:$RESOURCES/stringtree-json-2.0.5.jar" \
     -d ../build/macosx/work/classes \
     src/processing/app/*.java \
     src/processing/app/debug/*.java \
@@ -153,6 +157,7 @@ javac \
     src/bsh/reflect/*.java \
     src/bsh/util/*.java \
     src/edu/stanford/hci/processing/*.java \
+    src/edu/stanford/hci/helpmeout/*.java \
     src/edu/stanford/hci/processing/editor/*.java 
 
 cd ../build/macosx/work/classes

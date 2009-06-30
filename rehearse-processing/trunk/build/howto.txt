@@ -48,6 +48,14 @@ installer every few months to keep things fresh.
     Install it from Fink, Darwinports, or download as a package:
     http://metissian.com/projects/macosx/subversion/
 
+    On Mac OS X, set the current version of the JDK to 1.5. You
+    do this by modifying the symlink 'CurrentJDK' in the following 
+    directory:
+
+    /System/Library/Frameworks/JavaVM.framework/Versions
+
+    It should point to '1.5'
+
 
 1c. On Linux, you're pretty much on your own.. You need a pretty 
     standard development setup along with Subversion.
