@@ -16,5 +16,7 @@
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/jna.jar"/>
 	<classpathentry kind="lib" path="lib/ecj.jar"/>
+	<classpathentry kind="lib" path="lib/jj1.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/stringtree-json-2.0.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
