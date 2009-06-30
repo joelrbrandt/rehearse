@@ -41,6 +41,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 
+import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.processing.editor.RehearseEditorToolbar;
 
 
@@ -1578,6 +1579,12 @@ public class Editor extends JFrame implements RunnerListener {
     try {
       String appletClassName = sketch.compile();
       if (appletClassName != null) {
+        
+        // <HelpMeOut>
+        // We just compiled successfully without any errors - notify HelpMeOut
+        HelpMeOut.getInstance().processNoError(textarea.getText());
+        // </HelpMeOut>
+        
         runtime = new Runner(sketch, appletClassName, presenting, Editor.this);
 
         // Cannot use invokeLater() here, otherwise it gets
@@ -1594,6 +1601,11 @@ public class Editor extends JFrame implements RunnerListener {
     } catch (Exception e) {
       //System.err.println("exception reached editor");
       //e.printStackTrace();
+      
+      // <HelpMeOut>
+      // We compiled with error - don't notify HelpMeOut here, do it in statusError()
+      // </HelpMeOut>
+      
       statusError(e);
     }
   }
@@ -2158,6 +2170,16 @@ public class Editor extends JFrame implements RunnerListener {
         } else {
           textarea.select(textarea.getLineStartOffset(line),
                           textarea.getLineStopOffset(line) - 1);
+          
+          // <HelpMeOut>
+          // in here, we now have the error line and the error message
+          String errorLine = textarea.getText(textarea.getLineStartOffset(line),
+              textarea.getLineStopOffset(line) - textarea.getLineStartOffset(line));
+          String errorMsg = e.getMessage();
+          HelpMeOut.getInstance().query(errorMsg,errorLine,this);
+          // also, mark a broken code checkpoint
+          HelpMeOut.getInstance().processBroken(errorMsg,textarea.getText());
+          // </HelpMeOut>
         }
       }
     }
