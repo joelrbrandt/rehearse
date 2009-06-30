@@ -1,6 +1,8 @@
+Alias /helpmeout/ /project/helpmeout-server/
 <Location /helpmeout>
-	SetHandler mod_python
-	PythonHandler helpmeout
+	AddHandler mod_python .py
+	PythonHandler jsonrpc
+	ModMimeUsePathInfo On
 	PythonPath "['/project/helpmeout-server'] + sys.path"
 	PythonAutoReload On
 	PythonDebug On
