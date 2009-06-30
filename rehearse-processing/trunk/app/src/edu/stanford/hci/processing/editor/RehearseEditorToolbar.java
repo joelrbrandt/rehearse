@@ -18,7 +18,7 @@ import processing.app.Theme;
 public class RehearseEditorToolbar extends EditorToolbar {
 
 	  static final String title[] = {
-		  "Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run", "Modify"
+		  "Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run"
 	  };
 
 	  static final int BUTTON_COUNT  = title.length;
@@ -30,7 +30,6 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	  static final int BUTTON_GAP    = 5;
 
 	  static final int INTERACTIVE_RUN     = 6;
-	  static final int MODIFY = 7;
 
 	  static final int INACTIVE = 0;
 	  static final int ROLLOVER = 1;
@@ -73,13 +72,12 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	    this.menu = menu;
 
 	    if (buttons == null) {
-	      buttons = Base.getThemeImage("rehearseEditButtons.gif", this);
+	      buttons = Base.getThemeImage("rehearseButtons.gif", this);
 	    }
 
 	    buttonCount = 0;
 	    which = new int[BUTTON_COUNT];
 
-	    which[buttonCount++] = MODIFY;
 	    which[buttonCount++] = INTERACTIVE_RUN;
 	    which[buttonCount++] = RUN;
 	    which[buttonCount++] = STOP;
@@ -87,7 +85,6 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	    which[buttonCount++] = OPEN;
 	    which[buttonCount++] = SAVE;
 	    which[buttonCount++] = EXPORT;
-	    
 	    
 	    currentRollover = -1;
 
@@ -299,9 +296,6 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	    case INTERACTIVE_RUN:
 	    	((RehearseEditor)editor).handleInteractiveRun();
 	    	break;
-	    case MODIFY:
-	      //((RehearseEditor)editor).handleModify();
-	      break;
 	    case RUN:
 	      editor.handleRun(e.isShiftDown());
 	      break;
