@@ -41,6 +41,10 @@ cp ../../app/lib/antlr.jar processing/lib/
 cp ../../app/lib/ecj.jar processing/lib/
 cp ../../app/lib/jna.jar processing/lib/
 
+#helpmeout
+cp ../../app/lib/jj1.0.1.jar processing/lib/
+cp ../../app/lib/stringtree-json-2.0.5.jar processing/lib
+
 cp ../shared/revisions.txt processing/
 
 echo Extracting examples...
