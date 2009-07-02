@@ -18,6 +18,10 @@ else
   cp ../../app/lib/antlr.jar work/lib/
   cp ../../app/lib/ecj.jar work/lib/
   cp ../../app/lib/jna.jar work/lib/
+  
+  # HelpMeOut
+  cp ../../app/lib/jj1.0.1.jar work/lib
+  cp ../../app/lib/stringtree-json-2.0.5.jar work/lib
 
   echo Extracting examples...
   unzip -q -d work/ ../shared/examples.zip
@@ -137,7 +141,7 @@ fi
 
 
 ### -- BUILD PDE ------------------------------------------------
-
+### HelpMeOut: added 2 jars to classpath; source directory to sources
 cd app
 
 # has to be present, otherwise javac will complain of file writing errors
@@ -148,7 +152,7 @@ mkdir ../build/windows/work/classes
     -classpath "..\\build\\windows\\work\\java\\lib\\tools.jar" \
     com.sun.tools.javac.Main \
     -source 1.5 -target 1.5 \
-    -classpath "..\\build\\windows\\work\\lib\\core.jar;..\\build\\windows\\work\\lib\antlr.jar;..\\build\\windows\\work\\lib\\ecj.jar;..\\build\\windows\\work\\lib\\jna.jar;..\\build\\windows\\work\\java\\lib\\tools.jar" \
+    -classpath "..\\build\\windows\\work\\lib\\core.jar;..\\build\\windows\\work\\lib\antlr.jar;..\\build\\windows\\work\\lib\\ecj.jar;..\\build\\windows\\work\\lib\\jna.jar;..\\build\\windows\\work\\java\\lib\\tools.jar;..\\build\\windows\\work\\lib\\jj1.0.1.jar;..\\build\\windows\\work\\lib\\stringtree-json-2.0.5.jar" \
     -d ..\\build\\windows\\work\\classes \
     src/processing/app/*.java \
     src/processing/app/debug/*.java \
@@ -157,7 +161,18 @@ mkdir ../build/windows/work/classes
     src/processing/app/tools/*.java \
     src/processing/app/windows/*.java \
     src/antlr/*.java \
-    src/antlr/java/*.java 
+    src/antlr/java/*.java \
+    src/bsh/*.java \
+    src/bsh/classpath/*.java \
+    src/bsh/collection/*.java \
+    src/bsh/commands/*.java \
+    src/bsh/org/objectweb/asm/*.java \
+    src/bsh/reflect/*.java \
+    src/bsh/util/*.java \
+    src/edu/stanford/hci/processing/*.java \
+    src/edu/stanford/hci/helpmeout/*.java \
+    src/edu/stanford/hci/processing/editor/*.java 
+
 
 cd ../build/windows/work/classes
 rm -f ../lib/pde.jar
