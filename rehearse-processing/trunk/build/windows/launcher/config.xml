@@ -20,6 +20,8 @@
     <cp>lib/jna.jar</cp>
     <cp>lib/ecj.jar</cp>
     <cp>lib/antlr.jar</cp>
+    <cp>lib/jj1.0.1.jar</cp>
+    <cp>lib/stringtree-json-2.0.5.jar</cp>
   </classPath>
   <jre>
     <path>java</path>
