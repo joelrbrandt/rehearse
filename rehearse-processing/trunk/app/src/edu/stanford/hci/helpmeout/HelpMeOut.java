@@ -167,11 +167,11 @@ public class HelpMeOut {
           String result = (String)proxy.call("storeexception",errorMsg, errorLine, stackTraceString);
 
         }catch (Exception e) {
-          System.err.println("couldn't store.");
+          System.err.println("couldn't store exception.");
           e.printStackTrace();
         }
       } else {
-        System.err.println("store called with at least one null argument. tsk tsk.");
+        System.err.println("store exception called with at least one null argument. tsk tsk.");
       }
     }
     
