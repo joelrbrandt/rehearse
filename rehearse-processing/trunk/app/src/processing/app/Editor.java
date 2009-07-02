@@ -2179,9 +2179,23 @@ public class Editor extends JFrame implements RunnerListener {
           String errorLine = textarea.getText(textarea.getLineStartOffset(line),
               textarea.getLineStopOffset(line) - textarea.getLineStartOffset(line));
           String errorMsg = e.getMessage();
-          HelpMeOut.getInstance().query(errorMsg,errorLine,this);
-          // also, mark a broken code checkpoint
-          HelpMeOut.getInstance().processBroken(errorMsg,textarea.getText());
+          if (e instanceof RuntimeRunnerException) {
+            
+            // Get the stacktrace into String form
+            // http://www.devx.com/tips/Tip/27885
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            pw.flush();
+            sw.flush();
+            String exceptionString = sw.toString();
+            
+            HelpMeOut.getInstance().storeException(errorMsg, errorLine, exceptionString);
+          } else {
+            HelpMeOut.getInstance().query(errorMsg,errorLine,this);
+            // also, mark a broken code checkpoint
+            HelpMeOut.getInstance().processBroken(errorMsg,textarea.getText());
+          }
           // </HelpMeOut>
         }
       }

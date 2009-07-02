@@ -157,6 +157,24 @@ public class HelpMeOut {
       
     }
     
+    public void storeException(String errorMsg, String errorLine,
+                               String stackTrace) {
+      String stackTraceString = stackTrace;
+      // TODO Auto-generated method stub
+      if((errorMsg!=null)&&(errorLine!=null)&&(stackTrace!=null)) {
+        try {
+
+          String result = (String)proxy.call("storeexception",errorMsg, errorLine, stackTraceString);
+
+        }catch (Exception e) {
+          System.err.println("couldn't store.");
+          e.printStackTrace();
+        }
+      } else {
+        System.err.println("store called with at least one null argument. tsk tsk.");
+      }
+    }
+    
     /**
      * Save a reference to the HelpMeOutTool which we need to show text in the separate Tool window
      * @param toggleHelpMeOutWindowTool
@@ -165,5 +183,6 @@ public class HelpMeOut {
     public void registerTool(HelpMeOutTool tool) {
       this.tool = tool;
     }
+    
     
 }

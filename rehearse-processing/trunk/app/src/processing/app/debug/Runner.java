@@ -680,7 +680,7 @@ public class Runner implements MessageConsumer {
           lineNumber--;
 
           // getMessage() will be what's shown in the editor
-          exception = new RunnerException(message, codeIndex, lineNumber, -1);
+          exception = new RuntimeRunnerException(message, codeIndex, lineNumber, -1);
           exception.hideStackTrace();
           listener.statusError(exception);
           return;
@@ -688,7 +688,7 @@ public class Runner implements MessageConsumer {
       }
     } catch (AbsentInformationException e) {
       //e.printStackTrace();  // not useful
-      exception = new RunnerException(message);
+      exception = new RuntimeRunnerException(message);
       exception.hideStackTrace();
       listener.statusError(exception);
 
