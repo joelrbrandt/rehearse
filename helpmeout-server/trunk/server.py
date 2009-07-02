@@ -16,6 +16,7 @@ class HelpMeOutService(object):
     def connect(self):
         con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
         con.execute('create table if not exists errs(errmsg,diff)')
+        con.execute('create table if not exists exceptions(errmsg,line,stacktrace)')
         return con
     
     
@@ -73,6 +74,14 @@ class HelpMeOutService(object):
         con.commit()
         return "Stored error %s in db" % error
     
+    @ServiceMethod
+    def storeexception(self,error,line,stacktrace):
+        con = self.connect()
+        cur = con.cursor()
+        cur.execute("insert into exceptions values ('%s','%s','%s')" % (error,line,stacktrace))
+        con.commit()
+        return "Stored error %s into table exceptions" % error
+        
     # transmit string and all of both files
     # easier to call from java so we can generate right diff format in python
     @ServiceMethod
