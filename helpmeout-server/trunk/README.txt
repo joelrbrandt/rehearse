@@ -1,5 +1,9 @@
 helpmeout-server documentation
 ==============================
+To see apache errors
+sudo tail -f  /var/log/apache2/error.log
+To retload
+sudo /etc/init.d/apache2 reload
 
 here's quick rundown on files:
 
