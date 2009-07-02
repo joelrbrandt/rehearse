@@ -74,12 +74,17 @@ public class HelpMeOut {
      * @param code The line of code referenced by the compile error
      */
     public void query(String error, String code, JFrame frame) {
+      
+      if(tool!=null) {
+        tool.setLabelText("Querying...");
+      }
+      
       try {
         int i=1;
         String suggestions ="<html><body>";
         ArrayList<HashMap<String,ArrayList<String>>> result = 
           (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
-        suggestions+="<h3>Error</h3><pre>"+error+"</pre>";
+        suggestions+="<h3>Error</h3><p>"+error+"</p>";
         for(HashMap<String,ArrayList<String>> m:result) {
           suggestions += "<h3>Suggestion "+Integer.toString(i++)+"</h3>";
           suggestions += "<pre>";
@@ -100,13 +105,23 @@ public class HelpMeOut {
           suggestions += "</pre>";
         }
         suggestions+="</body></html>";
-        JLabel label= new JLabel(suggestions);
-        JOptionPane.showMessageDialog(frame, label,"HelpMeOut Suggestions",JOptionPane.PLAIN_MESSAGE);
+        
+        //show in a popup window:
+        //JLabel label= new JLabel(suggestions);
+        //JOptionPane.showMessageDialog(frame, label,"HelpMeOut Suggestions",JOptionPane.PLAIN_MESSAGE);
+        
+        //now show the suggestion in the HelpMeOut window
+        if(tool!=null) {
+          tool.setLabelText(suggestions);
+        }
 
       } catch (Exception e) {
         System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
-        
-        e.printStackTrace();
+        if(tool!=null) {
+          
+          tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
+        }
+        //e.printStackTrace();
       }
     }
     
@@ -141,4 +156,14 @@ public class HelpMeOut {
       }
       
     }
+    
+    /**
+     * Save a reference to the HelpMeOutTool which we need to show text in the separate Tool window
+     * @param toggleHelpMeOutWindowTool
+     */
+    private HelpMeOutTool tool=null;
+    public void registerTool(HelpMeOutTool tool) {
+      this.tool = tool;
+    }
+    
 }
