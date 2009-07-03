@@ -6,13 +6,25 @@
 
 from pysqlite2 import dbapi2 as sqlite
 
-def connect():
-    con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
-    con.execute('create table if not exists errs(errmsg,diff)')
-    return con
-con = connect()
+
+con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
 cur = con.cursor()
-cur.execute("insert into errs values ('test','test')")
-con.commit()
-res = con.execute("select * from errs")
-print [r for r in res]
+
+print "---------------------------------------------------------------"
+res = con.execute("select count(*) from compilererrors")
+print ("table compilererrors has %d entries" % [r[0] for r in res][0])
+
+print "---------------------------------------------------------------"
+print "last entry:"
+res = con.execute("select * from compilererrors order by id desc limit 1")
+print ([r for r in res])
+
+print "---------------------------------------------------------------"
+res = con.execute("select count(*) from exceptions")
+print ("table exceptions has %d entries" % [r[0] for r in res][0])
+
+
+print "---------------------------------------------------------------"
+print "last entry:"
+res = con.execute("select * from exceptions order by id desc limit 1")
+print ([r for r in res])
