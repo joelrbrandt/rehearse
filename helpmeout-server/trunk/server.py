@@ -70,17 +70,17 @@ class HelpMeOutService(object):
     def store(self,error,diff):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into compilererrors values (null,datetime('now'),'%s','%s')" % (error,diff))
+        cur.execute("insert into compilererrors values (null,datetime('now'),?,?)",(error,diff))
         con.commit()
-        return "Stored error %s in db" % error
+        return "Stored error in db"
     
     @ServiceMethod
     def storeexception(self,error,line,stacktrace):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into exceptions values (null,datetime('now'),'%s','%s','%s')" % (error,line,stacktrace))
+        cur.execute("insert into exceptions values (null,datetime('now'),?,?,?)",(error,line,stacktrace))
         con.commit()
-        return "Stored error %s into table exceptions" % error
+        return "Stored error into table exceptions"
     
     # transmit string and all of both files
     # easier to call from java so we can generate right diff format in python
@@ -95,7 +95,7 @@ class HelpMeOutService(object):
     def query(self,error,code):
         con = self.connect()
         cur = con.cursor()
-        res = con.execute("select diff from compilererrors where errmsg = '%s'" % error)
+        res = con.execute("select diff from compilererrors where errmsg = ?",(error,))
         if res==None:
             return ['error']
         arr = [d[0] for d in res]
