@@ -60,7 +60,7 @@ class HelpMeOutService(object):
             # generate a html diff report
             file1 = difflib.restore(all_lines,1)
             file2 = difflib.restore(all_lines,2)
-            table = htmlDiff.make_table(file1,file2,"Before (Broken)","After (Fixed)",context=True,numlines=0)
+            table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
             
             ranked_diffs.append((max_sim,{'old':old_lines,'new':new_lines,'table':[table,'']}))
             
