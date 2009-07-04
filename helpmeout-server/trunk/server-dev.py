@@ -62,7 +62,7 @@ class HelpMeOutService(object):
             file2 = difflib.restore(all_lines,2)
             table = htmlDiff.make_table(file1,file2,"Before (Broken)","After (Fixed)",context=True,numlines=0)
             
-            ranked_diffs.append((max_sim,{'old':old_lines,'new':new_lines,'table':table}))
+            ranked_diffs.append((max_sim,{'old':old_lines,'new':new_lines,'table':[table,'']}))
             
         #sort by decreasing ranking 
         ranked_diffs.sort(reverse=True)
