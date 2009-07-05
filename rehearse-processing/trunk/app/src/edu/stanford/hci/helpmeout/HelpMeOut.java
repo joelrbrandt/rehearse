@@ -1,11 +1,14 @@
 package edu.stanford.hci.helpmeout;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 import com.googlecode.jj1.ServiceProxy;
 
@@ -19,7 +22,20 @@ import com.googlecode.jj1.ServiceProxy;
 
 public class HelpMeOut {
   
-  private static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server.py";
+  //private class to store info of queried fixes
+  class FixInfo {
+    
+    public FixInfo(int id, String fixedCode) {
+      this.id = id;
+      this.fixedCode=  fixedCode;
+    }
+    
+    public int id;
+    public String fixedCode;
+  }
+  
+  private static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
+  private Map<Integer,FixInfo> currentFixes = new HashMap<Integer,FixInfo>(); // temp storage for currently displayed fixes, so we can copy them
   
   // make it a Singleton
   private static HelpMeOut instance = new HelpMeOut();
@@ -80,35 +96,77 @@ public class HelpMeOut {
       }
       
       try {
+        currentFixes.clear();
         int i=1;
-        String suggestions ="<html><body>";
+        String suggestions ="<html><head>"+
+//    "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-1' />"+
+//    "<title>HelpMeOut</title>"+
+    "<style type=\"text/css\">"+
+    "body {margin:7px; font-family:Arial,Helvetica; background-color:#f0f0f0;}"+
+    "    table.diff {font-family:Courier; font-size:9px; border:medium; border-style:solid; border-width:1px; background-color:#ffffff;}"+
+    "    .diff_header {background-color:#e0e0e0;}"+
+    "    td.diff_header {text-align:right; }"+ //these are the line# cells
+    "    .diff_next {background-color:#c0c0c0; border-style:solid border-width:1px; }"+
+    "    .diff_add {background-color:#aaffaa}"+
+    "    .diff_chg {background-color:#ffff77}"+
+    "    .diff_sub {background-color:#ffaaaa}"+
+    "    div {font-family:Arial,Helvetica; font-size:9px;}"+
+    "</style>"+
+    "</head><body>";
+        
+//        String suggestions ="<html><body>";
         ArrayList<HashMap<String,ArrayList<String>>> result = 
           (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
-        suggestions+="<h3>Error</h3><p>"+error+"</p>";
+        suggestions+="<h3>Error Message:</h3>"+error+"";
         for(HashMap<String,ArrayList<String>> m:result) {
-          suggestions += "<h3>Suggestion "+Integer.toString(i++)+"</h3>";
-          suggestions += "<pre>";
-          if(m.containsKey("old")) {
-            //suggestions += "=== BEFORE ===\n";
-            ArrayList<String> o = (ArrayList<String>)m.get("old");
-            for(String s:o){
-              suggestions+="BEFORE  "+s;
+          suggestions += "<h3>Suggestion "+Integer.toString(i)+"</h3>";
+          
+          
+//          suggestions += "<pre>";
+//          if(m.containsKey("old")) {
+//            //suggestions += "=== BEFORE ===\n";
+//            ArrayList<String> o = (ArrayList<String>)m.get("old");
+//            for(String s:o){
+//              suggestions+="BEFORE  "+s;
+//            }
+//          }
+//          if(m.containsKey("new")) {
+//            //suggestions += "=== AFTER ===\n";
+//            ArrayList<String> o = (ArrayList<String>)m.get("new");
+//            for(String s:o){
+//              suggestions += "AFTER   "+s;
+//            }
+//          }
+//          suggestions += "</pre>";
+          
+          //new format: generate html on server-side
+          
+          if(m.containsKey("table")) {
+            // add python-generated diff table to the page
+            // remove <br /> b/c java can't deal with them;
+            // also remove <a href="">n</a> and <a href="">t</a> links because they are distracting
+            suggestions+= ((ArrayList<String>)m.get("table")).get(0).replaceAll("<br />", "").replaceAll(">[nt]</a>", "></a>&nbsp;");
+
+            // add links to vote up/down and to copy a fix 
+            suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
+            
+            // assemble fixed code lines and save to currentFixes
+            // so we can copy+paste easily later
+            if(m.containsKey("new")) {
+              String lines = "";
+              ArrayList<String> o = (ArrayList<String>)m.get("new");
+              for(String s:o){
+                lines+=s;
+              }
+              currentFixes.put(i, new FixInfo(0,lines));
             }
+            
           }
-          if(m.containsKey("new")) {
-            //suggestions += "=== AFTER ===\n";
-            ArrayList<String> o = (ArrayList<String>)m.get("new");
-            for(String s:o){
-              suggestions += "AFTER   "+s;
-            }
-          }
-          suggestions += "</pre>";
+          
+          i++;
         }
         suggestions+="</body></html>";
         
-        //show in a popup window:
-        //JLabel label= new JLabel(suggestions);
-        //JOptionPane.showMessageDialog(frame, label,"HelpMeOut Suggestions",JOptionPane.PLAIN_MESSAGE);
         
         //now show the suggestion in the HelpMeOut window
         if(tool!=null) {
@@ -182,6 +240,29 @@ public class HelpMeOut {
     private HelpMeOutTool tool=null;
     public void registerTool(HelpMeOutTool tool) {
       this.tool = tool;
+    }
+    
+    /**
+     * Copy the source code of a currently displayed fix to the system clipboard
+     * Gets called from HelpMeOutTool's hyperlinkUpdate() link-click event handler
+     * http://www.devx.com/Java/Article/22326/0/page/4
+     * @param i index into list of suggestions (1-3) - which fix to copy
+     */
+    public void handleCopyAction(int i) {
+      Clipboard systemClipboard = 
+        Toolkit.getDefaultToolkit().getSystemClipboard(); 
+        Transferable transferableText =
+          new StringSelection(currentFixes.get(i).fixedCode);
+        systemClipboard.setContents(transferableText, null);
+    }
+    public void handleVoteUpAction(int i) {
+      // using id, call database method
+      //proxy.call("errorvote",1,currentFixes.get(i).id);
+      System.out.println("handleVoteUpo");
+    }
+    public void handleVoteDownAction(int i) {
+      //proxy.call("errorvote",-1,currentFixes.get(i).id);
+      System.out.println("handleDownVote");
     }
     
     

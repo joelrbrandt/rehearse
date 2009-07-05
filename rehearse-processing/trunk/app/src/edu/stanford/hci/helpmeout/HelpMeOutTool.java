@@ -5,12 +5,21 @@ package edu.stanford.hci.helpmeout;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import processing.app.Editor;
 import processing.app.tools.Tool;
@@ -21,7 +30,7 @@ import processing.app.tools.Tool;
  * @author bjoern
  *
  */
-public class HelpMeOutTool implements Tool {
+public class HelpMeOutTool implements Tool, HyperlinkListener {
 
   public class ExitListener implements WindowListener {
 
@@ -95,6 +104,8 @@ public class HelpMeOutTool implements Tool {
       pane = new JTextPane();
       pane.setContentType("text/html");
       pane.setEditable(false);
+      pane.addHyperlinkListener(this);
+
       pane.setText("HelpMeOut suggestions will be shown here.");
       JScrollPane scroll = new JScrollPane(pane);
       scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -127,4 +138,57 @@ public class HelpMeOutTool implements Tool {
 
     pane.setText(text);
   }
+
+  /**
+   * click handler; links are of form URL?action=<action>&id=<id>
+   */
+  public void hyperlinkUpdate(HyperlinkEvent e) {
+    
+    //only respond to this event if the link was actually clicked on
+    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+
+      String query = e.getURL().getQuery();
+      Map<String, String> map = getQueryMap(query);
+
+      // for a copy link, place text of fix on clipboard
+      // TODO: maybe paste it right in instead
+      // TODO: need some visual feedback
+      if("copy".matches(map.get("action"))) {
+        HelpMeOut.getInstance().handleCopyAction(Integer.parseInt(map.get("id")));
+      } 
+      // for a "thumbs up link:
+      else if("up".matches(map.get("action"))){
+        HelpMeOut.getInstance().handleVoteUpAction(Integer.parseInt(map.get("id")));
+      } 
+      // for a "thumbs down" link:
+      else if("down".matches(map.get("action"))) {
+        HelpMeOut.getInstance().handleVoteDownAction(Integer.parseInt(map.get("id")));
+      } 
+      else {
+        //just print for now
+        Set<String> keys = map.keySet();
+
+        for (String key : keys)
+        {
+          System.out.println("Name=" + key);
+          System.out.println("Value=" + map.get(key));
+        }
+      }
+    }
+  }
+  //from: http://www.coderanch.com/t/383310/Java-General-intermediate/java/parse-url-query-string-parameter
+
+  private static Map<String, String> getQueryMap(String query)
+  {
+    String[] params = query.split("&");
+    Map<String, String> map = new HashMap<String, String>();
+    for (String param : params)
+    {
+      String name = param.split("=")[0];
+      String value = param.split("=")[1];
+      map.put(name, value);
+    }
+    return map;
+  }
+
 }
