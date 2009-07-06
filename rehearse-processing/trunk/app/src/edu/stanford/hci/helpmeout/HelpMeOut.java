@@ -49,8 +49,13 @@ public class HelpMeOut {
   private enum CodeState {BROKEN,FIXED};
   CodeState codeState = CodeState.FIXED;
   
+  // keep track of msg and code for FSM
   String lastErrorMsg = null;
   String lastErrorCode = null;
+  
+  //store last query parameters in case we need to re-query
+  String lastQueryMsg = null;
+  String lastQueryCode = null;
   
   /**
    * Simple test: call an echo function that takes a string and returns that same string
@@ -90,6 +95,8 @@ public class HelpMeOut {
      * @param code The line of code referenced by the compile error
      */
     public void query(String error, String code, JFrame frame) {
+      lastQueryMsg = error;
+      lastQueryCode = code;
       
       if(tool!=null) {
         tool.setLabelText("Querying...");
@@ -142,6 +149,9 @@ public class HelpMeOut {
           //new format: generate html on server-side
           
           if(m.containsKey("table")) {
+            //extract fix id 
+            int fixId = Integer.parseInt(((ArrayList<String>)m.get("id")).get(0));
+            
             // add python-generated diff table to the page
             // remove <br /> b/c java can't deal with them;
             // also remove <a href="">n</a> and <a href="">t</a> links because they are distracting
@@ -158,7 +168,7 @@ public class HelpMeOut {
               for(String s:o){
                 lines+=s;
               }
-              currentFixes.put(i, new FixInfo(0,lines));
+              currentFixes.put(i, new FixInfo(fixId,lines));
             }
             
           }
@@ -255,15 +265,38 @@ public class HelpMeOut {
           new StringSelection(currentFixes.get(i).fixedCode);
         systemClipboard.setContents(transferableText, null);
     }
+    
+    /**
+     * Event handler for clicks on the vote up link in the helpmeout ui.
+     * @param i suggestion id extracted from link
+     */
     public void handleVoteUpAction(int i) {
-      // using id, call database method
-      //proxy.call("errorvote",1,currentFixes.get(i).id);
-      System.out.println("handleVoteUpo");
+      voteAndRequery(currentFixes.get(i).id, 1);
+        
     }
+    /**
+     * Event handler for clicks on the vote down link in the helpmeout ui.
+     * @param i suggestion id extracted from link
+     */    
     public void handleVoteDownAction(int i) {
-      //proxy.call("errorvote",-1,currentFixes.get(i).id);
-      System.out.println("handleDownVote");
+      voteAndRequery(currentFixes.get(i).id, -1);      
     }
     
-    
+    /**
+     * Call the errorvote service method to store vote in table
+     * @param fixid id of fix in db table
+     * @param vote numeric up or down vote
+     */
+    private void voteAndRequery(int fixid, int vote) {
+      try {
+        // using id, call database method
+        proxy.call("errorvote",fixid,vote);
+        
+      } catch (Exception e) {
+        System.err.println("couldn't call errorvote servicemethod.");
+        e.printStackTrace();
+      }
+      // then re-query?
+      query(lastQueryMsg,lastQueryCode,null);
+    }
 }
