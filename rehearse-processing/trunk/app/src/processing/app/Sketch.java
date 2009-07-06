@@ -1138,7 +1138,7 @@ public class Sketch {
    *    X. afterwards, some of these steps need a cleanup function
    * </PRE>
    */
-  protected String compile() throws RunnerException {
+  public String compile() throws RunnerException {
     // make sure the user didn't hide the sketch folder
     ensureExistence();
 

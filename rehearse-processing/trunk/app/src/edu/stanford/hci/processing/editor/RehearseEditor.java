@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 
+import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.processing.RehearsePApplet;
 import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
@@ -176,6 +177,13 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			}
 		}
 		 */
+		
+		// Compiles the interactive program to check for compile errors.
+		// If it fails, stop running.
+		boolean compiled = HelpMeOutCompile();
+		if (!compiled) {
+		  return;
+		}
 
 		String source = appendCodeFromAllTabs();
 		
@@ -224,7 +232,20 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		}
 	}
 
-	public void error(Object o) {
+	private boolean HelpMeOutCompile() {
+    try {
+      String appletClassName = getSketch().compile();
+      if (appletClassName != null) {
+        HelpMeOut.getInstance().processNoError(textarea.getText());
+        return true;
+      }
+    } catch (Exception e) {
+      statusError(e);
+    }
+    return false;
+  }
+
+  public void error(Object o) {
 		getOut().append(o.toString() + "\n");
 	}
 
