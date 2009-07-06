@@ -25,13 +25,14 @@ class HelpMeOutService(object):
     
     # Find the best example fixes in our database for the error 
     # assume error is a single line string, 
-    # assume diffs is an array of (id,multiline string) tuples
+    # assume diffs is an array of (id,multiline string,votes) tuples
     def find_best_source_match(self,error_line,diffs,num_results=3):
         htmlDiff = difflib.HtmlDiff()
         
         ranked_diffs = []
         for diff in diffs:
             fixid = diff[0]
+            votes = diff[2]
             max_sim = 0.0 #maximum similarity metric found so far
             all_lines = diff[1].splitlines(1)
         
@@ -65,13 +66,18 @@ class HelpMeOutService(object):
             table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
             
             # hack: for now make sure everything we return is a list of strings
-            ranked_diffs.append((max_sim,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
+            ranked_diffs.append((max_sim,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
             
-        #sort by decreasing ranking 
+        #sort by decreasing similarity ranking 
         ranked_diffs.sort(reverse=True)
         
+        #how should we take voting into account?
+        #take top 2N results (if we're returning n) and sort by votes
+        vote_ranked_diffs = [r[1:] for r in ranked_diffs[0:(2*num_results)]]
+        vote_ranked_diffs.sort(reverse=True)
+        
         #now return up to top num_results as [{'new':[new_lines1],'old':[old_lines1]),...]
-        return [r[1] for r in ranked_diffs[0:num_results]] # how many?
+        return [r[1] for r in vote_ranked_diffs[0:num_results]] # how many?
     
     @ServiceMethod
     def echo(self,msg):
@@ -103,12 +109,13 @@ class HelpMeOutService(object):
         return self.store(error,diff_str)
     
     # vote for a fix - either up or down
-    #@ServiceMethod
-    #def errorvote(self,vote,id):
-    #    con = self.connect()
-    #    cur = con.cursor()
-    #    res = cur.execute("update compilererrors set votes = (select votes from compilererrors where id = ?)+(?) where id = ?",(id,vote,id))
-    #    con.commit
+    @ServiceMethod
+    def errorvote(self,id,vote):
+        con = self.connect()
+        cur = con.cursor()
+        res = cur.execute("update compilererrors set votes = (select votes from compilererrors where id = :id)+(:vote) where id=:id",locals())
+        con.commit()
+        return "Updated vote"
     
     #query the database
     @ServiceMethod
@@ -116,10 +123,10 @@ class HelpMeOutService(object):
         con = self.connect()
         cur = con.cursor()
         #TODO: select id, diff and pass through to find_best_source_match
-        res = con.execute("select id,diff from compilererrors where errmsg = ?",(error,))
+        res = con.execute("select id,diff,votes from compilererrors where errmsg = ?",(error,))
         if res==None:
             return ['error']
-        arr = [d for d in res] # d[0] has id, d[1] has diff
+        arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes
         if len(arr)==0:
             return ['nothing found']
         # we have at least one useful result:
