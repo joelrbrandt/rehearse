@@ -16,22 +16,24 @@ from tokenlineformatter import TokenLineFormatter
 
 class HelpMeOutService(object):
     def connect(self):
+        #todo: added fields here
         con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
-        con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff)')
+        con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff,votes INTEGER DEFAULT 0)')
         con.execute('create table if not exists exceptions(id INTEGER PRIMARY KEY,timestamp,errmsg,line,stacktrace)')
         return con
     
     
     # Find the best example fixes in our database for the error 
-    # assume error is a single line string, diffs is an array of multiline strings
+    # assume error is a single line string, 
+    # assume diffs is an array of (id,multiline string) tuples
     def find_best_source_match(self,error_line,diffs,num_results=3):
         htmlDiff = difflib.HtmlDiff()
         
         ranked_diffs = []
         for diff in diffs:
-        
+            fixid = diff[0]
             max_sim = 0.0 #maximum similarity metric found so far
-            all_lines = diff.splitlines(1)
+            all_lines = diff[1].splitlines(1)
         
             # split the diff report into lines unique to broken, fixed source
             # [2:] omits the "- " and "+ " of the diff format.
@@ -39,7 +41,7 @@ class HelpMeOutService(object):
             new_lines = [l[2:] for l in all_lines if l.startswith('+')]
         
             # within broken old lines, find line with max similarity to error_line argument
-            # version 1: operate directly on source text
+            # version 1: ofperate directly on source text
             #for old_line in old_lines:
             #    s = difflib.SequenceMatcher(None,error_line,old_line)
             #    ratio = s.ratio() # calculate edit-distance based metric, [0.0-1.0]
@@ -62,11 +64,12 @@ class HelpMeOutService(object):
             file2 = difflib.restore(all_lines,2)
             table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
             
-            ranked_diffs.append((max_sim,{'old':old_lines,'new':new_lines,'table':[table,'']}))
+            # hack: for now make sure everything we return is a list of strings
+            ranked_diffs.append((max_sim,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
             
         #sort by decreasing ranking 
         ranked_diffs.sort(reverse=True)
-            
+        
         #now return up to top num_results as [{'new':[new_lines1],'old':[old_lines1]),...]
         return [r[1] for r in ranked_diffs[0:num_results]] # how many?
     
@@ -79,7 +82,7 @@ class HelpMeOutService(object):
     def store(self,error,diff):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into compilererrors values (null,datetime('now'),?,?)",(error,diff))
+        cur.execute("insert into compilererrors values (null,datetime('now'),?,?,0)",(error,diff))
         con.commit()
         return "Stored error in db"
     
@@ -99,19 +102,28 @@ class HelpMeOutService(object):
         diff_str = ''.join(diff_obj)
         return self.store(error,diff_str)
     
+    # vote for a fix - either up or down
+    #@ServiceMethod
+    #def errorvote(self,vote,id):
+    #    con = self.connect()
+    #    cur = con.cursor()
+    #    res = cur.execute("update compilererrors set votes = (select votes from compilererrors where id = ?)+(?) where id = ?",(id,vote,id))
+    #    con.commit
+    
     #query the database
     @ServiceMethod
     def query(self,error,code):
         con = self.connect()
         cur = con.cursor()
-        res = con.execute("select diff from compilererrors where errmsg = ?",(error,))
+        #TODO: select id, diff and pass through to find_best_source_match
+        res = con.execute("select id,diff from compilererrors where errmsg = ?",(error,))
         if res==None:
             return ['error']
-        arr = [d[0] for d in res]
+        arr = [d for d in res] # d[0] has id, d[1] has diff
         if len(arr)==0:
             return ['nothing found']
         # we have at least one useful result:
-        # TODO: go over returned results one by one and check distance
+        # go over returned results one by one and check distance
         best = self.find_best_source_match(code,arr)
         return best
 
