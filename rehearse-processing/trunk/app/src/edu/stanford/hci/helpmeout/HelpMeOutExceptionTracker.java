@@ -1,9 +1,12 @@
 package edu.stanford.hci.helpmeout;
 
+import java.util.HashMap;
+
 import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.googlecode.jj1.ServiceProxy;
+
 
 public class HelpMeOutExceptionTracker {
 
@@ -36,24 +39,26 @@ public class HelpMeOutExceptionTracker {
    */
   public int getLineToWatch(String newSource) {
     assert(eInfo!=null);
-
-    // TODO: write this implementation. intuition: use diff/patch to find correspondence
-    // here's some pseudo-code
     
     // compute character offset in source - make sure we're on the right line 
-    // diff_match_patch d = new diff_match_patch();
-    // int oldCharIndex = getCharIndexFromLine(source,line);
-    // int newCharIndex = d.diff_xIndex(d.diff_main(source, newSource), oldCharIndex);
-    // int newLineIndex = getLineFromCharIndex(newSource,newCharIndex);
-    // return newLineIndex;
-    
-    return 0;
+    diff_match_patch d = new diff_match_patch();
+    int oldCharIndex = getCharIndexFromLine(source, eInfo.getExceptionLineNum());
+    int newCharIndex = d.diff_xIndex(d.diff_main(source, newSource), oldCharIndex);
+    int newLineIndex = getLineFromCharIndex(newSource,newCharIndex);
+    return newLineIndex;
   }
   
-  private int getCharIndexFromLine(String source, String line) {
-    return source.indexOf(line);
+  private int getCharIndexFromLine(String source, int line) {
+    int newlinesToConsume = line-1;
+    int charIndex = 0;
+    while (newlinesToConsume > 0) {
+      charIndex++;
+      if (source.charAt(charIndex) == '\n') newlinesToConsume--;
+    }
+    if (line > 1) charIndex++; // move past the newline
+    return charIndex+1;
   }
-  
+
   private int getLineFromCharIndex(String newSource, int newCharIndex) {
     int newLine = 0;
     for (int i = 0; i < newCharIndex; i++) {
@@ -69,4 +74,5 @@ public class HelpMeOutExceptionTracker {
   public boolean hasExceptionOccurred() {
     return eInfo!=null;
   }
+  
 }

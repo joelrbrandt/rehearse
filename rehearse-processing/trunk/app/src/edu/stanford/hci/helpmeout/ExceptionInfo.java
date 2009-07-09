@@ -19,7 +19,8 @@ public class ExceptionInfo {
   protected String exceptionClass;
   protected String exceptionMessage;
 
-  protected int exceptionLine;
+  protected int exceptionLineNum;
+  protected String exceptionLine;
   
   protected String stackTrace;
   
@@ -56,9 +57,38 @@ public class ExceptionInfo {
     this.sourceCode = source;
     // and an index to the line that threw the error
     // TODO: this only works for single-file sketches for now
-    this.exceptionLine = e.getErrorLineNumber();
+    this.exceptionLineNum = e.getErrorLineNumber();
+    this.exceptionLine = e.getErrorText();
    
     //store environment of accessible variables and values
     this.environment = (HashMap<String, String>) i.makeSnapshotModel().getVariableMap();
    }
+
+  public String getSourceCode() {
+    return sourceCode;
+  }
+
+  public String getExceptionClass() {
+    return exceptionClass;
+  }
+
+  public String getExceptionMessage() {
+    return exceptionMessage;
+  }
+
+  public int getExceptionLineNum() {
+    return exceptionLineNum;
+  }
+
+  public String getExceptionLine() {
+    return exceptionLine;
+  }
+
+  public String getStackTrace() {
+    return stackTrace;
+  }
+
+  public HashMap<String, String> getEnvironment() {
+    return environment;
+  }
 }
