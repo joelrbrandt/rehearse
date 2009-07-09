@@ -42,12 +42,24 @@ public class HelpMeOutExceptionTracker {
     
     // compute character offset in source - make sure we're on the right line 
     // diff_match_patch d = new diff_match_patch();
-    // int oldCharIndex = getCharIndexFromLine(source,line); // have to write this function
+    // int oldCharIndex = getCharIndexFromLine(source,line);
     // int newCharIndex = d.diff_xIndex(d.diff_main(source, newSource), oldCharIndex);
-    // int newLineIndex = getLineFromCharIndex(newSource,newCharIndex); //have to write this function
+    // int newLineIndex = getLineFromCharIndex(newSource,newCharIndex);
     // return newLineIndex;
     
     return 0;
+  }
+  
+  private int getCharIndexFromLine(String source, String line) {
+    return source.indexOf(line);
+  }
+  
+  private int getLineFromCharIndex(String newSource, int newCharIndex) {
+    int newLine = 0;
+    for (int i = 0; i < newCharIndex; i++) {
+      if (newSource.charAt(i) == '\n') newLine++;
+    }
+    return newLine+1; // lines of code aren't 0-indexed
   }
   
   /**

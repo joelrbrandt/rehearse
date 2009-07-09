@@ -117,8 +117,8 @@ public class RehearsePApplet extends PApplet {
 		} catch (UtilEvalError e) {
 			throw new RuntimeException(e);
 		} catch (EvalError e) {
-		  HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i);
-			throw new RuntimeException(e);
+		  	HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i);
+		  	throw new RuntimeException(e);
 		}
 	}
 }
