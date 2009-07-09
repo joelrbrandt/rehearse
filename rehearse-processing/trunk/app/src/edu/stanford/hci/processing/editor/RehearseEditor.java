@@ -245,7 +245,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
           // TODO here or in handleInteractiveRun() above:
           int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch(textarea.getText());
           //System.out.println("Watch line number: " + lineToWatch);
-          interpreter.setLineToWatch(lineToWatch);
+          //TODO: interpreter.setLineToWatch(lineToWatch);
         }
         return true;
       }
