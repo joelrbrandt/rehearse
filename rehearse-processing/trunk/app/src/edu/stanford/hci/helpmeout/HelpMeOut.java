@@ -7,6 +7,8 @@ import java.util.Map;
 
 import processing.app.Editor;
 
+import bsh.EvalError;
+
 import com.googlecode.jj1.ServiceProxy;
 
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
@@ -35,7 +37,7 @@ public class HelpMeOut {
     public String brokenCode;
   }
 
-  private static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
+  protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
   private Map<Integer,FixInfo> currentFixes = new HashMap<Integer,FixInfo>(); // temp storage for currently displayed fixes, so we can copy them
 
   // make it a Singleton
@@ -349,4 +351,5 @@ public class HelpMeOut {
     
 
   }
+ 
 }

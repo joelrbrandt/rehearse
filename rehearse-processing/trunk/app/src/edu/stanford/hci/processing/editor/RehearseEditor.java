@@ -22,6 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 
 import edu.stanford.hci.helpmeout.HelpMeOut;
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 import edu.stanford.hci.processing.RehearsePApplet;
 import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
@@ -237,6 +238,14 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
       String appletClassName = getSketch().compile();
       if (appletClassName != null) {
         HelpMeOut.getInstance().processNoError(textarea.getText());
+        // if no exception has occurred yet, send text to HelpMeOut Exception class
+        if(!HelpMeOutExceptionTracker.getInstance().hasExceptionOccurred()) {
+          HelpMeOutExceptionTracker.getInstance().setSource(textarea.getText());
+        } else {
+          // TODO here or in handleInteractiveRun() above:
+          //HelpMeOutExceptionTracker.getInstance().getLineToWatch(textarea.getText());
+          //tell the interpreter what/where to watch.
+        }
         return true;
       }
     } catch (Exception e) {

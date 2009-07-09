@@ -5,6 +5,8 @@ import java.awt.Image;
 
 import javax.swing.JFrame;
 
+import edu.stanford.hci.helpmeout.HelpMeOut;
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
 import bsh.EvalError;
@@ -115,6 +117,7 @@ public class RehearsePApplet extends PApplet {
 		} catch (UtilEvalError e) {
 			throw new RuntimeException(e);
 		} catch (EvalError e) {
+		  HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i);
 			throw new RuntimeException(e);
 		}
 	}
