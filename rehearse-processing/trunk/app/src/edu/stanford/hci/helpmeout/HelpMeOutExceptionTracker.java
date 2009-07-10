@@ -1,5 +1,6 @@
 package edu.stanford.hci.helpmeout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import bsh.EvalError;
@@ -29,6 +30,23 @@ public class HelpMeOutExceptionTracker {
   /** record the runtime exception that just occurred */
   public void processRuntimeException(EvalError err,Interpreter i) {
     eInfo = new ExceptionInfo(err,i,source);
+    String error = eInfo.getExceptionClass();
+    String code = eInfo.getExceptionLine();
+    String trace = eInfo.getStackTrace();
+    HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
+    
+    try {
+      ArrayList<HashMap<String,ArrayList<String>>> result = 
+        (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("queryexception", error, code, trace);
+      HelpMeOut.getInstance().showQueryResult(result, error);
+    } catch (Exception e) {
+      System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
+      if(tool!=null) {
+
+        tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
+      }
+      //e.printStackTrace();
+    }
   }
   
   /** mark the previously recorded runtime exception as resolved */
@@ -38,6 +56,15 @@ public class HelpMeOutExceptionTracker {
     // old source and new source
     // error line
     // type of exception
+    try {
+      
+      String result = (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
+                                         eInfo.getStackTrace(), eInfo.getSourceCode(), source);
+
+    }catch (Exception e) {
+      System.err.println("couldn't store exception.");
+      e.printStackTrace();
+    }
   }
   
   /** given the old, broken source and Exception info we have in this object,
@@ -87,4 +114,5 @@ public class HelpMeOutExceptionTracker {
   public boolean notifyLineReached(int line, int executionCount) {
     return (eInfo.getExecutionCount() == executionCount);
   }
+  
 }

@@ -91,6 +91,98 @@ public class HelpMeOut {
       System.err.println("store called with at least one null argument. tsk tsk.");
     }
   }
+  
+  protected void showQueryResult(ArrayList<HashMap<String,ArrayList<String>>> result, String error) {
+
+    if(tool!=null) {
+      tool.setLabelText("Querying...");
+    }
+
+    currentFixes.clear();
+    int i=1;
+    String suggestions ="<html><head>"+
+    //    "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-1' />"+
+    //    "<title>HelpMeOut</title>"+
+    "<style type=\"text/css\">"+
+    "body {margin:7px; font-family:Arial,Helvetica; background-color:#f0f0f0;}"+
+    "    table.diff {font-family:Courier; font-size:9px; border:medium; border-style:solid; border-width:1px; background-color:#ffffff;}"+
+    "    .diff_header {background-color:#e0e0e0;}"+
+    "    td.diff_header {text-align:right; }"+ //these are the line# cells
+    "    .diff_next {background-color:#c0c0c0; border-style:solid border-width:1px; }"+
+    "    .diff_add {background-color:#aaffaa}"+
+    "    .diff_chg {background-color:#ffff77}"+
+    "    .diff_sub {background-color:#ffaaaa}"+
+    "    div {font-family:Arial,Helvetica; font-size:9px;}"+
+    "</style>"+
+    "</head><body>";
+
+    //        String suggestions ="<html><body>";
+    suggestions+="<h3>Error Message:</h3>"+error+"";
+    for(HashMap<String,ArrayList<String>> m:result) {
+      suggestions += "<h3>Suggestion "+Integer.toString(i)+"</h3>";
+
+
+      //          suggestions += "<pre>";
+      //          if(m.containsKey("old")) {
+      //            //suggestions += "=== BEFORE ===\n";
+      //            ArrayList<String> o = (ArrayList<String>)m.get("old");
+      //            for(String s:o){
+      //              suggestions+="BEFORE  "+s;
+      //            }
+      //          }
+      //          if(m.containsKey("new")) {
+      //            //suggestions += "=== AFTER ===\n";
+      //            ArrayList<String> o = (ArrayList<String>)m.get("new");
+      //            for(String s:o){
+      //              suggestions += "AFTER   "+s;
+      //            }
+      //          }
+      //          suggestions += "</pre>";
+
+      //new format: generate html on server-side
+
+      if(m.containsKey("table")) {
+        //extract fix id 
+        int fixId = Integer.parseInt(((ArrayList<String>)m.get("id")).get(0));
+
+        // add python-generated diff table to the page
+        // remove <br /> b/c java can't deal with them;
+        // also remove <a href="">n</a> and <a href="">t</a> links because they are distracting
+        suggestions+= ((ArrayList<String>)m.get("table")).get(0).replaceAll("<br />", "").replaceAll(">[nt]</a>", "></a>&nbsp;");
+
+        // add links to vote up/down and to copy a fix 
+        suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
+
+        // assemble fixed code lines and save to currentFixes
+        // so we can copy+paste easily later
+        if(m.containsKey("new")) {
+          String fixedLines = "";
+          ArrayList<String> n = (ArrayList<String>)m.get("new");
+          for(String s:n){
+            fixedLines+=s;
+          }
+          String brokenLines = "";
+          ArrayList<String> o = (ArrayList<String>)m.get("old");
+          for(String s:o){
+            brokenLines+=s;
+          }
+
+          currentFixes.put(i, new FixInfo(fixId,brokenLines,fixedLines));
+        }
+
+      }
+
+      i++;
+    }
+    suggestions+="</body></html>";
+
+
+    //now show the suggestion in the HelpMeOut window
+    if(tool!=null) {
+      tool.setLabelText(suggestions);
+    }
+
+  }
 
   /**
    * Query the remote HelpMeOut database for relevant example fixes.
@@ -104,98 +196,11 @@ public class HelpMeOut {
     lastQueryCode = code;
     lastQueryLine = line;
     lastQueryEditor = editor;
-
-    if(tool!=null) {
-      tool.setLabelText("Querying...");
-    }
-
+    
     try {
-      currentFixes.clear();
-      int i=1;
-      String suggestions ="<html><head>"+
-      //    "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-1' />"+
-      //    "<title>HelpMeOut</title>"+
-      "<style type=\"text/css\">"+
-      "body {margin:7px; font-family:Arial,Helvetica; background-color:#f0f0f0;}"+
-      "    table.diff {font-family:Courier; font-size:9px; border:medium; border-style:solid; border-width:1px; background-color:#ffffff;}"+
-      "    .diff_header {background-color:#e0e0e0;}"+
-      "    td.diff_header {text-align:right; }"+ //these are the line# cells
-      "    .diff_next {background-color:#c0c0c0; border-style:solid border-width:1px; }"+
-      "    .diff_add {background-color:#aaffaa}"+
-      "    .diff_chg {background-color:#ffff77}"+
-      "    .diff_sub {background-color:#ffaaaa}"+
-      "    div {font-family:Arial,Helvetica; font-size:9px;}"+
-      "</style>"+
-      "</head><body>";
-
-      //        String suggestions ="<html><body>";
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
-      suggestions+="<h3>Error Message:</h3>"+error+"";
-      for(HashMap<String,ArrayList<String>> m:result) {
-        suggestions += "<h3>Suggestion "+Integer.toString(i)+"</h3>";
-
-
-        //          suggestions += "<pre>";
-        //          if(m.containsKey("old")) {
-        //            //suggestions += "=== BEFORE ===\n";
-        //            ArrayList<String> o = (ArrayList<String>)m.get("old");
-        //            for(String s:o){
-        //              suggestions+="BEFORE  "+s;
-        //            }
-        //          }
-        //          if(m.containsKey("new")) {
-        //            //suggestions += "=== AFTER ===\n";
-        //            ArrayList<String> o = (ArrayList<String>)m.get("new");
-        //            for(String s:o){
-        //              suggestions += "AFTER   "+s;
-        //            }
-        //          }
-        //          suggestions += "</pre>";
-
-        //new format: generate html on server-side
-
-        if(m.containsKey("table")) {
-          //extract fix id 
-          int fixId = Integer.parseInt(((ArrayList<String>)m.get("id")).get(0));
-
-          // add python-generated diff table to the page
-          // remove <br /> b/c java can't deal with them;
-          // also remove <a href="">n</a> and <a href="">t</a> links because they are distracting
-          suggestions+= ((ArrayList<String>)m.get("table")).get(0).replaceAll("<br />", "").replaceAll(">[nt]</a>", "></a>&nbsp;");
-
-          // add links to vote up/down and to copy a fix 
-          suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
-
-          // assemble fixed code lines and save to currentFixes
-          // so we can copy+paste easily later
-          if(m.containsKey("new")) {
-            String fixedLines = "";
-            ArrayList<String> n = (ArrayList<String>)m.get("new");
-            for(String s:n){
-              fixedLines+=s;
-            }
-            String brokenLines = "";
-            ArrayList<String> o = (ArrayList<String>)m.get("old");
-            for(String s:o){
-              brokenLines+=s;
-            }
-
-            currentFixes.put(i, new FixInfo(fixId,brokenLines,fixedLines));
-          }
-
-        }
-
-        i++;
-      }
-      suggestions+="</body></html>";
-
-
-      //now show the suggestion in the HelpMeOut window
-      if(tool!=null) {
-        tool.setLabelText(suggestions);
-      }
-
+      showQueryResult(result, error);
     } catch (Exception e) {
       System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
       if(tool!=null) {
@@ -238,24 +243,6 @@ public class HelpMeOut {
 
   }
 
-  public void storeException(String errorMsg, String errorLine,
-                             String stackTrace) {
-    String stackTraceString = stackTrace;
-    // TODO Auto-generated method stub
-    if((errorMsg!=null)&&(errorLine!=null)&&(stackTrace!=null)) {
-      try {
-
-        String result = (String)proxy.call("storeexception",errorMsg, errorLine, stackTraceString);
-
-      }catch (Exception e) {
-        System.err.println("couldn't store exception.");
-        e.printStackTrace();
-      }
-    } else {
-      System.err.println("store exception called with at least one null argument. tsk tsk.");
-    }
-  }
-
   /**
    * Save a reference to the HelpMeOutTool which we need to show text in the separate Tool window
    * @param toggleHelpMeOutWindowTool
@@ -263,6 +250,10 @@ public class HelpMeOut {
   private HelpMeOutTool tool=null;
   public void registerTool(HelpMeOutTool tool) {
     this.tool = tool;
+  }
+  
+  protected HelpMeOutTool getTool() {
+    return tool;
   }
 
   /**

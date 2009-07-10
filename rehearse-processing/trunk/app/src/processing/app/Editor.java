@@ -2190,7 +2190,7 @@ public class Editor extends JFrame implements RunnerListener {
             sw.flush();
             String exceptionString = sw.toString();
             
-            HelpMeOut.getInstance().storeException(errorMsg, errorLine, exceptionString);
+            //HelpMeOut.getInstance().storeException(errorMsg, errorLine, exceptionString);
           } else {
             HelpMeOut.getInstance().query(errorMsg,errorLine,line,this);
             // also, mark a broken code checkpoint

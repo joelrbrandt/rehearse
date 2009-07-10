@@ -56,10 +56,16 @@ public class ExceptionInfo {
     
     // store source code of processing sketch
     this.sourceCode = source;
+    
     // and an index to the line that threw the error
     // TODO: this only works for single-file sketches for now
     this.exceptionLineNum = e.getErrorLineNumber();
+    
+    // TODO: Currently "exceptionLine" may hold less than the entire line due to how
+    // the interpreter handles parsing.  We may want to get the line text by
+    // using the source file text and line number instead.
     this.exceptionLine = e.getErrorText();
+    
     this.executionCount = i.getExecutionCount(exceptionLineNum);
    
     //store environment of accessible variables and values
