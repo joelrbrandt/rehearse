@@ -51,6 +51,7 @@ import java.lang.reflect.InvocationTargetException;
 import processing.core.PApplet;
 import processing.core.PApplet.RendererChangeException;
 
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 import edu.stanford.hci.processing.RehearsePApplet;
 import edu.stanford.hci.processing.ModeException;
 import edu.stanford.hci.processing.editor.RehearseEditor;
@@ -176,6 +177,9 @@ implements Runnable, ConsoleInterface,Serializable
 	private Object breakpointLock = new Object();
 	private int lastExecutedLine = -1;
 	private CallStack lastUsedCallStack = null;
+	
+	 private int lineToWatch = -1;
+	 private boolean watchForNextLine = false;
 
 	private boolean suspended = false;
 
@@ -1577,12 +1581,29 @@ implements Runnable, ConsoleInterface,Serializable
 
 	// TODO: check source?
 	public void doLog(int line, CallStack cs) {
+	  
 		lineNumbers.put(lastExecutedLine, new Date());
 		lastUsedCallStack = cs;
 		if (lastExecutedLine == line) {
 			// nothing to see here, just exit.
 			return;
 		}
+		
+		// <HelpMeOut>
+		if (watchForNextLine) {
+		  // HelpMeOut:
+		  // At this point we have seen an identical environment to when the exception was thrown
+		  // and have progressed one additional line in the code.  Tell HelpMeOut to mark that
+		  // exception as resolved.
+		  watchForNextLine = false;
+		  HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
+		}
+		
+    if (line == lineToWatch) {
+      HashMap<String, String> environment = (HashMap<String, String>)makeSnapshotModel().getVariableMap();
+      watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, environment);
+    }
+    //</HelpMeOut>
 
 		lastExecutedLine = line;
 		if (editor != null) { // TODO: figure out why this is null sometimes
@@ -1613,6 +1634,10 @@ implements Runnable, ConsoleInterface,Serializable
 	public RehearsePApplet getApplet() {
 		return applet;
 	}
+
+  public void setLineToWatch(int line) {
+    lineToWatch = line;
+  }
 
 	//	public void setLastExecutedLine(int lastExecutedLine) {
 	//		this.lastExecutedLine = lastExecutedLine;
