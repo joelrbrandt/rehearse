@@ -62,7 +62,7 @@ public class HelpMeOutExceptionTracker {
       if (source.charAt(charIndex) == '\n') newlinesToConsume--;
     }
     if (line > 1) charIndex++; // move past the newline
-    return charIndex+1;
+    return charIndex;
   }
 
   private int getLineFromCharIndex(String newSource, int newCharIndex) {
@@ -83,7 +83,7 @@ public class HelpMeOutExceptionTracker {
   
   public boolean notifyLineReached(int line, HashMap<String, String> newEnvironment) {
     
-    // We need some way to compare Objects even though they may be located at different addresses between runtimes.
+    // We need some way to compare Objects even though they may be located at different addresses between runs.
     // Since the environments are stored as strings, this is currently done by using a regular expression and
     // removing all address notations from the environment strings.  Thus, "Object@123abc" becomes "Object".
     //TODO: Find a better way to do this?
