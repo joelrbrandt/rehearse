@@ -20,6 +20,7 @@ class HelpMeOutService(object):
         con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
         con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff,votes INTEGER DEFAULT 0)')
         con.execute('create table if not exists exceptions(id INTEGER PRIMARY KEY,timestamp,errmsg,line,stacktrace)')
+        con.execute('CREATE TABLE if not exists exceptions(id INTEGER PRIMARY KEY,timestamp VARCHAR,errmsg VARCHAR,line VARCHAR,stacktrace VARCHAR,diff VARCHAR, votes INTEGER DEFAULT 0)')
         return con
     
     
@@ -93,10 +94,12 @@ class HelpMeOutService(object):
         return "Stored error in db"
     
     @ServiceMethod
-    def storeexception(self,error,line,stacktrace):
+    def storeexception(self,error,line,stacktrace,file1,file2):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into exceptions values (null,datetime('now'),?,?,?)",(error,line,stacktrace))
+        diff_obj = difflib.ndiff(file1.splitlines(1),file2.splitlines(1))
+        diff_str = ''.join(diff_obj)
+        cur.execute("insert into exceptions values (null,datetime('now'),?,?,?,?,0)",(error,line,stacktrace,diff_str))
         con.commit()
         return "Stored error into table exceptions"
     
