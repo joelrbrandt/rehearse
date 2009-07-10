@@ -35,6 +35,9 @@ public class HelpMeOutExceptionTracker {
   public void resolveRuntimeException() {
     System.out.println("Hooray, the exception was resolved!");
     //TODO: Store the fix in the HelpMeOut database.
+    // old source and new source
+    // error line
+    // type of exception
   }
   
   /** given the old, broken source and Exception info we have in this object,
@@ -43,14 +46,14 @@ public class HelpMeOutExceptionTracker {
    * @param newSource the source code that was changed by the user after the exception happened
    * @return the line in newSource that rehearse should watch
    */
-  public int getLineToWatch(String newSource) {
+  public int getLineToWatch() {
     assert(eInfo!=null);
     
     // compute character offset in source - make sure we're on the right line 
     diff_match_patch d = new diff_match_patch();
     int oldCharIndex = getCharIndexFromLine(eInfo.getSourceCode(), eInfo.getExceptionLineNum());
-    int newCharIndex = d.diff_xIndex(d.diff_main(source, newSource), oldCharIndex);
-    int newLineIndex = getLineFromCharIndex(newSource,newCharIndex);
+    int newCharIndex = d.diff_xIndex(d.diff_main(eInfo.getSourceCode(), source), oldCharIndex);
+    int newLineIndex = getLineFromCharIndex(source,newCharIndex);
     return newLineIndex;
   }
   
@@ -81,35 +84,7 @@ public class HelpMeOutExceptionTracker {
     return eInfo!=null;
   }
   
-  public boolean notifyLineReached(int line, HashMap<String, String> newEnvironment) {
-    
-    // We need some way to compare Objects even though they may be located at different addresses between runs.
-    // Since the environments are stored as strings, this is currently done by using a regular expression and
-    // removing all address notations from the environment strings.  Thus, "Object@123abc" becomes "Object".
-    //TODO: Find a better way to do this?
-    
-    // Fix newEnvironment
-    for (String key : newEnvironment.keySet()) {
-      String value = newEnvironment.get(key);
-      value = value.replaceAll("@.{6}", "");
-      newEnvironment.put(key, value);
-    }
-    
-    // Fix oldEnvironment
-    HashMap<String, String> oldEnvironment = eInfo.getEnvironment();
-    for (String key : oldEnvironment.keySet()) {
-      String value = oldEnvironment.get(key);
-      value = value.replaceAll("@.{6}", "");
-      oldEnvironment.put(key, value);
-    }
-    
-    // Compare them
-    if (oldEnvironment.equals(newEnvironment)) {
-      System.out.println("Reached line " + line + " and environment is the same!");
-      return true;
-    } else {
-      System.out.println("Reached line " + line + " but environment is different.");
-      return false;
-    }
+  public boolean notifyLineReached(int line, int executionCount) {
+    return (eInfo.getExecutionCount() == executionCount);
   }
 }

@@ -228,6 +228,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			if (obj != null)
 				console.message(obj.toString(), false, false);
 		} catch (EvalError e) {
+		  HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, interpreter);
 			console.message(e.toString(), true, false);
 			e.printStackTrace();
 		}
@@ -239,11 +240,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
       if (appletClassName != null) {
         HelpMeOut.getInstance().processNoError(textarea.getText());
         // if no exception has occurred yet, send text to HelpMeOut Exception class
-        if(!HelpMeOutExceptionTracker.getInstance().hasExceptionOccurred()) {
-          HelpMeOutExceptionTracker.getInstance().setSource(textarea.getText());
-        } else {
+        HelpMeOutExceptionTracker.getInstance().setSource(textarea.getText());
+        if(HelpMeOutExceptionTracker.getInstance().hasExceptionOccurred()) {
           // TODO here or in handleInteractiveRun() above:
-          int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch(textarea.getText());
+          int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch();
           interpreter.setLineToWatch(lineToWatch);
           //System.out.println("Watching line " + lineToWatch);
         }

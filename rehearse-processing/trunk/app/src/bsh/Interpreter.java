@@ -180,6 +180,7 @@ implements Runnable, ConsoleInterface,Serializable
 	
 	 private int lineToWatch = -1;
 	 private boolean watchForNextLine = false;
+	 private HashMap<Integer, Integer> lineExecutionCount = new HashMap<Integer, Integer>();
 
 	private boolean suspended = false;
 
@@ -733,6 +734,7 @@ implements Runnable, ConsoleInterface,Serializable
 		this.in = in;
 		parser = new Parser(in);
 		lineNumbers.clear();
+		lineExecutionCount.clear();
 		CallStack callstack = new CallStack( nameSpace );
 
 		boolean eof = false;
@@ -1588,22 +1590,28 @@ implements Runnable, ConsoleInterface,Serializable
 			// nothing to see here, just exit.
 			return;
 		}
+
+		if (lineExecutionCount.containsKey(line)) {
+		  lineExecutionCount.put(line, lineExecutionCount.get(line)+1);
+		} else {
+		  lineExecutionCount.put(line, 1);
+		}
 		
 		// <HelpMeOut>
 		if (watchForNextLine) {
 		  // HelpMeOut:
-		  // At this point we have seen an identical environment to when the exception was thrown
+		  // At this point we have executed the error line the same number of times as when the exception was thrown
 		  // and have progressed one additional line in the code.  Tell HelpMeOut to mark that
 		  // exception as resolved.
+		  lineToWatch = -1;
 		  watchForNextLine = false;
 		  HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
 		}
 		
     if (line == lineToWatch) {
-      HashMap<String, String> environment = (HashMap<String, String>)makeSnapshotModel().getVariableMap();
-      watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, environment);
+      watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, lineExecutionCount.get(lineToWatch));
     }
-    //</HelpMeOut>
+    // </HelpMeOut>
 
 		lastExecutedLine = line;
 		if (editor != null) { // TODO: figure out why this is null sometimes
@@ -1637,6 +1645,15 @@ implements Runnable, ConsoleInterface,Serializable
 
   public void setLineToWatch(int line) {
     lineToWatch = line;
+  }
+  
+  public int getExecutionCount(int line) {
+    if (lineExecutionCount.containsKey(line)) {
+      return lineExecutionCount.get(line);
+    } else {
+      // This case probably won't happen.
+      return 0;
+    }
   }
 
 	//	public void setLastExecutedLine(int lastExecutedLine) {
