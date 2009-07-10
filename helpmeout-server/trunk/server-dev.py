@@ -19,10 +19,46 @@ class HelpMeOutService(object):
         #todo: added fields here
         con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
         con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff,votes INTEGER DEFAULT 0)')
-        con.execute('create table if not exists exceptions(id INTEGER PRIMARY KEY,timestamp,errmsg,line,stacktrace)')
         con.execute('CREATE TABLE if not exists exceptions(id INTEGER PRIMARY KEY,timestamp VARCHAR,errmsg VARCHAR,line VARCHAR,stacktrace VARCHAR,diff VARCHAR, votes INTEGER DEFAULT 0)')
         return con
     
+    def find_best_exception_match(self,code,querytrace,arr,num_results=3) :
+        htmlDiff = difflib.HtmlDiff()
+        ranked_results = []
+        #clean up querytrace
+        lines = querytrace.splitlines(1)
+        good_lines = [l for l in lines if (l.strip().startswith("at") and not l.strip().startswith("at bsh."))]
+        cleaned_querytrace = ''.join(good_lines)
+        
+        for einfo in arr:
+            fixid = einfo[0]
+            trace = einfo[1]
+            diff = einfo[2]
+            all_lines = diff.splitlines(1)
+            old_lines = [l[2:] for l in all_lines if l.startswith('-')]
+            new_lines = [l[2:] for l in all_lines if l.startswith('+')]
+            #votes = einfo[3]
+            #clean fix trace
+            lines = trace.splitlines(1)
+            good_lines = [l for l in lines if (l.strip().startswith("at") and not l.strip().startswith("at bsh."))]
+            cleaned_trace = ''.join(good_lines)
+            # calculate similarity between cleaned stacktraces
+            s = difflib.SequenceMatcher(None,cleaned_querytrace,cleaned_trace)
+            ratio = s.ratio()
+            
+             # generate a html diff report
+            file1 = difflib.restore(all_lines,1)
+            file2 = difflib.restore(all_lines,2)
+            table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
+
+            # hack: for now make sure everything we return is a list of strings
+            ranked_results.append((ratio,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
+            
+        #sort by decreasing similarity ranking 
+        ranked_results.sort(reverse=True)
+        
+        #now return up to top num_results as [{'new':[new_lines1],'old':[old_lines1]),...]
+        return [r[1] for r in ranked_results[0:num_results]] # how many?
     
     # Find the best example fixes in our database for the error 
     # assume error is a single line string, 
@@ -125,7 +161,6 @@ class HelpMeOutService(object):
     def query(self,error,code):
         con = self.connect()
         cur = con.cursor()
-        #TODO: select id, diff and pass through to find_best_source_match
         res = con.execute("select id,diff,votes from compilererrors where errmsg = ?",(error,))
         if res==None:
             return ['error']
@@ -135,6 +170,20 @@ class HelpMeOutService(object):
         # we have at least one useful result:
         # go over returned results one by one and check distance
         best = self.find_best_source_match(code,arr)
+        return best
+    
+    # query the database for matching exceptions
+    @ServiceMethod
+    def queryexception(self,error,code,stacktrace):
+        con = self.connect()
+        cur = con.cursor()
+        res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg = ?",(error,))
+        if res==None:
+            return ['error']
+        arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes
+        if len(arr)==0:
+            return ['nothing found']
+        best = self.find_best_exception_match(code,stacktrace,arr)
         return best
 
     #dump the entire database out
