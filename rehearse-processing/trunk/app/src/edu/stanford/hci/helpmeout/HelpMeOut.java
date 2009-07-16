@@ -229,18 +229,11 @@ public class HelpMeOut {
     }
   }
   public void processBroken(String error, String code) {
-    switch(codeState) {
-    case FIXED:
-      System.out.println("processBroken: saving initial error state");
-      lastErrorCode = code;
-      lastErrorMsg = error;
-      codeState = CodeState.BROKEN;
-      break;
-    case BROKEN:
-      //do nothing;
-      System.out.println("processBroken: nothing to do");
-    }
-
+    // Always save the last error, even if already broken
+    System.out.println("processBroken: saving last error state");
+    lastErrorCode = code;
+    lastErrorMsg = error;
+    codeState = CodeState.BROKEN;
   }
 
   /**
