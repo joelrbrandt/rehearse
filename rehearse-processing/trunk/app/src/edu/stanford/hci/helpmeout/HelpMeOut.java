@@ -8,6 +8,7 @@ import java.util.Map;
 import processing.app.Editor;
 
 import bsh.EvalError;
+import bsh.Interpreter;
 
 import com.googlecode.jj1.ServiceProxy;
 
@@ -51,7 +52,11 @@ public class HelpMeOut {
   // states of the FSM
   private enum CodeState {BROKEN,FIXED};
   CodeState codeState = CodeState.FIXED;
-
+  
+  // types of errors
+  enum ErrorType {COMPILE, RUN};
+  ErrorType errorType = ErrorType.COMPILE;
+  
   // keep track of msg and code for FSM
   String lastErrorMsg = null;
   String lastErrorCode = null;
@@ -61,6 +66,10 @@ public class HelpMeOut {
   String lastQueryCode = null;
   private int lastQueryLine;
   private Editor lastQueryEditor = null;
+  
+  //store last query parameters for runtime exceptions
+  private EvalError lastEvalError;
+  private Interpreter lastInterpreter;
 
   /**
    * Simple test: call an echo function that takes a string and returns that same string
@@ -92,7 +101,10 @@ public class HelpMeOut {
     }
   }
   
-  protected void showQueryResult(ArrayList<HashMap<String,ArrayList<String>>> result, String error) {
+  protected void showQueryResult(ArrayList<HashMap<String,ArrayList<String>>> result, String error, ErrorType errorType) {
+    
+    // Set the error type so voting knows which table to update
+    this.errorType = errorType;
 
     if(tool!=null) {
       tool.setLabelText("Querying...");
@@ -200,7 +212,7 @@ public class HelpMeOut {
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
-      showQueryResult(result, error);
+      showQueryResult(result, error, ErrorType.COMPILE);
     } catch (Exception e) {
       System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
       if(tool!=null) {
@@ -318,22 +330,40 @@ public class HelpMeOut {
    */
   private void voteAndRequery(int fixid, int vote) {
     try {
-      // using id, call database method
-      proxy.call("errorvote",fixid,vote);
+      if (errorType == ErrorType.COMPILE) {
+        // using id, call database method for compiler errors
+        proxy.call("errorvote",fixid,vote);
+      } else if (errorType == ErrorType.RUN) {
+        // call database method for runtime errors
+        //proxy.call("errorvoteruntime",fixid,vote);
+      } else {
+        System.out.println("HelpMeOut Error: did not recognize error type");
+      }
 
     } catch (Exception e) {
       System.err.println("couldn't call errorvote servicemethod.");
       e.printStackTrace();
     }
+    
     // then re-query?
-    query(lastQueryMsg,lastQueryCode,lastQueryLine, lastQueryEditor);
+    if (errorType == ErrorType.COMPILE) {
+      query(lastQueryMsg,lastQueryCode,lastQueryLine, lastQueryEditor);
+    } else if (errorType == ErrorType.RUN) {
+      HelpMeOutExceptionTracker.getInstance().processRuntimeException(lastEvalError, lastInterpreter);
+    } else {
+      System.out.println("HelpMeOut Error: did not recognize error type");
+    }
   }
 
   private void pasteIntoEditor(int line, Editor editor,String fix) {
     editor.setLineText(line, fix);
     editor.setSelection(editor.getLineStartOffset(line), editor.getLineStartOffset(line)+fix.length());
-    
+   
 
+  }
+  public void saveExceptionInfo(EvalError err, Interpreter i) {
+    lastEvalError = err;
+    lastInterpreter = i;
   }
  
 }

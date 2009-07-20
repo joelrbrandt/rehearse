@@ -35,10 +35,13 @@ public class HelpMeOutExceptionTracker {
     String trace = eInfo.getStackTrace();
     HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
     
+    // make sure we save the EvalError and Interpreter in HelpMeOut in case it needs to call this method after a re-query
+    HelpMeOut.getInstance().saveExceptionInfo(err, i);
+    
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("queryexception", error, code, trace);
-      HelpMeOut.getInstance().showQueryResult(result, error);
+      HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
     } catch (Exception e) {
       System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
       if(tool!=null) {
