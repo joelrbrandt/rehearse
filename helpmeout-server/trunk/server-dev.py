@@ -37,7 +37,7 @@ class HelpMeOutService(object):
             all_lines = diff.splitlines(1)
             old_lines = [l[2:] for l in all_lines if l.startswith('-')]
             new_lines = [l[2:] for l in all_lines if l.startswith('+')]
-            #votes = einfo[3]
+            votes = einfo[3]
             #clean fix trace
             lines = trace.splitlines(1)
             good_lines = [l for l in lines if (l.strip().startswith("at") and not l.strip().startswith("at bsh."))]
@@ -52,13 +52,17 @@ class HelpMeOutService(object):
             table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
 
             # hack: for now make sure everything we return is a list of strings
-            ranked_results.append((ratio,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
+            ranked_results.append((ratio,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
             
         #sort by decreasing similarity ranking 
         ranked_results.sort(reverse=True)
         
+		# take voting into account
+        vote_ranked_results = [r[1:] for r in ranked_results[0:(2*num_results)]]
+        vote_ranked_results.sort(reverse=True)
+
         #now return up to top num_results as [{'new':[new_lines1],'old':[old_lines1]),...]
-        return [r[1] for r in ranked_results[0:num_results]] # how many?
+        return [r[1] for r in vote_ranked_results[0:num_results]] # how many?
     
     # Find the best example fixes in our database for the error 
     # assume error is a single line string, 
@@ -153,6 +157,15 @@ class HelpMeOutService(object):
         con = self.connect()
         cur = con.cursor()
         res = cur.execute("update compilererrors set votes = (select votes from compilererrors where id = :id)+(:vote) where id=:id",locals())
+        con.commit()
+        return "Updated vote"
+
+    # vote for a fix - either up or down
+    @ServiceMethod
+    def errorvoteexception(self,id,vote):
+        con = self.connect()
+        cur = con.cursor()
+        res = cur.execute("update exceptions set votes = (select votes from exceptions where id = :id)+(:vote) where id=:id",locals())
         con.commit()
         return "Updated vote"
     
