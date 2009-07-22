@@ -74,7 +74,7 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
   //make these static so we only have one helpmeout window, even if there are many processing windows
   private static JFrame frame = null;  // the window itself
   private static JTextPane pane = null;
-  private static boolean visible = false;  
+  private static boolean visible = false;
 
   /* (non-Javadoc)
    * @see processing.app.tools.Tool#getMenuTitle()
@@ -113,6 +113,9 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
       content.add(scroll);
 
       frame.addWindowListener(new ExitListener());
+      
+      // Set an initial editor for HelpMeOut.
+      HelpMeOut.getInstance().setEditor(editor);
 
       // register ourselves with the HelpMeOut class
       // TODO: this is problematic if we close down an earlier window,

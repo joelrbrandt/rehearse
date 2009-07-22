@@ -44,6 +44,7 @@ public class HelpMeOutExceptionTracker {
       HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
     } catch (Exception e) {
       System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
+      e.printStackTrace();
       if(tool!=null) {
 
         tool.setLabelText("HelpMeOutQuery did not return any suggestions.");

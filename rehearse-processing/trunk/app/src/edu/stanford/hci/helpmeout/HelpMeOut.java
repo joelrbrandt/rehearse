@@ -335,7 +335,7 @@ public class HelpMeOut {
         proxy.call("errorvote",fixid,vote);
       } else if (errorType == ErrorType.RUN) {
         // call database method for runtime errors
-        //proxy.call("errorvoteruntime",fixid,vote);
+        proxy.call("errorvoteexception",fixid,vote);
       } else {
         System.out.println("HelpMeOut Error: did not recognize error type");
       }
@@ -364,6 +364,9 @@ public class HelpMeOut {
   public void saveExceptionInfo(EvalError err, Interpreter i) {
     lastEvalError = err;
     lastInterpreter = i;
+  }
+  public void setEditor(Editor editor) {
+    this.lastQueryEditor = editor;
   }
  
 }
