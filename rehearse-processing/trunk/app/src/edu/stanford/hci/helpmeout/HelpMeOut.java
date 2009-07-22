@@ -294,7 +294,7 @@ public class HelpMeOut {
       pasteText = "// HELPMEOUT AUTO-PATCH. ORIGINAL: "+lastQueryCode+patchedText+"\n";
 
     } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException 
-      pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n"+lastQueryCode+"// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
+      pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n//"+lastQueryCode+"\n// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
     }
     
     //now replace the error line with our fix (makes the assumption that the error was actually at that line
@@ -361,7 +361,7 @@ public class HelpMeOut {
    
 
   }
-  public void saveExceptionInfo(EvalError err, Interpreter i, String msg, String code, int line) {
+  public void saveExceptionInfo(EvalError err, Interpreter i, String msg, String code, int line) {    
     lastEvalError = err;
     lastInterpreter = i;
     lastErrorMsg = msg;
@@ -370,6 +370,7 @@ public class HelpMeOut {
     lastQueryCode = code;
     lastQueryLine = line;
   }
+  
   public void setEditor(Editor editor) {
     this.lastQueryEditor = editor;
   }
