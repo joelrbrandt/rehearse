@@ -361,9 +361,14 @@ public class HelpMeOut {
    
 
   }
-  public void saveExceptionInfo(EvalError err, Interpreter i) {
+  public void saveExceptionInfo(EvalError err, Interpreter i, String msg, String code, int line) {
     lastEvalError = err;
     lastInterpreter = i;
+    lastErrorMsg = msg;
+    lastErrorCode = code;
+    lastQueryMsg = msg;
+    lastQueryCode = code;
+    lastQueryLine = line;
   }
   public void setEditor(Editor editor) {
     this.lastQueryEditor = editor;

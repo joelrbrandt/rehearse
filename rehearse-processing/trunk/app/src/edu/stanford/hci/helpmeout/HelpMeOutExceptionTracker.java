@@ -33,10 +33,12 @@ public class HelpMeOutExceptionTracker {
     String error = eInfo.getExceptionClass();
     String code = eInfo.getExceptionLine();
     String trace = eInfo.getStackTrace();
+    int line = eInfo.getExceptionLineNum();
     HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
     
     // make sure we save the EvalError and Interpreter in HelpMeOut in case it needs to call this method after a re-query
-    HelpMeOut.getInstance().saveExceptionInfo(err, i);
+    // save error and code in case we need to copy/paste fix
+    HelpMeOut.getInstance().saveExceptionInfo(err, i, error, code, line);
     
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
