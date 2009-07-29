@@ -1286,7 +1286,8 @@ public class Editor extends JFrame implements RunnerListener {
    */
   public void setLineText(int line, String what) {
     startCompoundEdit();
-    textarea.select(getLineStartOffset(line), getLineStopOffset(line));
+    textarea.select(Math.max(0,getLineStartOffset(line)), 
+                    Math.min(getLineStopOffset(line),textarea.getDocumentLength()));
     textarea.setSelectedText(what);
     stopCompoundEdit();
   }

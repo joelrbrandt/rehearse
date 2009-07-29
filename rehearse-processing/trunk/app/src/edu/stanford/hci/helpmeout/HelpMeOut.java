@@ -12,6 +12,8 @@ import bsh.Interpreter;
 
 import com.googlecode.jj1.ServiceProxy;
 
+import edu.stanford.hci.helpmeout.diff_match_patch.Diff;
+import edu.stanford.hci.helpmeout.diff_match_patch.Operation;
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
@@ -271,6 +273,13 @@ public class HelpMeOut {
     assert(lastQueryEditor != null);
     String pasteText;
     FixInfo f = currentFixes.get(i);
+    
+    // The line we're fixing may not be the exact line the error was thrown on.
+    int lineToChange = searchNearbyForBetterLine(f.brokenCode);
+    // If we've changed which line we're patching, we also need to update
+    // which "original" code is displayed to the user.
+    String originalCode = lastQueryEditor.getLineText(lineToChange);
+    
     try {
       
       //first, try to auto-apply patch
@@ -291,20 +300,86 @@ public class HelpMeOut {
       if(!patchSuccess) throw new Exception("could not apply any patches");
       
       //otherwise, copy our patch (fingers crossed)
-      pasteText = "// HELPMEOUT AUTO-PATCH. ORIGINAL: "+lastQueryCode+patchedText+"\n";
+      pasteText = "// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+patchedText+"\n";
 
     } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException 
-      pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n//"+lastQueryCode+"\n// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
+      pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n//"+originalCode+"\n// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
     }
-    
-    //now replace the error line with our fix (makes the assumption that the error was actually at that line
-    pasteIntoEditor(lastQueryLine,lastQueryEditor,pasteText);
+
+    //now replace the error line with our fix (makes the assumption that the error was actually at that line)
+    pasteIntoEditor(lineToChange,lastQueryEditor,pasteText);
 
     //      Clipboard systemClipboard = 
     //        Toolkit.getDefaultToolkit().getSystemClipboard(); 
     //        Transferable transferableText =
     //          new StringSelection(currentFixes.get(i).fixedCode);
     //        systemClipboard.setContents(transferableText, null);
+  }
+  
+  /** Search one line above and one line below the error line to see if the fix
+   *  is not the error line itself, but one above or below.  This manifests itself
+   *  in missing semicolon errors, for example.
+   *  
+   *  We do this currently by doing a diff match/patch on each of the three lines:
+   *  the error line and the lines above and below, and choosing the line with the
+   *  least number of patches between it and the fixed line.
+   *  
+   * @param fix the chosen fix from the database that we are going to copy into the editor
+   * @return the line we have chosen as the most likely line needing to be fixed
+   */
+  private int searchNearbyForBetterLine(String fix) {
+    diff_match_patch dmp = new diff_match_patch();
+    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
+    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
+    int bestLine = lastQueryLine;
+    
+    // check above
+    if (lastQueryLine > 0) {
+      int above = lastQueryLine-1;
+      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
+      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
+      if (score > bestScore) {
+        bestScore = score;
+        bestLine = above;
+      }
+    }
+
+    //check below
+    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
+      int below = lastQueryLine+1;
+      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
+      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
+      if (score > bestScore) {
+        bestScore = score;
+        bestLine = below;
+      }
+    }
+    
+    return bestLine;
+  }
+  
+  /** 
+   * Computes how close a patch already is to the target text
+   * by summing the length of the number of "EQUAL" sections of the patch.
+   * 
+   * This uses the algorithm defined in Python's difflib.ratio() function
+   *  
+   * @param pList list of patches
+   * @param errorLength the length of the error code string
+   * @param fixLength the length of the broken code in the fix
+   * @return the ratio of equal characters over total characters in the two strings
+   */
+  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
+    double ratio = 0;
+    for (Patch p : pList) {
+      for (Diff d : p.diffs) {
+        if (d.operation == Operation.EQUAL)
+          ratio += d.text.length();
+      }
+    }
+    
+    ratio = ratio*2/(errorLength+fixLength);
+    return ratio;
   }
 
   /**
@@ -356,6 +431,7 @@ public class HelpMeOut {
   }
 
   private void pasteIntoEditor(int line, Editor editor,String fix) {
+   
     editor.setLineText(line, fix);
     editor.setSelection(editor.getLineStartOffset(line), editor.getLineStartOffset(line)+fix.length());
    
