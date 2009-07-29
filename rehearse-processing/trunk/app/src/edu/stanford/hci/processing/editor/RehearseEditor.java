@@ -54,9 +54,12 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
 	
+	private static final boolean USEHIGHLIGHT = false;
+	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
-		getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
+		if (USEHIGHLIGHT)
+		  getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
 	}
 
 	@Override

@@ -275,35 +275,45 @@ public class HelpMeOut {
     FixInfo f = currentFixes.get(i);
     
     // The line we're fixing may not be the exact line the error was thrown on.
-    int lineToChange = searchNearbyForBetterLine(f.brokenCode);
+    int lineToChange = searchFileForBestLine(f.brokenCode);
+    //int lineToChange = searchNearbyForBetterLine(f.brokenCode);
+    
     // If we've changed which line we're patching, we also need to update
     // which "original" code is displayed to the user.
     String originalCode = lastQueryEditor.getLineText(lineToChange);
     
-    try {
-      
-      //first, try to auto-apply patch
-      //TODO: make this smarter and token-based
-      
-      diff_match_patch dmp = new diff_match_patch();
-      LinkedList<Patch> pList = dmp.patch_make(f.brokenCode, f.fixedCode);
-      Object[] pResult = dmp.patch_apply(pList, lastQueryCode);
-      String patchedText = (String)pResult[0];
-      boolean[] patchFlags = (boolean[])pResult[1];
-      boolean patchSuccess = false;
-      
-      //see if we actually applied anything
-      for(boolean b : patchFlags) {
-        if(b) {patchSuccess = true; break;}
-      }
-      //if we didn't, give up and let user merge manually
-      if(!patchSuccess) throw new Exception("could not apply any patches");
-      
-      //otherwise, copy our patch (fingers crossed)
-      pasteText = "// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+patchedText+"\n";
+    int linesInFix = f.brokenCode.split("\n").length;
+    
+    if (linesInFix <= 1) {
 
-    } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException 
-      pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n//"+originalCode+"\n// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
+      try {
+
+        //first, try to auto-apply patch
+        //TODO: make this smarter and token-based
+
+        diff_match_patch dmp = new diff_match_patch();
+        LinkedList<Patch> pList = dmp.patch_make(f.brokenCode, f.fixedCode);
+        Object[] pResult = dmp.patch_apply(pList, originalCode);
+        String patchedText = (String)pResult[0];
+        boolean[] patchFlags = (boolean[])pResult[1];
+        boolean patchSuccess = false;
+
+        //see if we actually applied anything
+        for(boolean b : patchFlags) {
+          if(b) {patchSuccess = true; break;}
+        }
+        //if we didn't, give up and let user merge manually
+        if(!patchSuccess) throw new Exception("could not apply any patches");
+
+        //otherwise, copy our patch (fingers crossed)
+        pasteText = "// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+"\n"+patchedText+"\n";
+
+      } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException 
+        pasteText = "// HELPMEOUT MANUAL PATCH. ORIGINAL\n//"+originalCode+"\n// SUGGESTED FIX\n//"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n";
+      }
+      
+    } else { // the fix is a block of text, just paste it in as close as possible
+      pasteText = "// HELPMEOUT SUGGESTED FIX:\n"+currentFixes.get(i).fixedCode.replaceAll("\n","\n//")+"\n"+originalCode+"\n";
     }
 
     //now replace the error line with our fix (makes the assumption that the error was actually at that line)
@@ -314,6 +324,22 @@ public class HelpMeOut {
     //        Transferable transferableText =
     //          new StringSelection(currentFixes.get(i).fixedCode);
     //        systemClipboard.setContents(transferableText, null);
+  }
+  
+  private int searchFileForBestLine(String fix) {
+    diff_match_patch dmp = new diff_match_patch();
+    LinkedList<Diff> diffList = dmp.diff_main(lastQueryEditor.getText(), fix);
+    dmp.diff_cleanupSemantic(diffList); // align to word boundaries
+    
+    if (diffList.get(0).operation == Operation.DELETE) {
+      // Find line corresponding to character offset
+      int offset = diffList.get(0).text.length();
+      int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
+      return line;
+      
+    } else {
+      return 0;
+    }
   }
   
   /** Search one line above and one line below the error line to see if the fix
