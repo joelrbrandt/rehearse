@@ -54,7 +54,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
 	
-	private static final boolean USEHIGHLIGHT = false;
+	private static final boolean USEHIGHLIGHT = true;
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
