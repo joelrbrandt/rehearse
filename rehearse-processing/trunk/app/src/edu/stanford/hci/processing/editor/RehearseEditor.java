@@ -23,6 +23,7 @@ import javax.swing.JMenu;
 
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
+import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.processing.RehearsePApplet;
 import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
@@ -71,6 +72,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	@Override
 	public void handleRun(boolean present) {
 		wasLastRunInteractive = false;
+		HelpMeOutLog.getInstance().write("Clicked on compiled run");
 		super.handleRun(present);
 	}
 
@@ -121,6 +123,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 
 	public void handleInteractiveRun() {
+	  HelpMeOutLog.getInstance().write("Clicked on interactive run");
+	  
 		wasLastRunInteractive = true;
 		// clear previous context
 		if (canvasFrame != null)

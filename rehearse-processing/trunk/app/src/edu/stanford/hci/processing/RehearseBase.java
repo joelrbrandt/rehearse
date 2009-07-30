@@ -6,6 +6,7 @@ import java.io.File;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
+import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 import processing.app.Base;
 import processing.app.Editor;
@@ -56,6 +57,12 @@ public class RehearseBase extends Base {
 
 	    return editor;
 	  }
+	
+	 public boolean handleQuit() {
+	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
+	   System.out.println(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
+	   return super.handleQuit();
+	 }
 
 	
 	 static public void main(String args[]) {

@@ -95,11 +95,11 @@ public class HelpMeOut {
         String result = (String)proxy.call("store2",error, s0, s1);
 
       }catch (Exception e) {
-        System.err.println("couldn't store.");
+        HelpMeOutLog.getInstance().writeError("couldn't store");
         e.printStackTrace();
       }
     } else {
-      System.err.println("store called with at least one null argument. tsk tsk.");
+      HelpMeOutLog.getInstance().writeError("store called with at least one null argument. tsk tsk.");
     }
   }
   
@@ -134,24 +134,6 @@ public class HelpMeOut {
     suggestions+="<h3>Error Message:</h3>"+error+"";
     for(HashMap<String,ArrayList<String>> m:result) {
       suggestions += "<h3>Suggestion "+Integer.toString(i)+"</h3>";
-
-
-      //          suggestions += "<pre>";
-      //          if(m.containsKey("old")) {
-      //            //suggestions += "=== BEFORE ===\n";
-      //            ArrayList<String> o = (ArrayList<String>)m.get("old");
-      //            for(String s:o){
-      //              suggestions+="BEFORE  "+s;
-      //            }
-      //          }
-      //          if(m.containsKey("new")) {
-      //            //suggestions += "=== AFTER ===\n";
-      //            ArrayList<String> o = (ArrayList<String>)m.get("new");
-      //            for(String s:o){
-      //              suggestions += "AFTER   "+s;
-      //            }
-      //          }
-      //          suggestions += "</pre>";
 
       //new format: generate html on server-side
 
@@ -215,8 +197,9 @@ public class HelpMeOut {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
       showQueryResult(result, error, ErrorType.COMPILE);
+      HelpMeOutLog.getInstance().write("HelpMeOutQuery for \"" +error+ "\" succeeded.");
     } catch (Exception e) {
-      System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
+      HelpMeOutLog.getInstance().writeError("HelpMeOutQuery: couldn't query or wrong type returned.");
       if(tool!=null) {
 
         tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
@@ -226,11 +209,14 @@ public class HelpMeOut {
   }
 
   public void processNoError(String code) {
+    if(tool!=null) {
+      tool.setLabelText("Code compiled successfully. No need to help you out (yet).");
+    }
     switch(codeState) {
     case BROKEN:
       //went from broken to fixed - great!
       //shove it into our db
-      System.out.println("processFixed: saving fix to db...");
+      HelpMeOutLog.getInstance().write("processFixed: saving fix to db...");
 
       store(lastErrorMsg,lastErrorCode,code);
       lastErrorMsg = null;
@@ -239,12 +225,12 @@ public class HelpMeOut {
       break;
     case FIXED:
       //do nothing
-      System.out.println("processFixed: nothing to do");
+      HelpMeOutLog.getInstance().write("processFixed: nothing to do");
     }
   }
   public void processBroken(String error, String code) {
     // Always save the last error, even if already broken
-    System.out.println("processBroken: saving last error state");
+    HelpMeOutLog.getInstance().write("processBroken: saving last error state");
     lastErrorCode = code;
     lastErrorMsg = error;
     codeState = CodeState.BROKEN;
@@ -309,6 +295,7 @@ public class HelpMeOut {
 
       } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException
         pasteText = commentCode(currentFixes.get(i).fixedCode, originalCode);
+        HelpMeOutLog.getInstance().writeError("unable to auto-patch.");
       }
       
     } else { // the fix is a block of text, just paste it in as close as possible
@@ -345,36 +332,36 @@ public class HelpMeOut {
    * @param fix the chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
-  private int searchNearbyForBetterLine(String fix) {
-    diff_match_patch dmp = new diff_match_patch();
-    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
-    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
-    int bestLine = lastQueryLine;
-    
-    // check above
-    if (lastQueryLine > 0) {
-      int above = lastQueryLine-1;
-      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
-      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
-      if (score > bestScore) {
-        bestScore = score;
-        bestLine = above;
-      }
-    }
-
-    //check below
-    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
-      int below = lastQueryLine+1;
-      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
-      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
-      if (score > bestScore) {
-        bestScore = score;
-        bestLine = below;
-      }
-    }
-    
-    return bestLine;
-  }
+//  private int searchNearbyForBetterLine(String fix) {
+//    diff_match_patch dmp = new diff_match_patch();
+//    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
+//    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
+//    int bestLine = lastQueryLine;
+//    
+//    // check above
+//    if (lastQueryLine > 0) {
+//      int above = lastQueryLine-1;
+//      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
+//      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
+//      if (score > bestScore) {
+//        bestScore = score;
+//        bestLine = above;
+//      }
+//    }
+//
+//    //check below
+//    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
+//      int below = lastQueryLine+1;
+//      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
+//      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
+//      if (score > bestScore) {
+//        bestScore = score;
+//        bestLine = below;
+//      }
+//    }
+//    
+//    return bestLine;
+//  }
   
   /** 
    * Computes how close a patch already is to the target text
@@ -387,18 +374,18 @@ public class HelpMeOut {
    * @param fixLength the length of the broken code in the fix
    * @return the ratio of equal characters over total characters in the two strings
    */
-  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
-    double ratio = 0;
-    for (Patch p : pList) {
-      for (Diff d : p.diffs) {
-        if (d.operation == Operation.EQUAL)
-          ratio += d.text.length();
-      }
-    }
-    
-    ratio = ratio*2/(errorLength+fixLength);
-    return ratio;
-  }
+//  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
+//    double ratio = 0;
+//    for (Patch p : pList) {
+//      for (Diff d : p.diffs) {
+//        if (d.operation == Operation.EQUAL)
+//          ratio += d.text.length();
+//      }
+//    }
+//    
+//    ratio = ratio*2/(errorLength+fixLength);
+//    return ratio;
+//  }
   
   private String commentCode(String fix, String original) {
     String comment = "// --- HELPMEOUT ---\n";
@@ -444,11 +431,11 @@ public class HelpMeOut {
         // call database method for runtime errors
         proxy.call("errorvoteexception",fixid,vote);
       } else {
-        System.out.println("HelpMeOut Error: did not recognize error type");
+        HelpMeOutLog.getInstance().writeError("HelpMeOut Error: did not recognize error type");
       }
 
     } catch (Exception e) {
-      System.err.println("couldn't call errorvote servicemethod.");
+      HelpMeOutLog.getInstance().writeError("couldn't call errorvote servicemethod.");
       e.printStackTrace();
     }
     
@@ -458,7 +445,7 @@ public class HelpMeOut {
     } else if (errorType == ErrorType.RUN) {
       HelpMeOutExceptionTracker.getInstance().processRuntimeException(lastEvalError, lastInterpreter);
     } else {
-      System.out.println("HelpMeOut Error: did not recognize error type");
+      HelpMeOutLog.getInstance().writeError("HelpMeOut Error: did not recognize error type");
     }
   }
 

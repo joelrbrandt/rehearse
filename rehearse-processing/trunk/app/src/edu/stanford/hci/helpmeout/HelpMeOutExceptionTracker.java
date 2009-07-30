@@ -30,6 +30,13 @@ public class HelpMeOutExceptionTracker {
   /** record the runtime exception that just occurred */
   public void processRuntimeException(EvalError err,Interpreter i) {
     eInfo = new ExceptionInfo(err,i,source);
+    
+    try{
+      HelpMeOutLog.getInstance().write("processRuntimeException: "+eInfo.getExceptionClass());
+    }catch (Exception e) {
+      e.printStackTrace();
+    }
+      
     String error = eInfo.getExceptionClass();
     String code = eInfo.getExceptionLine();
     String trace = eInfo.getStackTrace();
@@ -43,9 +50,10 @@ public class HelpMeOutExceptionTracker {
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("queryexception", error, code, trace);
+      HelpMeOutLog.getInstance().write("HelpMeOutQuery for \"" +error+ "\" succeeded.");
       HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
     } catch (Exception e) {
-      System.err.println("HelpMeOutQuery: couldn't query or wrong type returned.");
+      HelpMeOutLog.getInstance().writeError("HelpMeOutQuery: couldn't query or wrong type returned.");
       e.printStackTrace();
       if(tool!=null) {
 
@@ -57,7 +65,7 @@ public class HelpMeOutExceptionTracker {
   
   /** mark the previously recorded runtime exception as resolved */
   public void resolveRuntimeException() {
-    System.out.println("Hooray, the exception was resolved!");
+    HelpMeOutLog.getInstance().write("Hooray, the exception was resolved!");
     //TODO: Store the fix in the HelpMeOut database.
     // old source and new source
     // error line
@@ -68,7 +76,7 @@ public class HelpMeOutExceptionTracker {
                                          eInfo.getStackTrace(), eInfo.getSourceCode(), source);
 
     }catch (Exception e) {
-      System.err.println("couldn't store exception.");
+      HelpMeOutLog.getInstance().writeError("couldn't store exception.");
       e.printStackTrace();
     }
   }

@@ -157,15 +157,22 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
       // TODO: maybe paste it right in instead
       // TODO: need some visual feedback
       if("copy".matches(map.get("action"))) {
+        HelpMeOutLog.getInstance().write("Clicked on copy link for id "+map.get("id"));
         HelpMeOut.getInstance().handleCopyAction(Integer.parseInt(map.get("id")));
+        
       } 
       // for a "thumbs up link:
       else if("up".matches(map.get("action"))){
+        
+        HelpMeOutLog.getInstance().write("Clicked on vote up link for id "+map.get("id"));
         HelpMeOut.getInstance().handleVoteUpAction(Integer.parseInt(map.get("id")));
+        
       } 
       // for a "thumbs down" link:
       else if("down".matches(map.get("action"))) {
+        HelpMeOutLog.getInstance().write("Clicked on vote down link for id "+map.get("id"));
         HelpMeOut.getInstance().handleVoteDownAction(Integer.parseInt(map.get("id")));
+        
       } 
       else {
         //just print for now
