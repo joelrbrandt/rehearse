@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/dxf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/opengl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pdf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/processing"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/serial"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/video"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="lib" path="lib/uispec4j-jdk5-2.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

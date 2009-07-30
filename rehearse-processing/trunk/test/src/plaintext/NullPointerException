@@ -1,0 +1,7 @@
+String a = "hello";
+
+// Fix: change null to "world"
+String b = null;
+
+String c = a.concat(b);
+println("done");
