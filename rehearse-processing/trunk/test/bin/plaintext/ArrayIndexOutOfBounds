@@ -1,6 +1,0 @@
-int arr[] = new int[1];
-
-// Fix: change 1 to 0
-arr[1] = 1;
-
-println("done");
