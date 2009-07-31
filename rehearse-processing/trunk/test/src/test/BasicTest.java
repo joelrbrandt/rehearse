@@ -1,7 +1,6 @@
 package test;
 
 import org.uispec4j.*;
-import org.uispec4j.finder.ComponentMatchers;
 import org.uispec4j.interception.*;
 
 import processing.app.EditorConsole;
