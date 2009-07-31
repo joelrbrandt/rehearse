@@ -42,6 +42,8 @@ import javax.swing.text.*;
 import javax.swing.undo.*;
 
 import edu.stanford.hci.helpmeout.HelpMeOut;
+import edu.stanford.hci.helpmeout.HelpMeOutLog;
+import edu.stanford.hci.processing.editor.RehearseEditor;
 import edu.stanford.hci.processing.editor.RehearseEditorToolbar;
 
 
@@ -1599,6 +1601,8 @@ public class Editor extends JFrame implements RunnerListener {
           }
         });
         t.start();
+        if (RehearseEditor.logTerminationMessage)
+          HelpMeOutLog.getInstance().write(HelpMeOutLog.PROGRAM_FINISHED);
         //runtime.start(appletLocation);
       }
 
