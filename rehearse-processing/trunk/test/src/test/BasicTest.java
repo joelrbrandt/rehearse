@@ -6,6 +6,7 @@ import org.uispec4j.interception.*;
 import processing.app.EditorConsole;
 import processing.app.syntax.JEditTextArea;
 
+import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.processing.RehearseBase;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
@@ -20,12 +21,30 @@ public class BasicTest extends UISpecTestCase {
 	
 	public void testRun() {
 		assertTrue(window != null);
-		RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
+		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
 		
 		JEditTextArea textarea = editor.getTextArea();
-		textarea.setText("println(\"it works!\");");
+		textarea.setText("int i = 1; i++;");
+			
 		editor.handleRun(false);
+		
+		assertTrue(HelpMeOutLog.getInstance().didProgramFinish());
+	}
+	
+	private void runInteractive() {
+		assertTrue(window != null);
+		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
+		EditorConsole.setEditor(editor);
+		
+		JEditTextArea textarea = editor.getTextArea();
+		textarea.setText("String a = null;a.concat(null);");
+		
+		Window w = WindowInterceptor.run(new Trigger() {
+			public void run() {
+				editor.handleInteractiveRun();
+			}
+		});
 	}
 	
 	/*

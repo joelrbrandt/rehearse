@@ -50,6 +50,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	private ArrayList<SnapshotModel> snapshots = new ArrayList<SnapshotModel>();
 
 	private boolean wasLastRunInteractive = false;
+	
+	public static boolean logTerminationMessage = true;
 
 	private RehearseLineModel lastExecutedLineModel = null;
 

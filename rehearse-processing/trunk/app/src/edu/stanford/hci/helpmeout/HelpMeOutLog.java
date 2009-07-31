@@ -31,6 +31,7 @@ public class HelpMeOutLog {
   public static final String AUTO_PATCH_FAIL = "Auto-patching failed";
   public static final String VOTE_FAIL = "Voting failed: unable to call errorvote servicemethod";
   public static final String VOTE_FAIL_UNRECOGNIZED = "Voting failed: unable to recognize error type";
+  public static final String PROGRAM_FINISHED = "PROGRAM FINISHED";
   
   // make it a Singleton
   private static HelpMeOutLog instance = new HelpMeOutLog();
@@ -73,6 +74,12 @@ public class HelpMeOutLog {
     } catch (IOException e) {
       System.out.println("Error writing HelpMeOut log file");
     }
+  }
+  
+  public boolean didProgramFinish() {
+    String logarr[] = log.toString().split("\n");
+    String last = logarr[logarr.length-1];
+    return last.contains(PROGRAM_FINISHED);
   }
   
   private String formatText(String text) {
