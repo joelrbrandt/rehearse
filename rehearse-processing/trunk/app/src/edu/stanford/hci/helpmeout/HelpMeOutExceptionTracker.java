@@ -32,7 +32,7 @@ public class HelpMeOutExceptionTracker {
     eInfo = new ExceptionInfo(err,i,source);
     
     try{
-      HelpMeOutLog.getInstance().write("processRuntimeException: "+eInfo.getExceptionClass());
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_BROKEN_FOR + eInfo.getExceptionClass());
     }catch (Exception e) {
       e.printStackTrace();
     }
@@ -50,10 +50,10 @@ public class HelpMeOutExceptionTracker {
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("queryexception", error, code, trace);
-      HelpMeOutLog.getInstance().write("HelpMeOutQuery for \"" +error+ "\" succeeded.");
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
       HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
     } catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError("HelpMeOutQuery: couldn't query or wrong type returned.");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL);
       e.printStackTrace();
       if(tool!=null) {
 
@@ -65,18 +65,14 @@ public class HelpMeOutExceptionTracker {
   
   /** mark the previously recorded runtime exception as resolved */
   public void resolveRuntimeException() {
-    HelpMeOutLog.getInstance().write("Hooray, the exception was resolved!");
-    //TODO: Store the fix in the HelpMeOut database.
-    // old source and new source
-    // error line
-    // type of exception
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED);
     try {
       
       String result = (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
                                          eInfo.getStackTrace(), eInfo.getSourceCode(), source);
 
     }catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError("couldn't store exception.");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_EXCEPTION);
       e.printStackTrace();
     }
   }

@@ -95,11 +95,11 @@ public class HelpMeOut {
         String result = (String)proxy.call("store2",error, s0, s1);
 
       }catch (Exception e) {
-        HelpMeOutLog.getInstance().writeError("couldn't store");
+        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_COMPILE);
         e.printStackTrace();
       }
     } else {
-      HelpMeOutLog.getInstance().writeError("store called with at least one null argument. tsk tsk.");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_NULL);
     }
   }
   
@@ -197,9 +197,9 @@ public class HelpMeOut {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
       showQueryResult(result, error, ErrorType.COMPILE);
-      HelpMeOutLog.getInstance().write("HelpMeOutQuery for \"" +error+ "\" succeeded.");
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
     } catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError("HelpMeOutQuery: couldn't query or wrong type returned.");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL);
       if(tool!=null) {
 
         tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
@@ -216,7 +216,7 @@ public class HelpMeOut {
     case BROKEN:
       //went from broken to fixed - great!
       //shove it into our db
-      HelpMeOutLog.getInstance().write("processFixed: saving fix to db...");
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.COMPILE_FIXED);
 
       store(lastErrorMsg,lastErrorCode,code);
       lastErrorMsg = null;
@@ -225,12 +225,12 @@ public class HelpMeOut {
       break;
     case FIXED:
       //do nothing
-      HelpMeOutLog.getInstance().write("processFixed: nothing to do");
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.COMPILE_FIXED_ALREADY);
     }
   }
   public void processBroken(String error, String code) {
     // Always save the last error, even if already broken
-    HelpMeOutLog.getInstance().write("processBroken: saving last error state");
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.COMPILE_BROKEN_FOR + error);
     lastErrorCode = code;
     lastErrorMsg = error;
     codeState = CodeState.BROKEN;
@@ -292,10 +292,11 @@ public class HelpMeOut {
 
         //otherwise, copy our patch (fingers crossed)
         pasteText = "\n// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+"\n"+patchedText+"\n";
-
+        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.AUTO_PATCH_SUCCESS);
+        
       } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException
         pasteText = commentCode(currentFixes.get(i).fixedCode, originalCode);
-        HelpMeOutLog.getInstance().writeError("unable to auto-patch.");
+        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.AUTO_PATCH_FAIL);
       }
       
     } else { // the fix is a block of text, just paste it in as close as possible
@@ -431,11 +432,11 @@ public class HelpMeOut {
         // call database method for runtime errors
         proxy.call("errorvoteexception",fixid,vote);
       } else {
-        HelpMeOutLog.getInstance().writeError("HelpMeOut Error: did not recognize error type");
+        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.VOTE_FAIL_UNRECOGNIZED);
       }
 
     } catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError("couldn't call errorvote servicemethod.");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.VOTE_FAIL);
       e.printStackTrace();
     }
     
@@ -445,16 +446,13 @@ public class HelpMeOut {
     } else if (errorType == ErrorType.RUN) {
       HelpMeOutExceptionTracker.getInstance().processRuntimeException(lastEvalError, lastInterpreter);
     } else {
-      HelpMeOutLog.getInstance().writeError("HelpMeOut Error: did not recognize error type");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.VOTE_FAIL_UNRECOGNIZED);
     }
   }
 
   private void pasteIntoEditor(int line, Editor editor,String fix) {
-   
     editor.setLineText(line, fix);
     editor.setSelection(editor.getLineStartOffset(line), editor.getLineStartOffset(line)+fix.length());
-   
-
   }
   public void saveExceptionInfo(EvalError err, Interpreter i, String msg, String code, int line) {    
     lastEvalError = err;

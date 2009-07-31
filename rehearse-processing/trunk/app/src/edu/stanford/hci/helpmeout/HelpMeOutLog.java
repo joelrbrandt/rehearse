@@ -7,10 +7,35 @@ import java.util.Date;
 
 public class HelpMeOutLog {
   
+  /**
+   * Canonical list of possible messages to log.
+   * If the variable name ends in "FOR" then it 
+   * expects to be followed by additional information.
+   */
+  public static final String CLICKED_COMPILED_RUN = "Clicked on compiled run";
+  public static final String CLICKED_INTERACTIVE_RUN = "Clicked on interactive run";
+  public static final String COMPILE_BROKEN_FOR = "Compilation broken: ";
+  public static final String COMPILE_FIXED = "Compilation fixed: saving fix to database";
+  public static final String COMPILE_FIXED_ALREADY = "Compilation fixed: nothing to do";
+  public static final String EXCEPTION_BROKEN_FOR = "Runtime exception: ";
+  public static final String EXCEPTION_FIXED = "Runtime exception fixed: saving fix to database";
+  public static final String QUERY_SUCCESS_FOR = "Query successful for: ";
+  public static final String QUERY_FAIL = "Query failure: couldn't query or wrong type returned";
+  public static final String STORE_FAIL_COMPILE = "Couldn't store compilation error";
+  public static final String STORE_FAIL_EXCEPTION = "Couldn't store runtime exception";
+  public static final String STORE_FAIL_NULL= "Store called with at least one null argument";
+  public static final String CLICKED_COPY_FOR = "Clicked on copy link for id: ";
+  public static final String CLICKED_VOTE_UP_FOR = "Clicked on vote up link for id: ";
+  public static final String CLICKED_VOTE_DOWN_FOR = "Clicked on vote down link for id: ";
+  public static final String AUTO_PATCH_SUCCESS = "Auto-patching successful";
+  public static final String AUTO_PATCH_FAIL = "Auto-patching failed";
+  public static final String VOTE_FAIL = "Voting failed: unable to call errorvote servicemethod";
+  public static final String VOTE_FAIL_UNRECOGNIZED = "Voting failed: unable to recognize error type";
+  
   // make it a Singleton
   private static HelpMeOutLog instance = new HelpMeOutLog();
   private HelpMeOutLog(){
-    addTimestamp();
+    logNewSession();
   }
   public static HelpMeOutLog getInstance() {
     return instance;
@@ -23,7 +48,7 @@ public class HelpMeOutLog {
   private boolean writeToStdOut = true;
   
   public void write(String text) {
-    text = text.concat("\n");
+    text = formatText(text);
     out.append(text);
     log.append(text);
     if (writeToStdOut) {
@@ -32,7 +57,7 @@ public class HelpMeOutLog {
   }
   
   public void writeError(String text) {
-    text = text.concat("\n");
+    text = formatText(text);
     err.append(text);
     log.append(text);
     if (writeToStdOut) {
@@ -50,7 +75,13 @@ public class HelpMeOutLog {
     }
   }
   
-  private void addTimestamp() {
+  private String formatText(String text) {
+    text = (new Date()).toString().concat("  "+text);
+    text = text.concat("\n");
+    return text;
+  }
+  
+  private void logNewSession() {
     Date now = new Date();
     log.append("\n\n--------------------------\n");
     log.append("NEW SESSION - " + now.toString());

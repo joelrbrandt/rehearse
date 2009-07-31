@@ -153,24 +153,21 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
       String query = e.getURL().getQuery();
       Map<String, String> map = getQueryMap(query);
 
-      // for a copy link, place text of fix on clipboard
-      // TODO: maybe paste it right in instead
-      // TODO: need some visual feedback
       if("copy".matches(map.get("action"))) {
-        HelpMeOutLog.getInstance().write("Clicked on copy link for id "+map.get("id"));
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_COPY_FOR + map.get("id"));
         HelpMeOut.getInstance().handleCopyAction(Integer.parseInt(map.get("id")));
         
       } 
       // for a "thumbs up link:
       else if("up".matches(map.get("action"))){
         
-        HelpMeOutLog.getInstance().write("Clicked on vote up link for id "+map.get("id"));
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_VOTE_UP_FOR + map.get("id"));
         HelpMeOut.getInstance().handleVoteUpAction(Integer.parseInt(map.get("id")));
         
       } 
       // for a "thumbs down" link:
       else if("down".matches(map.get("action"))) {
-        HelpMeOutLog.getInstance().write("Clicked on vote down link for id "+map.get("id"));
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_VOTE_DOWN_FOR + map.get("id"));
         HelpMeOut.getInstance().handleVoteDownAction(Integer.parseInt(map.get("id")));
         
       } 

@@ -60,7 +60,7 @@ public class RehearseBase extends Base {
 	
 	 public boolean handleQuit() {
 	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
-	   System.out.println(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
+	   //System.out.println(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
 	   return super.handleQuit();
 	 }
 
