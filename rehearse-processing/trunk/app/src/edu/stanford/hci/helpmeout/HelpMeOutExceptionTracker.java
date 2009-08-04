@@ -1,5 +1,7 @@
 package edu.stanford.hci.helpmeout;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,10 +38,19 @@ public class HelpMeOutExceptionTracker {
   // TODO: NOT COMPLETE YET. write this function that only queries if we run in non-interactive mode; 
   public void processRuntimeExceptionNonInteractive(RunnerException rre) {
     
-    String error = "java.lang.NullPointerException";//TODO...
-    String code = "";//TODO...rre.get
+    String error = rre.getMessage();
     
-    String trace = "";//TODO...
+    int line = rre.getCodeLine();
+    String code = HelpMeOut.getInstance().getEditor().getTextArea().getLineText(line);
+    
+    // Get the stacktrace into String form
+    // http://www.devx.com/tips/Tip/27885
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw, true);
+    rre.printStackTrace(pw);
+    pw.flush();
+    sw.flush();
+    String trace = sw.toString();
     
     HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
     

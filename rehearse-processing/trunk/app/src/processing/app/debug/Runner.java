@@ -627,7 +627,10 @@ public class Runner implements MessageConsumer {
       listener.statusError("Could not find QuickTime, please reinstall QuickTime 7 or later.");
 
     } else {
-      reportException(message, event.thread());
+      // This originally passed "message" instead of "exceptionName".
+      // We changed it so it would report the full error (e.g., "java.lang.NullPointerException")
+      // instead of just the last bit ("NullPointerException").
+      reportException(exceptionName, event.thread());
     }
     editor.internalRunnerClosed();
   }
