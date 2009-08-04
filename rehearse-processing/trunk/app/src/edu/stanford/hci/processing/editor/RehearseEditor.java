@@ -140,6 +140,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		canvasFrame.setResizable(false);
 
 		applet = new RehearsePApplet();
+		
 		//applet.setupFrameResizeListener();
 		applet.frame = canvasFrame;
 		applet.sketchPath = getSketch().getFolder().getAbsolutePath();

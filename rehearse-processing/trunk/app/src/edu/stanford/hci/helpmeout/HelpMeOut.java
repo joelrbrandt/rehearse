@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
-
 import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.googlecode.jj1.ServiceProxy;
 
-import edu.stanford.hci.helpmeout.diff_match_patch.Diff;
-import edu.stanford.hci.helpmeout.diff_match_patch.Operation;
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
@@ -40,12 +42,12 @@ public class HelpMeOut {
     public String brokenCode;
   }
 
-  protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
   private Map<Integer,FixInfo> currentFixes = new HashMap<Integer,FixInfo>(); // temp storage for currently displayed fixes, so we can copy them
 
   // make it a Singleton
   private static HelpMeOut instance = new HelpMeOut();
-  private ServiceProxy proxy = new ServiceProxy(SERVICE_URL);
+  private HelpMeOutServerProxy serverProxy = new HelpMeOutServerProxy();
+  
   private HelpMeOut(){}
   public static HelpMeOut getInstance() {
     return instance;
@@ -54,11 +56,11 @@ public class HelpMeOut {
   // states of the FSM
   private enum CodeState {BROKEN,FIXED};
   CodeState codeState = CodeState.FIXED;
-  
+
   // types of errors
   enum ErrorType {COMPILE, RUN};
   ErrorType errorType = ErrorType.COMPILE;
-  
+
   // keep track of msg and code for FSM
   String lastErrorMsg = null;
   String lastErrorCode = null;
@@ -68,7 +70,7 @@ public class HelpMeOut {
   String lastQueryCode = null;
   private int lastQueryLine;
   private Editor lastQueryEditor = null;
-  
+
   //store last query parameters for runtime exceptions
   private EvalError lastEvalError;
   private Interpreter lastInterpreter;
@@ -77,8 +79,13 @@ public class HelpMeOut {
    * Simple test: call an echo function that takes a string and returns that same string
    */
   private void echo() {
-    String result = (String)proxy.call("echo", "hello you!");
-    System.out.println(result);
+    String result;
+    try {
+      result = serverProxy.echo("hello");
+      System.out.println(result);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -91,9 +98,7 @@ public class HelpMeOut {
   private void store(String error, String s0, String s1) {
     if((error!=null)&&(s0!=null)&&(s1!=null)) {
       try {
-
-        String result = (String)proxy.call("store2",error, s0, s1);
-
+        String result = serverProxy.store2(error, s0, s1);
       }catch (Exception e) {
         HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_COMPILE);
         e.printStackTrace();
@@ -102,9 +107,9 @@ public class HelpMeOut {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_NULL);
     }
   }
-  
+
   protected void showQueryResult(ArrayList<HashMap<String,ArrayList<String>>> result, String error, ErrorType errorType) {
-    
+
     // Set the error type so voting knows which table to update
     this.errorType = errorType;
 
@@ -180,6 +185,7 @@ public class HelpMeOut {
 
   }
 
+ 
   /**
    * Query the remote HelpMeOut database for relevant example fixes.
    * Via JSON-RPC
@@ -187,19 +193,26 @@ public class HelpMeOut {
    * @param error The compile error string of the current error
    * @param code The line of code referenced by the compile error
    */
-  public void query(String error, String code, int line, Editor editor) {
+  public void query(final String error, final String code, int line, Editor editor) {
     lastQueryMsg = error;
     lastQueryCode = code;
     lastQueryLine = line;
     lastQueryEditor = editor;
-    
+
     try {
-      ArrayList<HashMap<String,ArrayList<String>>> result = 
-        (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("query", error, code);
+      //query database - this call may time out or throw other exceptions
+      ArrayList<HashMap<String,ArrayList<String>>> result = serverProxy.query(error, code);
       showQueryResult(result, error, ErrorType.COMPILE);
       HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
-    } catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL);
+    } catch(TimeoutException te) {
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL+"Timeout");
+      if(tool!=null) {
+
+        tool.setLabelText("HelpMeOutQuery did not return any suggestions because of a network timeout.");
+      }
+    }catch (Exception e) { //can end up here with a timeout exception
+
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL+"Wrong return type");
       if(tool!=null) {
 
         tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
@@ -244,7 +257,7 @@ public class HelpMeOut {
   public void registerTool(HelpMeOutTool tool) {
     this.tool = tool;
   }
-  
+
   protected HelpMeOutTool getTool() {
     return tool;
   }
@@ -259,16 +272,16 @@ public class HelpMeOut {
     assert(lastQueryEditor != null);
     String pasteText;
     FixInfo f = currentFixes.get(i);
-    
+
     // The line we're fixing may not be the exact line the error was thrown on.
     int lineToChange = searchFileForBestLine(f.brokenCode);
-    
+
     // If we've changed which line we're patching, we also need to update
     // which "original" code is displayed to the user.
     String originalCode = lastQueryEditor.getLineText(lineToChange);
-    
+
     int linesInFix = f.brokenCode.split("\n").length;
-    
+
     if (linesInFix <= 1) {
 
       try {
@@ -293,12 +306,12 @@ public class HelpMeOut {
         //otherwise, copy our patch (fingers crossed)
         pasteText = "\n// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+"\n"+patchedText+"\n";
         HelpMeOutLog.getInstance().writeError(HelpMeOutLog.AUTO_PATCH_SUCCESS);
-        
+
       } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException
         pasteText = commentCode(currentFixes.get(i).fixedCode, originalCode);
         HelpMeOutLog.getInstance().writeError(HelpMeOutLog.AUTO_PATCH_FAIL);
       }
-      
+
     } else { // the fix is a block of text, just paste it in as close as possible
       pasteText = commentCode(currentFixes.get(i).fixedCode, originalCode);
     }
@@ -306,22 +319,28 @@ public class HelpMeOut {
     //now replace the error line with our fix (makes the assumption that the error was actually at that line)
     pasteIntoEditor(lineToChange,lastQueryEditor,pasteText);
   }
-  
+
   private int searchFileForBestLine(String fix) {
     diff_match_patch dmp = new diff_match_patch();
     dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-    int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
-    int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc);
-    
-    if (offset == -1) {
+    try {
+      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
+      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc);
+      if (offset == -1) {
+        return 0;
+
+      } else {
+        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
+        return line;
+      }
+    } catch (Exception e) {
+      //for some reqson we failed in diff_match_patch
       return 0;
-      
-    } else {
-      int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
-      return line;
     }
+    
+    
   }
-  
+
   /** Search one line above and one line below the error line to see if the fix
    *  is not the error line itself, but one above or below.  This manifests itself
    *  in missing semicolon errors, for example.
@@ -333,37 +352,37 @@ public class HelpMeOut {
    * @param fix the chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
-//  private int searchNearbyForBetterLine(String fix) {
-//    diff_match_patch dmp = new diff_match_patch();
-//    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
-//    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
-//    int bestLine = lastQueryLine;
-//    
-//    // check above
-//    if (lastQueryLine > 0) {
-//      int above = lastQueryLine-1;
-//      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
-//      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
-//      if (score > bestScore) {
-//        bestScore = score;
-//        bestLine = above;
-//      }
-//    }
-//
-//    //check below
-//    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
-//      int below = lastQueryLine+1;
-//      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
-//      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
-//      if (score > bestScore) {
-//        bestScore = score;
-//        bestLine = below;
-//      }
-//    }
-//    
-//    return bestLine;
-//  }
-  
+  //  private int searchNearbyForBetterLine(String fix) {
+  //    diff_match_patch dmp = new diff_match_patch();
+  //    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
+  //    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
+  //    int bestLine = lastQueryLine;
+  //    
+  //    // check above
+  //    if (lastQueryLine > 0) {
+  //      int above = lastQueryLine-1;
+  //      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
+  //      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
+  //      if (score > bestScore) {
+  //        bestScore = score;
+  //        bestLine = above;
+  //      }
+  //    }
+  //
+  //    //check below
+  //    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
+  //      int below = lastQueryLine+1;
+  //      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
+  //      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
+  //      if (score > bestScore) {
+  //        bestScore = score;
+  //        bestLine = below;
+  //      }
+  //    }
+  //    
+  //    return bestLine;
+  //  }
+
   /** 
    * Computes how close a patch already is to the target text
    * by summing the length of the number of "EQUAL" sections of the patch.
@@ -375,19 +394,19 @@ public class HelpMeOut {
    * @param fixLength the length of the broken code in the fix
    * @return the ratio of equal characters over total characters in the two strings
    */
-//  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
-//    double ratio = 0;
-//    for (Patch p : pList) {
-//      for (Diff d : p.diffs) {
-//        if (d.operation == Operation.EQUAL)
-//          ratio += d.text.length();
-//      }
-//    }
-//    
-//    ratio = ratio*2/(errorLength+fixLength);
-//    return ratio;
-//  }
-  
+  //  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
+  //    double ratio = 0;
+  //    for (Patch p : pList) {
+  //      for (Diff d : p.diffs) {
+  //        if (d.operation == Operation.EQUAL)
+  //          ratio += d.text.length();
+  //      }
+  //    }
+  //    
+  //    ratio = ratio*2/(errorLength+fixLength);
+  //    return ratio;
+  //  }
+
   private String commentCode(String fix, String original) {
     String comment = "// --- HELPMEOUT ---\n";
     fix = fix.replaceAll("\n$", "");
@@ -427,10 +446,10 @@ public class HelpMeOut {
     try {
       if (errorType == ErrorType.COMPILE) {
         // using id, call database method for compiler errors
-        proxy.call("errorvote",fixid,vote);
+        serverProxy.errorvote(fixid, vote);
       } else if (errorType == ErrorType.RUN) {
         // call database method for runtime errors
-        proxy.call("errorvoteexception",fixid,vote);
+        serverProxy.errorvoteexception(fixid, vote);
       } else {
         HelpMeOutLog.getInstance().writeError(HelpMeOutLog.VOTE_FAIL_UNRECOGNIZED);
       }
@@ -439,7 +458,7 @@ public class HelpMeOut {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.VOTE_FAIL);
       e.printStackTrace();
     }
-    
+
     // then re-query?
     if (errorType == ErrorType.COMPILE) {
       query(lastQueryMsg,lastQueryCode,lastQueryLine, lastQueryEditor);
@@ -463,9 +482,34 @@ public class HelpMeOut {
     lastQueryCode = code;
     lastQueryLine = line;
   }
-  
+
+
+
   public void setEditor(Editor editor) {
-    this.lastQueryEditor = editor;
+    //only reset our state if we actually changed editor
+    //(and not just deactivated and reactivated window)
+    if(!editor.equals(lastQueryEditor)) {
+      lastQueryEditor = editor;
+      //reset our state
+      codeState = CodeState.FIXED;
+      errorType = ErrorType.COMPILE;
+      // keep track of msg and code for FSM
+      lastErrorMsg = null;
+      lastErrorCode = null;
+
+      //store last query parameters in case we need to re-query
+      lastQueryMsg = null;
+      lastQueryCode = null;
+      lastQueryLine = -1;
+
+
+      //store last query parameters for runtime exceptions
+      lastEvalError=null;
+      lastInterpreter=null;
+    }
   }
- 
+  public Editor getEditor() {
+    return lastQueryEditor;
+  }
+
 }

@@ -12,6 +12,7 @@ import edu.stanford.hci.processing.editor.RehearseEditor;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
+import processing.app.debug.RuntimeRunnerException;
 import processing.core.PApplet;
 
 public class RehearsePApplet extends PApplet {
@@ -117,7 +118,8 @@ public class RehearsePApplet extends PApplet {
 		} catch (UtilEvalError e) {
 			throw new RuntimeException(e);
 		} catch (EvalError e) {
-		  	HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i);
+		  	HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i); //notify editor in here.
+        
 		  	throw new RuntimeException(e);
 		}
 	}

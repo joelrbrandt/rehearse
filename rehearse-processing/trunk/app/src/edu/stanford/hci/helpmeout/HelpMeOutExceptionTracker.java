@@ -3,10 +3,11 @@ package edu.stanford.hci.helpmeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import processing.app.debug.RunnerException;
+import processing.app.debug.RuntimeRunnerException;
 import bsh.EvalError;
 import bsh.Interpreter;
-
-import com.googlecode.jj1.ServiceProxy;
+import bsh.TargetError;
 
 
 public class HelpMeOutExceptionTracker {
@@ -16,7 +17,8 @@ public class HelpMeOutExceptionTracker {
   
   // make it a Singleton
   private static HelpMeOutExceptionTracker instance = new HelpMeOutExceptionTracker();
-  private ServiceProxy proxy = new ServiceProxy(HelpMeOut.SERVICE_URL);
+ 
+  private HelpMeOutServerProxy serverProxy = new HelpMeOutServerProxy();
   private HelpMeOutExceptionTracker() {}
   public static HelpMeOutExceptionTracker getInstance() {
     return instance;
@@ -27,8 +29,62 @@ public class HelpMeOutExceptionTracker {
     this.source=source;
   }
   
-  /** record the runtime exception that just occurred */
+  
+  /** IF an exception occurred during non-interactive run, we cannot try to record a fix, but we can at least query for it
+   * and show any available fixes. 
+   */
+  // TODO: NOT COMPLETE YET. write this function that only queries if we run in non-interactive mode; 
+  public void processRuntimeExceptionNonInteractive(RunnerException rre) {
+    
+    String error = "java.lang.NullPointerException";//TODO...
+    String code = "";//TODO...rre.get
+    
+    String trace = "";//TODO...
+    
+    HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
+    
+    try {
+      ArrayList<HashMap<String,ArrayList<String>>> result = 
+        serverProxy.queryexception(error, code, trace);
+      HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
+      HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
+    } catch (Exception e) {
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL);
+      e.printStackTrace();
+      if(tool!=null) {
+        tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
+      }
+      //e.printStackTrace();
+    }
+  }
+  
+  /** record the runtime exception that just occurred in interactive mode and query for suggestions*/
   public void processRuntimeException(EvalError err,Interpreter i) {
+    
+    
+    ///// First, try to notify editor of our exception so we get syntax highlighting and an error status bar update
+    // analogous to Runner.java: reportException()
+    // we need to know: String message, int file, int line, int column
+    // TODO: currently only works for single-tab sketches! figure out how to extend to multi-tab sketches
+    
+    try {
+      // if this EvalError just wraps a different Exception thrown by the script, then use that target
+      Throwable t;
+      if(err instanceof TargetError) {
+        t = ((TargetError)err).getTarget();
+      } else {
+        t = err;
+      }
+      
+      RuntimeRunnerException rre = new RuntimeRunnerException(t.getMessage(), 0,err.getErrorLineNumber()-1, -1,false); //need -1???
+      HelpMeOut.getInstance().getEditor().statusError(rre);
+    } catch (Exception e) {
+      //something went wrong while we tried to notify editor
+      e.printStackTrace();
+    }
+    
+    
+    // now save exception info and do HelpMeOut-specific stuff.
     eInfo = new ExceptionInfo(err,i,source);
     
     try{
@@ -49,7 +105,7 @@ public class HelpMeOutExceptionTracker {
     
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
-        (ArrayList<HashMap<String,ArrayList<String>>>) proxy.call("queryexception", error, code, trace);
+        serverProxy.queryexception(error, code, trace);
       HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
       HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
     } catch (Exception e) {
@@ -68,9 +124,8 @@ public class HelpMeOutExceptionTracker {
     HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED);
     try {
       
-      String result = (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
-                                         eInfo.getStackTrace(), eInfo.getSourceCode(), source);
-
+      String result = serverProxy.storeexception(eInfo, source);
+      
     }catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_EXCEPTION);
       e.printStackTrace();
@@ -110,7 +165,7 @@ public class HelpMeOutExceptionTracker {
     for (int i = 0; i < newCharIndex; i++) {
       if (newSource.charAt(i) == '\n') newLine++;
     }
-    return newLine+1; // lines of code aren't 0-indexed
+    return newLine; ///was: +1; // lines of code aren't 0-indexed
   }
   
   /**

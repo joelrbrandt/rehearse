@@ -34,6 +34,8 @@ import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.event.ExceptionEvent;
 
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
+
 
 /**
  * Runs a compiled sketch. As of release 0136, all sketches are run externally
@@ -683,6 +685,8 @@ public class Runner implements MessageConsumer {
           exception = new RuntimeRunnerException(message, codeIndex, lineNumber, -1);
           exception.hideStackTrace();
           listener.statusError(exception);
+          //HelpMeOut: this is not tested or complete yet!
+          HelpMeOutExceptionTracker.getInstance().processRuntimeExceptionNonInteractive(exception);
           return;
         }
       }

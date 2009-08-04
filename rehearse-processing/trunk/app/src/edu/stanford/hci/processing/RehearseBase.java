@@ -6,6 +6,7 @@ import java.io.File;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
+import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 import processing.app.Base;
@@ -65,7 +66,17 @@ public class RehearseBase extends Base {
 	 }
 
 	
-	 static public void main(String args[]) {
+	 /* (non-Javadoc)
+   * @see processing.app.Base#handleActivated(processing.app.Editor)
+   */
+  @Override
+  protected void handleActivated(Editor whichEditor) {
+    HelpMeOut.getInstance().setEditor(whichEditor);
+    
+    super.handleActivated(whichEditor);
+  }
+
+  static public void main(String args[]) {
 
 	     System.out.println("Starting RehearseBase...");
 	    try {
@@ -209,4 +220,6 @@ public class RehearseBase extends Base {
 
 	    new RehearseBase(args);
 	  }
+	 
+	 
 }
