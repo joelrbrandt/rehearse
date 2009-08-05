@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.googlecode.jj1.ServiceProxy;
+
 
 /**
  * Test class to try echoing strings, storing into remote db and loading from remote db.

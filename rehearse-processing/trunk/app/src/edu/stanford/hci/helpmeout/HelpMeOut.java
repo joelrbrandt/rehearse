@@ -4,23 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
 import bsh.EvalError;
 import bsh.Interpreter;
-
-import com.googlecode.jj1.ServiceProxy;
-
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
  * HelpMeOut
- * make sure jj1.0.1.jar and stringtree-json-2.0.5.jar are in build path
+ * make sure stringtree-json-2.0.5.jar is in build path (jj1.0.1.jar - removed, we now use source code directly)
  * i copied to processing/lib and added to processing project build path
  * @author bjoern
  *
@@ -100,7 +93,7 @@ public class HelpMeOut {
       try {
         String result = serverProxy.store2(error, s0, s1);
       }catch (Exception e) {
-        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_COMPILE);
+        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_COMPILE,e.getMessage());
         e.printStackTrace();
       }
     } else {
@@ -201,23 +194,26 @@ public class HelpMeOut {
 
     try {
       //query database - this call may time out or throw other exceptions
+      
       ArrayList<HashMap<String,ArrayList<String>>> result = serverProxy.query(error, code);
-      showQueryResult(result, error, ErrorType.COMPILE);
-      HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS_FOR + error);
+      if(result!=null) {
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS, error);
+        showQueryResult(result, error, ErrorType.COMPILE);
+      } else {
+        if(tool!=null) {
+          tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
+        }
+      }
     } catch(TimeoutException te) {
-      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL+"Timeout");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL,"Timeout");
       if(tool!=null) {
-
         tool.setLabelText("HelpMeOutQuery did not return any suggestions because of a network timeout.");
       }
     }catch (Exception e) { //can end up here with a timeout exception
-
-      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL+"Wrong return type");
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL,e.getMessage());
       if(tool!=null) {
-
         tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
       }
-      //e.printStackTrace();
     }
   }
 
@@ -243,7 +239,7 @@ public class HelpMeOut {
   }
   public void processBroken(String error, String code) {
     // Always save the last error, even if already broken
-    HelpMeOutLog.getInstance().write(HelpMeOutLog.COMPILE_BROKEN_FOR + error);
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.COMPILE_BROKEN, error);
     lastErrorCode = code;
     lastErrorMsg = error;
     codeState = CodeState.BROKEN;

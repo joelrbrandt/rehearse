@@ -74,7 +74,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	@Override
 	public void handleRun(boolean present) {
 		wasLastRunInteractive = false;
-		HelpMeOutLog.getInstance().write("Clicked on compiled run");
+		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_COMPILED_RUN);
 		super.handleRun(present);
 	}
 
@@ -130,7 +130,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 
 	public void handleInteractiveRun() {
-	  HelpMeOutLog.getInstance().write("Clicked on interactive run");
+	  HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
 	  
 		wasLastRunInteractive = true;
 		// clear previous context
