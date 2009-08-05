@@ -175,8 +175,8 @@ class HelpMeOutService(object):
     def query(self,error,code):
         con = self.connect()
         cur = con.cursor()
-        cleaned_error = re.sub(u'["\u201c].*?["\u201d]','%',error) # get rid of quotes - straight or unicode
-        res = con.execute("select id,diff,votes from compilererrors where errmsg LIKE ?",(cleaned_error,))
+        #cleaned_error = re.sub(u'[\u201c].*?[\u201d]','%',error) # get rid of quotes - straight or unicode
+        res = con.execute("select id,diff,votes from compilererrors where errmsg LIKE ?",(error,))
         if res==None:
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes
@@ -192,8 +192,8 @@ class HelpMeOutService(object):
     def queryexception(self,error,code,stacktrace):
         con = self.connect()
         cur = con.cursor()
-        cleaned_error = re.sub(u'["\u201c].*?["\u201d]','%',error) # get rid of quotes - straight or unicode
-        res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg LIKE ?",(cleaned_error,))
+        #cleaned_error = re.sub(u'["\u201c].*?["\u201d]','%',error) # get rid of quotes - straight or unicode
+        res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg LIKE ?",(error,))
         if res==None:
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes
