@@ -176,10 +176,10 @@ class HelpMeOutService(object):
         cur = con.cursor()
         res = con.execute("select id,diff,votes from compilererrors where errmsg = ?",(error,))
         if res==None:
-            return ['error']
+            return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes
         if len(arr)==0:
-            return ['nothing found']
+            return 'NO_RESULT'
         # we have at least one useful result:
         # go over returned results one by one and check distance
         best = self.find_best_source_match(code,arr)
@@ -192,10 +192,10 @@ class HelpMeOutService(object):
         cur = con.cursor()
         res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg = ?",(error,))
         if res==None:
-            return ['error']
+            return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes
         if len(arr)==0:
-            return ['nothing found']
+            return 'NO_RESULT'
         best = self.find_best_exception_match(code,stacktrace,arr)
         return best
 
@@ -205,7 +205,7 @@ class HelpMeOutService(object):
         con = self.connect()
         res = con.execute("select * from compilererrors")
         if res==None:
-            return ['error']
+            return 'ERROR'
         return [d for d in res]
     
     
