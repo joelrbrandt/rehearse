@@ -1588,7 +1588,7 @@ public class Editor extends JFrame implements RunnerListener {
         
         // <HelpMeOut>
         // We just compiled successfully without any errors - notify HelpMeOut
-        HelpMeOut.getInstance().processNoError(textarea.getText());
+        HelpMeOut.getInstance().processNoError(((RehearseEditor) HelpMeOut.getInstance().getEditor()).appendCodeFromAllTabs(false));
         // </HelpMeOut>
         
         runtime = new Runner(sketch, appletClassName, presenting, Editor.this);
@@ -2197,10 +2197,11 @@ public class Editor extends JFrame implements RunnerListener {
             
             //HelpMeOut.getInstance().storeException(errorMsg, errorLine, exceptionString);
           } else {
-           
-            HelpMeOut.getInstance().query(errorMsg,errorLine,line,this);
+            // We need to translate the current tab's error line to the error line in the program.
+            int realLine = line+sketch.getCurrentCode().getPreprocOffset();
+            HelpMeOut.getInstance().query(errorMsg,errorLine,realLine,this);
             // also, mark a broken code checkpoint
-            HelpMeOut.getInstance().processBroken(errorMsg,textarea.getText());
+            HelpMeOut.getInstance().processBroken(errorMsg,((RehearseEditor) HelpMeOut.getInstance().getEditor()).appendCodeFromAllTabs(false));
           }
           // </HelpMeOut>
         }

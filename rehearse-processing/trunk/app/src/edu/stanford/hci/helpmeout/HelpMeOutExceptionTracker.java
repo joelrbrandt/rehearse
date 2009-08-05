@@ -5,11 +5,13 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import processing.app.SketchCode;
 import processing.app.debug.RunnerException;
 import processing.app.debug.RuntimeRunnerException;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.TargetError;
+import edu.stanford.hci.processing.editor.RehearseEditor;
 
 
 public class HelpMeOutExceptionTracker {
@@ -37,11 +39,12 @@ public class HelpMeOutExceptionTracker {
    */
   // TODO: NOT COMPLETE YET. write this function that only queries if we run in non-interactive mode; 
   public void processRuntimeExceptionNonInteractive(RunnerException rre) {
+
+    RehearseEditor editor = (RehearseEditor) HelpMeOut.getInstance().getEditor();
     
     String error = rre.getMessage();
-    
-    int line = rre.getCodeLine();
-    String code = HelpMeOut.getInstance().getEditor().getTextArea().getLineText(line);
+
+    String code = editor.getTextArea().getLineText(rre.getCodeLine());
     
     // Get the stacktrace into String form
     // http://www.devx.com/tips/Tip/27885
@@ -87,7 +90,13 @@ public class HelpMeOutExceptionTracker {
         t = err;
       }
       
-      RuntimeRunnerException rre = new RuntimeRunnerException(t.getMessage(), 0,err.getErrorLineNumber()-1, -1,false); //need -1???
+      RehearseEditor editor = (RehearseEditor) HelpMeOut.getInstance().getEditor();
+      
+      SketchCode sc = editor.lineToSketchCode(err.getErrorLineNumber()-1);
+      
+      RuntimeRunnerException rre = new RuntimeRunnerException(t.getMessage(), 
+                                                              editor.getSketch().getCodeIndex(sc),
+                                                              err.getErrorLineNumber()-1-sc.getPreprocOffset(), -1, false); //need -1???
       HelpMeOut.getInstance().getEditor().statusError(rre);
     } catch (Exception e) {
       //something went wrong while we tried to notify editor

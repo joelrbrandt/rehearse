@@ -688,7 +688,7 @@ public class Runner implements MessageConsumer {
           exception = new RuntimeRunnerException(message, codeIndex, lineNumber, -1);
           exception.hideStackTrace();
           listener.statusError(exception);
-          //HelpMeOut: this is not tested or complete yet!
+          
           HelpMeOutExceptionTracker.getInstance().processRuntimeExceptionNonInteractive(exception);
           return;
         }

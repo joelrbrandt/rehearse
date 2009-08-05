@@ -325,7 +325,7 @@ public class HelpMeOut {
     dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
     try {
       int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
-      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc);
+      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
       if (offset == -1) {
         return 0;
 

@@ -57,7 +57,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
 	
-	private static final boolean USEHIGHLIGHT = true;
+	private static final boolean USEHIGHLIGHT = false;
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
@@ -88,11 +88,16 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		}
 	}
 	
-	private String appendCodeFromAllTabs() {
+	public String appendCodeFromAllTabs() {
+	  return appendCodeFromAllTabs(true);
+	}
+	
+	public String appendCodeFromAllTabs(boolean interactive) {
 		StringBuffer bigCode = new StringBuffer();
 		int bigCount = 0;
 		for (SketchCode sc : getSketch().getCode()) {
-			sc.setPreprocOffset(bigCount);
+		  if (interactive)
+		    sc.setPreprocOffset(bigCount);
 			if (sc == getSketch().getCurrentCode()) {
 				bigCode.append(getText());
 		        bigCode.append('\n');
@@ -107,7 +112,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		return bigCode.toString();
 	}
 	
-	private SketchCode lineToSketchCode(int line) {
+	public SketchCode lineToSketchCode(int line) {
 		for (SketchCode sc : getSketch().getCode()) {
 			int lineCount;
 			if (sc == getSketch().getCurrentCode()) {
@@ -248,9 +253,9 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
     try {
       String appletClassName = getSketch().compile();
       if (appletClassName != null) {
-        HelpMeOut.getInstance().processNoError(textarea.getText());
+        HelpMeOut.getInstance().processNoError(appendCodeFromAllTabs(false));
         // if no exception has occurred yet, send text to HelpMeOut Exception class
-        HelpMeOutExceptionTracker.getInstance().setSource(textarea.getText());
+        HelpMeOutExceptionTracker.getInstance().setSource(appendCodeFromAllTabs(false));
         if(HelpMeOutExceptionTracker.getInstance().hasExceptionOccurred()) {
           // TODO here or in handleInteractiveRun() above:
           int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch();
