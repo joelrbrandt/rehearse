@@ -25,11 +25,14 @@ public class BasicTest extends UISpecTestCase {
 		EditorConsole.setEditor(editor);
 		
 		JEditTextArea textarea = editor.getTextArea();
-		textarea.setText("int i = 1; i++;");
-			
-		editor.handleRun(false);
+		textarea.setText("\ninnnt i = 1;\n i++;\n\n");
 		
-		assertTrue(HelpMeOutLog.getInstance().didProgramFinish());
+		boolean present= false;
+		editor.handleRun(present);
+		
+		
+		//look through the log if any actions failed - if so, use the log as the assertion message.
+		assertFalse(HelpMeOutLog.getInstance().getLogAsString(),HelpMeOutLog.getInstance().hasErrorOccurred());
 	}
 	
 	private void runInteractive() {
