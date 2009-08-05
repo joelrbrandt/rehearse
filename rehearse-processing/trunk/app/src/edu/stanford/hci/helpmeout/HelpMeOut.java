@@ -1,5 +1,6 @@
 package edu.stanford.hci.helpmeout;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
+import processing.app.preproc.PdeLexer;
 import bsh.EvalError;
 import bsh.Interpreter;
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
@@ -316,6 +318,11 @@ public class HelpMeOut {
     pasteIntoEditor(lineToChange,lastQueryEditor,pasteText);
   }
 
+  /** Search for the best line of code based on a fuzzy string matching algorithm trades of closeness of match and distance 
+   * from a suggested location
+    * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
+   * @return the line we have chosen as the most likely line needing to be fixed
+   */
   private int searchFileForBestLine(String fix) {
     diff_match_patch dmp = new diff_match_patch();
     dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
@@ -336,6 +343,17 @@ public class HelpMeOut {
     
     
   }
+  
+  /**
+   * TODO: write an implementation based on tokenizing Strings in here.
+   * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
+   * @return the line we have chosen as the most likely line needing to be fixed
+   */
+  private int searchTokenStreamForBestLine(String fix) {
+    PdeLexer lex = new PdeLexer(new StringReader(fix));
+    // ...
+    return -1;
+  }
 
   /** Search one line above and one line below the error line to see if the fix
    *  is not the error line itself, but one above or below.  This manifests itself
@@ -345,7 +363,7 @@ public class HelpMeOut {
    *  the error line and the lines above and below, and choosing the line with the
    *  least number of patches between it and the fixed line.
    *  
-   * @param fix the chosen fix from the database that we are going to copy into the editor
+   * @param fix broken version of the chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
   //  private int searchNearbyForBetterLine(String fix) {
