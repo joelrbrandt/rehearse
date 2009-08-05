@@ -19,6 +19,11 @@ public class PdeMatchProcessor {
     
   }
   public String process(String program) throws TokenStreamException {
+    //handle edge case where lexer dies if code ends in a comment:
+    //(how many others like this are there?
+    if(!program.endsWith("\n")) {
+      program +="\n";
+    }
     String filteredProgram = "";
     PdeLexer lex = new PdeLexer(new StringReader(program));
     // and our custom filter
@@ -27,11 +32,12 @@ public class PdeMatchProcessor {
   //now read tokens one-by-one
     while(true) {
       Token tok = filter.nextToken();
-      filteredProgram += tok.getText();
+     
       
       if(tok.getType()==Token.EOF_TYPE) {
         break;
       }
+      filteredProgram += tok.getText();
     }
     return filteredProgram;
   }

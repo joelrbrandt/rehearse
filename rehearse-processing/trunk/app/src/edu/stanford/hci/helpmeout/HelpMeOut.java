@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
 import processing.app.preproc.PdeLexer;
+import antlr.TokenStreamException;
 import bsh.EvalError;
 import bsh.Interpreter;
 import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
@@ -272,7 +273,7 @@ public class HelpMeOut {
     FixInfo f = currentFixes.get(i);
 
     // The line we're fixing may not be the exact line the error was thrown on.
-    int lineToChange = searchFileForBestLine(f.brokenCode);
+    int lineToChange = searchTokenStreamForBestLine(f.brokenCode);//searchFileForBestLine(f.brokenCode);
 
     // If we've changed which line we're patching, we also need to update
     // which "original" code is displayed to the user.
@@ -323,38 +324,88 @@ public class HelpMeOut {
     * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
-  private int searchFileForBestLine(String fix) {
-    diff_match_patch dmp = new diff_match_patch();
-    dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-    try {
-      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
-      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
-      if (offset == -1) {
-        return 0;
-
-      } else {
-        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
-        return line;
-      }
-    } catch (Exception e) {
-      //for some reqson we failed in diff_match_patch
-      return 0;
-    }
-    
-    
-  }
+//  private int searchFileForBestLine(String fix) {
+//    diff_match_patch dmp = new diff_match_patch();
+//    dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
+//    try {
+//      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
+//      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
+//      if (offset == -1) {
+//        return 0;
+//
+//      } else {
+//        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
+//        return line;
+//      }
+//    } catch (Exception e) {
+//      //for some reqson we failed in diff_match_patch
+//      return 0;
+//    }
+//    
+//    
+//  }
   
   /**
-   * TODO: write an implementation based on tokenizing Strings in here.
+   * Search for the best line of code based on a fuzzy string matching algorithm OVER TOKENIZED CODE
    * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
   private int searchTokenStreamForBestLine(String fix) {
-    PdeLexer lex = new PdeLexer(new StringReader(fix));
+    PdeMatchProcessor proc = new PdeMatchProcessor();
+    try {
+      String program = lastQueryEditor.getText();
+      program = proc.process(program); //look only at current tab
+      fix = proc.process(fix);
+      diff_match_patch dmp = new diff_match_patch();
+      dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
+      //TODO: TOTAL hack:
+      int l = lastQueryLine;
+      if(lastQueryLine > program.split("\n").length) {
+        l = lastQueryLine - lastQueryEditor.getSketch().getCurrentCode().getPreprocOffset();
+      }
+      int loc = getLineStartOffet(program,l); //get line start offset of lastQueryLine in processed program textlastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
+      int offset = dmp.match_main(program, fix, loc); // This only searches in the currently viewed tab
+      if (offset == -1) {
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.INFO, "match_main() did not return useful offset (-1).");
+        return 0;
+      } else {
+        int line = getLineOfOffset(program,offset);//get line of found offset in tokenized pgm
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.INFO, "match_main() returned offset "+Integer.toString(offset)+" at line "+Integer.toString(line));
+        return line;
+      }
+    } catch (TokenStreamException e) {
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.TOKENIZER_ERROR, e.getMessage());
+      return 0;
+     
+    } catch (Exception e) {
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.DIFF_MATCH_PATCH_ERROR, e.getMessage());
+    }
+    
     // ...
     return -1;
   }
 
+  /** return zero-based line# of offset */
+  private int getLineOfOffset(String program, int offset) {
+    String lines[] = program.split("\n");
+    int chars =0;
+    for(int i=0; i<lines.length; i++) {
+      chars += lines[i].length();
+      if(chars>offset) 
+        return i;
+    }
+    return 0;
+  }
+  /* return character offset of line# lineIndex in String program */
+  private int getLineStartOffet(String program, int lineIndex) {
+    String lines[] = program.split("\n");
+    int chars = 0;
+    for(int i=0; i<lineIndex; i++) {
+      chars+=lines[i].length();
+    }
+    return chars+1;
+  }
+  
   /** Search one line above and one line below the error line to see if the fix
    *  is not the error line itself, but one above or below.  This manifests itself
    *  in missing semicolon errors, for example.

@@ -49,6 +49,10 @@ public class HelpMeOutLog {
   public static final String QUERYEXCEPTION_FAIL = "Query for Exception failed.";
   public static final String QUERYEXCEPTION_SUCCESS = "Query for Exception succeeded.";
   public static final String QUERYEXCEPTION_EMPTY = "Query for Exception returned no results.";
+  public static final String TOKENIZER_ERROR = "Tokenizing string during match calculation failed.";
+  public static final String DIFF_MATCH_PATCH_ERROR = "diff_match_patch() failed.";
+  public static final String INFO = "Info"; //generic info message
+  
   public static String CLEANED_QUERY = "Cleaned up query.";
   
   SimpleDateFormat dateFormat =
