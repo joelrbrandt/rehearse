@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
+import processing.app.SketchCode;
 import antlr.Token;
 import antlr.TokenStreamException;
 import bsh.EvalError;
@@ -71,6 +72,8 @@ public class HelpMeOut {
   //store last query parameters for runtime exceptions
   private EvalError lastEvalError;
   private Interpreter lastInterpreter;
+
+  private SketchCode lastQuerySketchCode=null;
 
   /**
    * Simple test: call an echo function that takes a string and returns that same string
@@ -190,13 +193,14 @@ public class HelpMeOut {
    * 
    * @param error The compile error string of the current error
    * @param code The line of code referenced by the compile error
+   * @param sketchCode 
    */
-  public void query(final String error, final String code, int line, Editor editor) {
+  public void query(final String error, final String code, int line, SketchCode sketchCode, Editor editor) {
     lastQueryMsg = error;
     lastQueryCode = code;
     lastQueryLine = line;
     lastQueryEditor = editor;
-
+    lastQuerySketchCode = sketchCode;
     try {
       //query database - this call may time out or throw other exceptions
       
@@ -267,6 +271,7 @@ public class HelpMeOut {
    * Gets called from HelpMeOutTool's hyperlinkUpdate() link-click event handler
    * http://www.devx.com/Java/Article/22326/0/page/4
    * @param i index into list of suggestions (1-3) - which fix to copy
+   * NOTE: all line numbers in this method should be relative to current tab!
    */
   public void handleCopyAction(int i) {
     assert(lastQueryEditor != null);
@@ -424,12 +429,10 @@ public class HelpMeOut {
       program = proc.process(program); //look only at current tab
       fix = proc.process(fix);
       diff_match_patch dmp = new diff_match_patch();
-      dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-      //TODO: TOTAL hack:
+      dmp.Match_Threshold = 1.0f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
+      
       int l = lastQueryLine;
-      if(lastQueryLine > program.split("\n").length) {
-        l = lastQueryLine - lastQueryEditor.getSketch().getCurrentCode().getPreprocOffset();
-      }
+      
       int loc = getLineStartOffet(program,l); //get line start offset of lastQueryLine in processed program textlastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
       int offset = dmp.match_main(program, fix, loc); // This only searches in the currently viewed tab
       if (offset == -1) {
@@ -453,24 +456,25 @@ public class HelpMeOut {
   }
 
   /** return zero-based line# of offset */
-  private int getLineOfOffset(String program, int offset) {
+  public int getLineOfOffset(String program, int offset) {
     String lines[] = program.split("\n");
     int chars =0;
     for(int i=0; i<lines.length; i++) {
-      chars += lines[i].length();
-      if(chars>offset) 
+      chars += lines[i].length()+1;//1 is of \n which split removed
+      if(chars>offset) //>= - \n is part of earlier line; > - \n is part of following line
         return i;
     }
     return 0;
   }
-  /* return character offset of line# lineIndex in String program */
-  private int getLineStartOffet(String program, int lineIndex) {
+  
+  /** return character offset of line# lineIndex in String program; zero-based */
+  public int getLineStartOffet(String program, int lineIndex) {
     String lines[] = program.split("\n");
     int chars = 0;
     for(int i=0; i<lineIndex; i++) {
-      chars+=lines[i].length();
+      chars+=lines[i].length()+1; //1 is for \n which split consumed
     }
-    return chars+1;
+    return chars;
   }
   
   /** Search one line above and one line below the error line to see if the fix
@@ -593,7 +597,7 @@ public class HelpMeOut {
 
     // then re-query?
     if (errorType == ErrorType.COMPILE) {
-      query(lastQueryMsg,lastQueryCode,lastQueryLine, lastQueryEditor);
+      query(lastQueryMsg,lastQueryCode,lastQueryLine, lastQuerySketchCode, lastQueryEditor);
     } else if (errorType == ErrorType.RUN) {
       HelpMeOutExceptionTracker.getInstance().processRuntimeException(lastEvalError, lastInterpreter);
     } else {

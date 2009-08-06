@@ -2201,9 +2201,9 @@ public class Editor extends JFrame implements RunnerListener {
             //NOTE: I switched the two calls below to create more reasonable log files. need to check if this broke anything.
             // also, mark a broken code checkpoint
             HelpMeOut.getInstance().processBroken(errorMsg,((RehearseEditor) HelpMeOut.getInstance().getEditor()).appendCodeFromAllTabs(false));
-            // We need to translate the current tab's error line to the error line in the program.
-            int realLine = line+sketch.getCurrentCode().getPreprocOffset();
-            HelpMeOut.getInstance().query(errorMsg,errorLine,realLine,this);
+            SketchCode sketchCode = sketch.getCurrentCode();
+            // line right now is relative 0-based line # of error in current editor.
+            HelpMeOut.getInstance().query(errorMsg,errorLine,line,sketchCode, this);
             
           }
           // </HelpMeOut>

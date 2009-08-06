@@ -1583,7 +1583,7 @@ implements Runnable, ConsoleInterface,Serializable
 
 	// TODO: check source?
 	public void doLog(int line, CallStack cs) {
-	  
+	  System.out.println(line+":"+lineToWatch);
 		lineNumbers.put(lastExecutedLine, new Date());
 		lastUsedCallStack = cs;
 		if (lastExecutedLine == line) {

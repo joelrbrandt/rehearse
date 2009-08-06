@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 
+import processing.app.SketchCode;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.TargetError;
@@ -19,8 +20,13 @@ public class ExceptionInfo {
   protected String exceptionClass;
   protected String exceptionMessage;
 
-  protected int exceptionLineNum;
-  protected String exceptionLine;
+  protected int exceptionLineNum; //absolute. 0-indexed
+  
+  protected int relativeLineNum; //relative, 0-indexed line num in sketchCode
+  protected SketchCode sketchCode; //which tab/sketchCode
+  
+  protected String exceptionLine; 
+  
   protected int executionCount;
   
   protected String stackTrace;
@@ -29,7 +35,7 @@ public class ExceptionInfo {
   
   private ExceptionInfo() {} //no default constructor
  
-  public ExceptionInfo(EvalError e, Interpreter i, String source) {
+  public ExceptionInfo(EvalError e, Interpreter i, String source, int relativeLine, SketchCode sc) {
     Throwable t;
     
     // if this EvalError just wraps a different Exception thrown by the script, then use that target
@@ -44,6 +50,8 @@ public class ExceptionInfo {
     // and error message
     this.exceptionMessage = t.getMessage();
     
+    this.sketchCode=sc;
+    this.relativeLineNum = relativeLine;
     
     // Get the stacktrace into String form
     // http://www.devx.com/tips/Tip/27885
@@ -59,14 +67,14 @@ public class ExceptionInfo {
     
     // and an index to the line that threw the error
     // TODO: this only works for single-file sketches for now
-    this.exceptionLineNum = e.getErrorLineNumber();
+    this.exceptionLineNum = e.getErrorLineNumber()-1; //exceptions report 1-indexed, we want 0-indexed.
     
     // TODO: Currently "exceptionLine" may hold less than the entire line due to how
     // the interpreter handles parsing.  We may want to get the line text by
     // using the source file text and line number instead.
     this.exceptionLine = e.getErrorText();
     
-    this.executionCount = i.getExecutionCount(exceptionLineNum);
+    this.executionCount = i.getExecutionCount(e.getErrorLineNumber()); //ask interpreter with 1-based number
    
     //store environment of accessible variables and values
     //this.environment = (HashMap<String, String>) i.makeSnapshotModel().getVariableMap();
@@ -84,10 +92,14 @@ public class ExceptionInfo {
     return exceptionMessage;
   }
 
-  public int getExceptionLineNum() {
+  public int getExceptionAbsouteLineNum() {
     return exceptionLineNum;
   }
 
+  public int getExceptionRelativeLineNum() {
+    return relativeLineNum;
+  }
+  
   public String getExceptionLine() {
     return exceptionLine;
   }

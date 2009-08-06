@@ -38,7 +38,7 @@ public class HelpMeOutServerProxy {
     return theTask.get(TIMEOUT,TimeUnit.SECONDS);
   }
 
-  public ArrayList<HashMap<String,ArrayList<String>>> query(final String error, final String code) throws TimeoutException,RuntimeException, InterruptedException, ExecutionException {
+  public ArrayList<HashMap<String,ArrayList<String>>> query(final String error, final String lineOfCode) throws TimeoutException,RuntimeException, InterruptedException, ExecutionException {
     if (usage == HelpMeOutPreferences.Usage.QUERY || usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
       FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
       // create new task
@@ -47,7 +47,7 @@ public class HelpMeOutServerProxy {
             public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
               String clean_error = cleanCompilerError(error);
 
-              Object o = proxy.call("query",clean_error,code);
+              Object o = proxy.call("query",clean_error,lineOfCode);
               if(o instanceof String) {
                 if(((String)o).equals("ERROR")) {
                   HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL, "database reported error");
@@ -105,7 +105,7 @@ public class HelpMeOutServerProxy {
 
   }
   
-  public ArrayList<HashMap<String,ArrayList<String>>> queryexception(final String error, final String code, final String trace) throws RuntimeException, InterruptedException, ExecutionException, TimeoutException {
+  public ArrayList<HashMap<String,ArrayList<String>>> queryexception(final String error, final String lineOfCode, final String trace) throws RuntimeException, InterruptedException, ExecutionException, TimeoutException {
     if (usage == HelpMeOutPreferences.Usage.QUERY || usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
       FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
       // create new task
@@ -113,7 +113,7 @@ public class HelpMeOutServerProxy {
           new Callable<ArrayList<HashMap<String,ArrayList<String>>>>() {
             public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
               String clean_error = cleanRuntimeError(error);
-              Object o = proxy.call("queryexception", clean_error, code,trace);
+              Object o = proxy.call("queryexception", clean_error, lineOfCode,trace);
               if(o instanceof String) {
                 if(((String)o).equals("ERROR")) {
                   HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL, "database reported error");
@@ -136,12 +136,12 @@ public class HelpMeOutServerProxy {
   }
 
 
-  public String store2(final String error, final String s0, final String s1) throws InterruptedException, ExecutionException, TimeoutException {
+  public String store2(final String error, final String pgmBroken, final String pgmFixed) throws InterruptedException, ExecutionException, TimeoutException {
     if (usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
       FutureTask<String> theTask = new FutureTask<String>(
           new Callable<String>() {
             public String call() throws Exception {
-              return (String)proxy.call("store2", error,s0,s1);
+              return (String)proxy.call("store2", error,pgmBroken,pgmFixed);
             }
           });
       new Thread(theTask).start();
@@ -151,13 +151,13 @@ public class HelpMeOutServerProxy {
     }
   }
 
-  public String storeexception(final ExceptionInfo eInfo, final String source) throws InterruptedException, ExecutionException, TimeoutException {
+  public String storeexception(final ExceptionInfo eInfo, final String pgmFixed) throws InterruptedException, ExecutionException, TimeoutException {
     if (usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
       FutureTask<String> theTask = new FutureTask<String>(
           new Callable<String>() {
             public String call() throws Exception {
               return (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
-                                        eInfo.getStackTrace(), eInfo.getSourceCode(), source );
+                                        eInfo.getStackTrace(), eInfo.getSourceCode(), pgmFixed );
             }
           });
       new Thread(theTask).start();

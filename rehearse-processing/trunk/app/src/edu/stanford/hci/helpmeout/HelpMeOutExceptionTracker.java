@@ -37,7 +37,7 @@ public class HelpMeOutExceptionTracker {
   /** IF an exception occurred during non-interactive run, we cannot try to record a fix, but we can at least query for it
    * and show any available fixes. 
    */
-  // TODO: NOT COMPLETE YET. write this function that only queries if we run in non-interactive mode; 
+  
   public void processRuntimeExceptionNonInteractive(RunnerException rre) {
 
     RehearseEditor editor = (RehearseEditor) HelpMeOut.getInstance().getEditor();
@@ -86,7 +86,9 @@ public class HelpMeOutExceptionTracker {
     // analogous to Runner.java: reportException()
     // we need to know: String message, int file, int line, int column
     // TODO: currently only works for single-tab sketches! figure out how to extend to multi-tab sketches
-
+    SketchCode sc = null;
+    int relativeLine = -1;
+    
     try {
       // if this EvalError just wraps a different Exception thrown by the script, then use that target
       Throwable t;
@@ -98,11 +100,12 @@ public class HelpMeOutExceptionTracker {
 
       RehearseEditor editor = (RehearseEditor) HelpMeOut.getInstance().getEditor();
 
-      SketchCode sc = editor.lineToSketchCode(err.getErrorLineNumber()-1);
+      sc = editor.lineToSketchCode(err.getErrorLineNumber()-1);
+      relativeLine = err.getErrorLineNumber()-1-sc.getPreprocOffset();
 
       RuntimeRunnerException rre = new RuntimeRunnerException(t.getMessage(), 
                                                               editor.getSketch().getCodeIndex(sc),
-                                                              err.getErrorLineNumber()-1-sc.getPreprocOffset(), -1, false); //need -1???
+                                                              relativeLine, -1, false); //need -1???
       HelpMeOut.getInstance().getEditor().statusError(rre);
     } catch (Exception e) {
       //something went wrong while we tried to notify editor
@@ -111,7 +114,7 @@ public class HelpMeOutExceptionTracker {
 
 
     // now save exception info and do HelpMeOut-specific stuff.
-    eInfo = new ExceptionInfo(err,i,source);
+    eInfo = new ExceptionInfo(err,i,source,relativeLine,sc);
 
     try{
       HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_OCCURRED, eInfo.getExceptionClass());
@@ -122,7 +125,7 @@ public class HelpMeOutExceptionTracker {
     String error = eInfo.getExceptionClass();
     String code = eInfo.getExceptionLine();
     String trace = eInfo.getStackTrace();
-    int line = eInfo.getExceptionLineNum();
+    int line = eInfo.getExceptionRelativeLineNum();
     HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
 
     // make sure we save the EvalError and Interpreter in HelpMeOut in case it needs to call this method after a re-query
@@ -157,47 +160,49 @@ public class HelpMeOutExceptionTracker {
     try {
 
       String result = serverProxy.storeexception(eInfo, source);
-
+      
     }catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_EXCEPTION);
       e.printStackTrace();
     }
+    eInfo = null;
   }
 
   /** given the old, broken source and Exception info we have in this object,
    * which line in the new source passed in as argument corresponds to the line
    * that last threw an exception and that we should watch?
    * @param newSource the source code that was changed by the user after the exception happened
-   * @return the line in newSource that rehearse should watch
+   * @return the line in newSource that rehearse should watch, 0-based
    */
   public int getLineToWatch() {
     assert(eInfo!=null);
 
     // compute character offset in source - make sure we're on the right line 
     diff_match_patch d = new diff_match_patch();
-    int oldCharIndex = getCharIndexFromLine(eInfo.getSourceCode(), eInfo.getExceptionLineNum());
+    
+    int oldCharIndex = getCharIndexFromLine(eInfo.getSourceCode(), eInfo.getExceptionAbsouteLineNum()); //returns 0-based absolute line#
     int newCharIndex = d.diff_xIndex(d.diff_main(eInfo.getSourceCode(), source), oldCharIndex);
     int newLineIndex = getLineFromCharIndex(source,newCharIndex);
     return newLineIndex;
   }
 
-  private int getCharIndexFromLine(String source, int line) {
-    int newlinesToConsume = line-1;
+  public int getCharIndexFromLine(String source, int line) { //zero-indexed
+    int newlinesToConsume = line; //zero-indexed
     int charIndex = 0;
     while (newlinesToConsume > 0) {
       charIndex++;
       if (source.charAt(charIndex) == '\n') newlinesToConsume--;
     }
-    if (line > 1) charIndex++; // move past the newline
+    if (line >= 1) charIndex++; // move past the newline
     return charIndex;
   }
 
-  private int getLineFromCharIndex(String newSource, int newCharIndex) {
+  public int getLineFromCharIndex(String newSource, int newCharIndex) {
     int newLine = 0;
     for (int i = 0; i < newCharIndex; i++) {
       if (newSource.charAt(i) == '\n') newLine++;
     }
-    return newLine; ///was: +1; // lines of code aren't 0-indexed
+    return newLine; 
   }
 
   /**
