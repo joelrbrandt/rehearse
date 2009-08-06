@@ -4,11 +4,12 @@
 package edu.stanford.hci.helpmeout;
 
 import java.io.StringReader;
-
-import antlr.Token;
-import antlr.TokenStreamException;
+import java.util.ArrayList;
+import java.util.List;
 
 import processing.app.preproc.PdeLexer;
+import antlr.Token;
+import antlr.TokenStreamException;
 
 /**
  * @author bjoern
@@ -41,4 +42,31 @@ public class PdeMatchProcessor {
     }
     return filteredProgram;
   }
+  
+  
+  /** Lexes String program and returns resulting tokens as a List */
+  public List<Token> getUnfilteredTokenArray(String program) throws TokenStreamException {
+    
+    List<Token> tokens = new ArrayList<Token>();
+    if(!program.endsWith("\n")) {
+      program +="\n";
+    }
+    String filteredProgram = "";
+    PdeLexer lex = new PdeLexer(new StringReader(program));
+    // don't add our custom filter = we need the original token text values!
+    // PdeLexingFilter filter = new PdeLexingFilter(lex);
+    
+    //now read tokens one-by-one
+    while(true) {
+      Token tok = lex.nextToken();
+     
+      
+      if(tok.getType()==Token.EOF_TYPE) {
+        break;
+      }
+      tokens.add(tok);
+    }
+    return tokens;
+  }
+  
 }

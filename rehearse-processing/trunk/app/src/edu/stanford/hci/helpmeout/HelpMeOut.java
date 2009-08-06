@@ -1,18 +1,17 @@
 package edu.stanford.hci.helpmeout;
 
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import processing.app.Editor;
-import processing.app.preproc.PdeLexer;
+import antlr.Token;
 import antlr.TokenStreamException;
 import bsh.EvalError;
 import bsh.Interpreter;
-import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
  * HelpMeOut
@@ -74,7 +73,7 @@ public class HelpMeOut {
   /**
    * Simple test: call an echo function that takes a string and returns that same string
    */
-  private void echo() {
+  protected void echo() {
     String result;
     try {
       result = serverProxy.echo("hello");
@@ -93,8 +92,9 @@ public class HelpMeOut {
    */
   private void store(String error, String s0, String s1) {
     if((error!=null)&&(s0!=null)&&(s1!=null)) {
+     
       try {
-        String result = serverProxy.store2(error, s0, s1);
+        serverProxy.store2(error, s0, s1);
       }catch (Exception e) {
         HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_COMPILE,e.getMessage());
         e.printStackTrace();
@@ -284,10 +284,13 @@ public class HelpMeOut {
     if (linesInFix <= 1) {
 
       try {
+        //smarter token-based patch
+     
+        String patchedText = tokenBasedAutoPatch(originalCode,f.fixedCode);
+        boolean patchSuccess = (patchedText!=null);
 
         //first, try to auto-apply patch
-        //TODO: make this smarter and token-based
-
+        /*
         diff_match_patch dmp = new diff_match_patch();
         LinkedList<Patch> pList = dmp.patch_make(f.brokenCode, f.fixedCode);
         Object[] pResult = dmp.patch_apply(pList, originalCode);
@@ -299,6 +302,7 @@ public class HelpMeOut {
         for(boolean b : patchFlags) {
           if(b) {patchSuccess = true; break;}
         }
+        */
         //if we didn't, give up and let user merge manually
         if(!patchSuccess) throw new Exception("could not apply any patches");
 
@@ -319,6 +323,68 @@ public class HelpMeOut {
     pasteIntoEditor(lineToChange,lastQueryEditor,pasteText);
   }
 
+  
+  
+  private String tokenBasedAutoPatch(String line1, String line2) {
+    //token comparator tests equality of token types, not content
+    Comparator<Token> ct = new Comparator<Token>() {
+      public int compare(Token o1, Token o2) {
+        return o2.getType()-o1.getType();
+      }
+    };
+    
+    //tokenize each line
+    PdeMatchProcessor proc = new PdeMatchProcessor();
+    List<Token> tokens1,tokens2;
+    try {
+      tokens1 = proc.getUnfilteredTokenArray(line1);
+      tokens2 = proc.getUnfilteredTokenArray(line2);
+    } catch (TokenStreamException e) {
+      
+      e.printStackTrace();
+      return null;
+    } 
+    
+    // do a diff on the token level
+    Diff<Token> diff = new Diff<Token>(tokens1, tokens2,ct);
+    List<Difference> differences = diff.diff();
+    
+    // now transform tokens1 into tokens2 by stepping through diffs
+    List<Token> tokensOut = new ArrayList<Token>();
+    int diffIndex =0;
+    for(int i=0; i<tokens1.size(); i++) {
+  
+      Difference d = differences.get(diffIndex);
+      //copy everything that's unchanged until next difference
+      if(i<d.getDeletedStart()) {
+        tokensOut.add(tokens1.get(i));
+      } else {
+        //now were at the difference
+        //handle deletion - skip forward in ptr
+        if(d.getDeletedEnd()!=Difference.NONE) {
+          i+=d.getDeletedEnd()-d.getDeletedStart();
+        }
+        //handle addition - insert into output
+        if(d.getAddedEnd()!=Difference.NONE) {
+          tokensOut.addAll(tokens2.subList(d.getAddedStart(), d.getAddedEnd()+1));
+        }
+        diffIndex++;
+        if(diffIndex>=differences.size()) {
+          //copy remaining
+          tokensOut.addAll(tokens1.subList(i, tokens1.size()-1));
+          break;
+        }
+      }
+    }
+    String result = "";
+    //print what we have so far
+    for(Token t: tokensOut) {
+      result+=t.getText();
+    }
+    return result;
+  }
+  
+  
   /** Search for the best line of code based on a fuzzy string matching algorithm trades of closeness of match and distance 
    * from a suggested location
     * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
