@@ -10,7 +10,18 @@ import java.util.concurrent.TimeoutException;
 
 
 public class HelpMeOutServerProxy {
-
+  
+  private static HelpMeOutServerProxy instance = new HelpMeOutServerProxy();
+  private HelpMeOutServerProxy(){}
+  public static HelpMeOutServerProxy getInstance() {
+    return instance;
+  }
+  
+  /* Determines how much (if any) information is sent to or received from the HelpMeOut database.
+   * Set from HelpMeOutPreferences.
+   */
+  private HelpMeOutPreferences.Usage usage = null;
+  
   private static final long TIMEOUT = 5L;
   protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
   private ServiceProxy proxy = new ServiceProxy(SERVICE_URL);
@@ -28,31 +39,35 @@ public class HelpMeOutServerProxy {
   }
 
   public ArrayList<HashMap<String,ArrayList<String>>> query(final String error, final String code) throws TimeoutException,RuntimeException, InterruptedException, ExecutionException {
-    FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
-    // create new task
-    theTask = new FutureTask<ArrayList<HashMap<String,ArrayList<String>>>>(
-        new Callable<ArrayList<HashMap<String,ArrayList<String>>>>() {
-          public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
-            String clean_error = cleanCompilerError(error);
+    if (usage == HelpMeOutPreferences.Usage.QUERY || usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
+      FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
+      // create new task
+      theTask = new FutureTask<ArrayList<HashMap<String,ArrayList<String>>>>(
+          new Callable<ArrayList<HashMap<String,ArrayList<String>>>>() {
+            public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
+              String clean_error = cleanCompilerError(error);
 
-            Object o = proxy.call("query",clean_error,code);
-            if(o instanceof String) {
-              if(((String)o).equals("ERROR")) {
-                HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL, "database reported error");
-                return null;
-              } else if(((String)o).equals("NO_RESULT")) {
-                HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_EMPTY,error);
-                return null;
+              Object o = proxy.call("query",clean_error,code);
+              if(o instanceof String) {
+                if(((String)o).equals("ERROR")) {
+                  HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL, "database reported error");
+                  return null;
+                } else if(((String)o).equals("NO_RESULT")) {
+                  HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_EMPTY,error);
+                  return null;
+                }
               }
-            }
-            return (ArrayList<HashMap<String,ArrayList<String>>>)o;
+              return (ArrayList<HashMap<String,ArrayList<String>>>)o;
 
-          }
-        });
-    // start task in a new thread
-    new Thread(theTask).start();
-    // wait for the execution to finish, timeout after 10 secs 
-    return theTask.get(TIMEOUT, TimeUnit.SECONDS); 
+            }
+          });
+      // start task in a new thread
+      new Thread(theTask).start();
+      // wait for the execution to finish, timeout after 10 secs 
+      return theTask.get(TIMEOUT, TimeUnit.SECONDS);
+    } else {
+      return null;
+    }
   }
 
   protected String cleanCompilerError(String error) {
@@ -89,54 +104,67 @@ public class HelpMeOutServerProxy {
     }
 
   }
+  
   public ArrayList<HashMap<String,ArrayList<String>>> queryexception(final String error, final String code, final String trace) throws RuntimeException, InterruptedException, ExecutionException, TimeoutException {
-    FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
-    // create new task
-    theTask = new FutureTask<ArrayList<HashMap<String,ArrayList<String>>>>(
-        new Callable<ArrayList<HashMap<String,ArrayList<String>>>>() {
-          public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
-            String clean_error = cleanRuntimeError(error);
-            Object o = proxy.call("queryexception", clean_error, code,trace);
-            if(o instanceof String) {
-              if(((String)o).equals("ERROR")) {
-                HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL, "database reported error");
-                return null;
-              } else if(((String)o).equals("NO_RESULT")) {
-                HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_EMPTY, error);
-                return null;
+    if (usage == HelpMeOutPreferences.Usage.QUERY || usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
+      FutureTask<ArrayList<HashMap<String,ArrayList<String>>>> theTask = null;
+      // create new task
+      theTask = new FutureTask<ArrayList<HashMap<String,ArrayList<String>>>>(
+          new Callable<ArrayList<HashMap<String,ArrayList<String>>>>() {
+            public ArrayList<HashMap<String,ArrayList<String>>> call() throws Exception {
+              String clean_error = cleanRuntimeError(error);
+              Object o = proxy.call("queryexception", clean_error, code,trace);
+              if(o instanceof String) {
+                if(((String)o).equals("ERROR")) {
+                  HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL, "database reported error");
+                  return null;
+                } else if(((String)o).equals("NO_RESULT")) {
+                  HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_EMPTY, error);
+                  return null;
+                }
               }
+              return (ArrayList<HashMap<String,ArrayList<String>>>)o;
             }
-            return (ArrayList<HashMap<String,ArrayList<String>>>)o;
-          }
-        });
-    // start task in a new thread
-    new Thread(theTask).start();
-    // wait for the execution to finish, timeout after 10 secs 
-    return theTask.get(TIMEOUT, TimeUnit.SECONDS); 
+          });
+      // start task in a new thread
+      new Thread(theTask).start();
+      // wait for the execution to finish, timeout after 10 secs 
+      return theTask.get(TIMEOUT, TimeUnit.SECONDS);
+    } else {
+      return null;
+    }
   }
 
 
   public String store2(final String error, final String s0, final String s1) throws InterruptedException, ExecutionException, TimeoutException {
-    FutureTask<String> theTask = new FutureTask<String>(
-        new Callable<String>() {
-          public String call() throws Exception {
-            return (String)proxy.call("store2", error,s0,s1);
-          }
-        });
-    new Thread(theTask).start();
-    return theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    if (usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
+      FutureTask<String> theTask = new FutureTask<String>(
+          new Callable<String>() {
+            public String call() throws Exception {
+              return (String)proxy.call("store2", error,s0,s1);
+            }
+          });
+      new Thread(theTask).start();
+      return theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    } else {
+      return null;
+    }
   }
 
   public String storeexception(final ExceptionInfo eInfo, final String source) throws InterruptedException, ExecutionException, TimeoutException {
-    FutureTask<String> theTask = new FutureTask<String>(
-        new Callable<String>() {
-          public String call() throws Exception {
-            return (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
-                                      eInfo.getStackTrace(), eInfo.getSourceCode(), source );
-          }
-        });
-    new Thread(theTask).start();
-    return theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    if (usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
+      FutureTask<String> theTask = new FutureTask<String>(
+          new Callable<String>() {
+            public String call() throws Exception {
+              return (String)proxy.call("storeexception",eInfo.getExceptionClass(), eInfo.getExceptionLine(), 
+                                        eInfo.getStackTrace(), eInfo.getSourceCode(), source );
+            }
+          });
+      new Thread(theTask).start();
+      return theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    } else {
+      return null;
+    }
   }
 
 
@@ -157,6 +185,9 @@ public class HelpMeOutServerProxy {
     new Thread(theTask).start();
     theTask.get(TIMEOUT,TimeUnit.SECONDS);
   }
-
+  
+  public void setUsage(HelpMeOutPreferences.Usage usage) {
+    this.usage = usage;
+  }
 
 }

@@ -12,6 +12,8 @@ import antlr.Token;
 import antlr.TokenStreamException;
 import bsh.EvalError;
 import bsh.Interpreter;
+import edu.stanford.hci.helpmeout.HelpMeOutPreferences.Usage;
+import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
  * HelpMeOut
@@ -41,7 +43,7 @@ public class HelpMeOut {
 
   // make it a Singleton
   private static HelpMeOut instance = new HelpMeOut();
-  private HelpMeOutServerProxy serverProxy = new HelpMeOutServerProxy();
+  private HelpMeOutServerProxy serverProxy = HelpMeOutServerProxy.getInstance();
   
   private HelpMeOut(){}
   public static HelpMeOut getInstance() {
@@ -256,7 +258,6 @@ public class HelpMeOut {
   public void registerTool(HelpMeOutTool tool) {
     this.tool = tool;
   }
-
   protected HelpMeOutTool getTool() {
     return tool;
   }
@@ -642,5 +643,14 @@ public class HelpMeOut {
   public Editor getEditor() {
     return lastQueryEditor;
   }
-
+  public void setUsage(Usage usage) {
+    if (usage == Usage.DISABLED) {
+      if (tool != null) {
+        //TODO: tool is probably going to be null. Maybe check for usage in HelpMeOut.registerTool() instead?
+        tool.setLabelText("HelpMeOut is disabled.\nEnable HelpMeOut in Tools > HelpMeOutPreferences.");
+      }
+    }
+    
+    HelpMeOutServerProxy.getInstance().setUsage(usage);
+  }
 }

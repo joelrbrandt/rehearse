@@ -22,7 +22,7 @@ public class HelpMeOutExceptionTracker {
   // make it a Singleton
   private static HelpMeOutExceptionTracker instance = new HelpMeOutExceptionTracker();
 
-  private HelpMeOutServerProxy serverProxy = new HelpMeOutServerProxy();
+  private HelpMeOutServerProxy serverProxy = HelpMeOutServerProxy.getInstance();
   private HelpMeOutExceptionTracker() {}
   public static HelpMeOutExceptionTracker getInstance() {
     return instance;

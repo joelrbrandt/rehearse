@@ -790,6 +790,7 @@ public class Editor extends JFrame implements RunnerListener {
     menu.add(createToolMenuItem("processing.app.tools.FixEncoding"));
 
     //<HelpMeOut>
+    menu.add(createToolMenuItem("edu.stanford.hci.helpmeout.HelpMeOutPreferences"));
     menu.add(createToolMenuItem("edu.stanford.hci.helpmeout.HelpMeOutTool"));
     //</HelpMeOut>
     return menu;
