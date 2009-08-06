@@ -67,7 +67,7 @@ public class Preferences {
 
   // what to call the feller
 
-  static final String PREFS_FILE = "preferences.txt";
+  public static final String PREFS_FILE = "preferences.txt";
 
 
   // platform strings (used to get settings for specific platforms)

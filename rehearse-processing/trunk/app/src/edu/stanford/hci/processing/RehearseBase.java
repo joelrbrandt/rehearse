@@ -1,13 +1,17 @@
 package edu.stanford.hci.processing;
 
 import java.awt.Frame;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
+import edu.stanford.hci.helpmeout.HelpMeOutPreferences;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 import processing.app.Base;
 import processing.app.Editor;
@@ -60,9 +64,27 @@ public class RehearseBase extends Base {
 	  }
 	
 	 public boolean handleQuit() {
+	   
+	   // Handle regular quit behavior
+	   // This is done first so preferences.txt is written before we write to it.
+	   boolean retval = super.handleQuit();
+	   
+	   // Write to HelpMeOut log
 	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
-	   //System.out.println(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
-	   return super.handleQuit();
+	   
+	   //Write HelpMeOut preferences to preferences.txt
+	   //File prefsFile = Preferences.getPreferencesFile();
+	   File prefsFile = getSettingsFile(Preferences.PREFS_FILE);
+	   String usage = HelpMeOutPreferences.getUsage().toString();
+	   try {
+	      BufferedWriter out = new BufferedWriter(new FileWriter(prefsFile, true)); // true appends
+	      out.write("helpmeout.usage="+usage);
+	      out.close();
+	    } catch (IOException e) {
+	      System.out.println("Error writing HelpMeOut preferences");
+	    }
+	   
+	   return retval;
 	 }
 
 	
@@ -136,6 +158,8 @@ public class RehearseBase extends Base {
 
 	    // run static initialization that grabs all the prefs
 	    Preferences.init(null);
+	    String usage = Preferences.get("helpmeout.usage");
+	    HelpMeOutPreferences.setInitialUsage(usage);
 
 	    // setup the theme coloring fun
 	    Theme.init();

@@ -23,7 +23,14 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
   private static JFrame frame = null;
   private static boolean visible = false;
   private static Usage usageChoice = null;
+  
+  private static ButtonGroup usageGroup = null;
+  private static JRadioButton usage1 = null;
+  private static JRadioButton usage2 = null;
+  private static JRadioButton usage3 = null;
 
+  private static final String DEFAULT_USAGE_STR = "DISABLED";
+  
   public String getMenuTitle() {
     return "HelpMeOut Preferences";
   }
@@ -36,20 +43,25 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
       Container content = frame.getContentPane();
       content.setBackground(Color.gray);
       
-      JRadioButton usage1 = new JRadioButton("Disable HelpMeOut");
-      JRadioButton usage2 = new JRadioButton("Get suggestions from HelpMeOut");
-      JRadioButton usage3 = new JRadioButton("Get suggestions from HelpMeOut and submit my fixes");
+      usage1 = new JRadioButton("Disable HelpMeOut");
+      usage2 = new JRadioButton("Get suggestions from HelpMeOut");
+      usage3 = new JRadioButton("Get suggestions from HelpMeOut and submit my fixes");
       usage1.setActionCommand(Usage.DISABLED.toString());
       usage2.setActionCommand(Usage.QUERY.toString());
       usage3.setActionCommand(Usage.QUERY_AND_SUBMIT.toString());
       
-      ButtonGroup group = new ButtonGroup();
-      group.add(usage1);
-      group.add(usage2);
-      group.add(usage3);
+      usageGroup = new ButtonGroup();
+      usageGroup.add(usage1);
+      usageGroup.add(usage2);
+      usageGroup.add(usage3);
       
-      usage1.setSelected(true);
-      usageChoice = Usage.DISABLED;
+      if (usageChoice.equals(Usage.DISABLED)) {
+        usage1.setSelected(true);
+      } else if (usageChoice.equals(Usage.QUERY)) {
+        usage2.setSelected(true);
+      } else if (usageChoice.equals(Usage.QUERY_AND_SUBMIT)) {
+        usage3.setSelected(true);
+      }
       
       usage1.addActionListener(this);
       usage2.addActionListener(this);
@@ -87,6 +99,24 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
     }
     
     HelpMeOut.getInstance().setUsage(usageChoice);
+  }
+  
+  public static Usage getUsage() {
+    return usageChoice;
+  }
+
+  public static void setInitialUsage(String usage) {
+    
+    if (usage == null)
+      usage = DEFAULT_USAGE_STR;
+    
+    if (usage.equals(Usage.DISABLED.toString())) {
+      usageChoice = Usage.DISABLED;
+    } else if (usage.equals(Usage.QUERY.toString())) {
+      usageChoice = Usage.QUERY;
+    } else if (usage.equals(Usage.QUERY_AND_SUBMIT.toString())) {
+      usageChoice = Usage.QUERY_AND_SUBMIT;
+    }
   }
 
 }
