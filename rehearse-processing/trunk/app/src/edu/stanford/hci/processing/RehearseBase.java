@@ -73,7 +73,7 @@ public class RehearseBase extends Base {
 	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
 	   
 	   //Write HelpMeOut preferences to preferences.txt
-	   //File prefsFile = Preferences.getPreferencesFile();
+	   //TODO: Maybe move this into HelpMeOutPreferences.save() ?
 	   File prefsFile = getSettingsFile(Preferences.PREFS_FILE);
 	   String usage = HelpMeOutPreferences.getUsage().toString();
 	   try {

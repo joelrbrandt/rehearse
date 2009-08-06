@@ -1,12 +1,15 @@
 package edu.stanford.hci.helpmeout;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -39,9 +42,8 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
     if (frame == null) {
       frame = new JFrame("HelpMeOut Preferences");
       
-      frame.setSize(400, 200);
       Container content = frame.getContentPane();
-      content.setBackground(Color.gray);
+      content.setLayout(new BorderLayout());
       
       usage1 = new JRadioButton("Disable HelpMeOut");
       usage2 = new JRadioButton("Get suggestions from HelpMeOut");
@@ -63,18 +65,35 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
         usage3.setSelected(true);
       }
       
-      usage1.addActionListener(this);
-      usage2.addActionListener(this);
-      usage3.addActionListener(this);
+//      usage1.addActionListener(this);
+//      usage2.addActionListener(this);
+//      usage3.addActionListener(this);
       
-      JPanel radioPanel = new JPanel(new GridLayout(3,1));
+      JPanel radioPanel = new JPanel();
+      radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
       radioPanel.add(usage1);
       radioPanel.add(usage2);
       radioPanel.add(usage3);
       
-      content.add(radioPanel);
+      content.add(radioPanel, BorderLayout.NORTH);
+      
+      JButton ok = new JButton("OK");
+      JButton cancel = new JButton("Cancel");
+      ok.setActionCommand("OK");
+      cancel.setActionCommand("Cancel");
+      ok.addActionListener(this);
+      cancel.addActionListener(this);
+      
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+      buttonPanel.add(ok);
+      buttonPanel.add(cancel);
+      
+      content.add(buttonPanel, BorderLayout.SOUTH);
       
       HelpMeOut.getInstance().setUsage(usageChoice);
+      
+      frame.pack();
     }
   }
 
@@ -87,16 +106,41 @@ public class HelpMeOutPreferences implements Tool, ActionListener {
   public void actionPerformed(ActionEvent e) {
     String command = e.getActionCommand();
     
-    if (command.equals(Usage.DISABLED.toString())) {
-      usageChoice = Usage.DISABLED;
-      //System.out.println("HelpMeOut usage changed to DISABLED");
-    } else if (command.equals(Usage.QUERY.toString())) {
-      usageChoice = Usage.QUERY;
-      //System.out.println("HelpMeOut usage changed to QUERY");
-    } else if (command.equals(Usage.QUERY_AND_SUBMIT.toString())) {
-      usageChoice = Usage.QUERY_AND_SUBMIT;
-      //System.out.println("HelpMeOut usage changed to QUERY_AND_SUBMIT");
+    if (command.equals("OK")) {
+      if (usage1.isSelected()) {
+        usageChoice = Usage.DISABLED;
+      } else if (usage2.isSelected()) {
+        usageChoice = Usage.QUERY;
+      } else if (usage3.isSelected()) {
+        usageChoice = Usage.QUERY_AND_SUBMIT;
+      }
+      
+      visible = false;
+      frame.setVisible(visible);
+      
+    } else if (command.equals("Cancel")) {
+      if (usageChoice.equals(Usage.DISABLED)) {
+        usage1.setSelected(true);
+      } else if (usageChoice.equals(Usage.QUERY)) {
+        usage2.setSelected(true);
+      } else if (usageChoice.equals(Usage.QUERY_AND_SUBMIT)) {
+        usage3.setSelected(true);
+      }
+      
+      visible = false;
+      frame.setVisible(visible);
     }
+    
+//    if (command.equals(Usage.DISABLED.toString())) {
+//      usageChoice = Usage.DISABLED;
+//      //System.out.println("HelpMeOut usage changed to DISABLED");
+//    } else if (command.equals(Usage.QUERY.toString())) {
+//      usageChoice = Usage.QUERY;
+//      //System.out.println("HelpMeOut usage changed to QUERY");
+//    } else if (command.equals(Usage.QUERY_AND_SUBMIT.toString())) {
+//      usageChoice = Usage.QUERY_AND_SUBMIT;
+//      //System.out.println("HelpMeOut usage changed to QUERY_AND_SUBMIT");
+//    }
     
     HelpMeOut.getInstance().setUsage(usageChoice);
   }
