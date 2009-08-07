@@ -1,0 +1,60 @@
+<%
+from cgi import escape
+from urllib import unquote
+from pysqlite2 import dbapi2 as sqlite
+import difflib
+con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+if int(form['type']) == 0:
+  res = con.execute("select diff from compilererrors where id = ?",(form['id']))
+else:
+  res = con.execute("select diff from exceptions where id = ?", (form['id']))
+diff = [r for r in res][0][0]
+all_lines = diff.splitlines(1)
+htmlDiff = difflib.HtmlDiff()
+# generate a html diff report
+file1 = difflib.restore(all_lines,1)
+file2 = difflib.restore(all_lines,2)
+table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=False)
+%>
+<html>
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=ISO-8859-1" />
+
+    <style type="text/css">
+
+        table.diff {font-family:Courier; border:medium;}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+    </style>
+<title>HelpMeOut Detail Page</title>
+</head>
+<body bgcolor="#ffffff">
+<h1>Detail page</h1>
+<%= table %>
+<table class="diff" summary="Legends">
+        <tr> <th colspan="2"> Legends </th> </tr>
+        <tr> <td> <table border="" summary="Colors">
+                      <tr><th> Colors </th> </tr>
+
+                      <tr><td 
+class="diff_add">&nbsp;Added&nbsp;</td></tr>
+                      <tr><td class="diff_chg">Changed</td> </tr>
+                      <tr><td class="diff_sub">Deleted</td> </tr>
+                  </table></td>
+             <td> <table border="" summary="Links">
+                      <tr><th colspan="2"> Links </th> </tr>
+
+                      <tr><td>(f)irst change</td> </tr>
+                      <tr><td>(n)ext change</td> </tr>
+                      <tr><td>(t)op</td> </tr>
+                  </table></td> </tr>
+    </table>
+
+</body>
+</html>
+
