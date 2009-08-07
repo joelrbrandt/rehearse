@@ -3,9 +3,8 @@ Alias /helpmeout /project/helpmeout-server/
 
 
 <Location /helpmeout-www>
-	SetHandler mod_python
-	PythonHandler helpmeout
-	PythonPath "['/project/helpmeout-www'] + sys.path"
+	SetHandler mod_python .psp
+	PythonHandler mod_python.psp
 	PythonAutoReload On
 	PythonDebug On
 </Location>
