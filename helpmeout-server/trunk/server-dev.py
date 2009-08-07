@@ -21,6 +21,9 @@ class HelpMeOutService(object):
         con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
         con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff,votes INTEGER DEFAULT 0)')
         con.execute('CREATE TABLE if not exists exceptions(id INTEGER PRIMARY KEY,timestamp VARCHAR,errmsg VARCHAR,line VARCHAR,stacktrace VARCHAR,diff VARCHAR, votes INTEGER DEFAULT 0)')
+        con.execute('CREATE TABLE if not exists querylog(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, status INTEGER, error VARCHAR, code VARCHAR, stacktrace VARCHAR)')
+        con.execute('CREATE TABLE if not exists comments(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, fix_id INTEGER)')
+        con.execute('CREATE TABLE if not exists fixidlog(id INTEGER PRIMARY KEY, log_id INTEGER, fix_id INTEGER)')
         return con
     
     def find_best_exception_match(self,code,querytrace,arr,num_results=3) :
@@ -59,7 +62,7 @@ class HelpMeOutService(object):
         #sort by decreasing similarity ranking 
         ranked_results.sort(reverse=True)
         
-		# take voting into account
+        # take voting into account
         vote_ranked_results = [r[1:] for r in ranked_results[0:(2*num_results)]]
         vote_ranked_results.sort(reverse=True)
 
@@ -179,13 +182,24 @@ class HelpMeOutService(object):
         #cleaned_error = re.sub(u'[\u201c].*?[\u201d]','%',error) # get rid of quotes - straight or unicode
         res = con.execute("select id,diff,votes from compilererrors where errmsg LIKE ?",(error,))
         if res==None:
+            cur.execute("insert into querylog values (null, datetime('now'), 0, 2, ?, ?, '')",(error,code))
+            con.commit()
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes
         if len(arr)==0:
+            cur.execute("insert into querylog values (null, datetime('now'), 0, 1, ?, ?, '')",(error,code))
+            con.commit()
             return 'NO_RESULT'
         # we have at least one useful result:
         # go over returned results one by one and check distance
         best = self.find_best_source_match(code,arr)
+        best_ids = [int(r['id'][0]) for r in best]
+        cur.execute("insert into querylog values (null, datetime('now'), 0, 0, ?, ?, '')",(error,code))
+        res = con.execute("select last_insert_rowid() from querylog")
+        last_query_log_id = [r for r in res][0][0]
+        for id in best_ids:
+            cur.execute("insert into fixidlog values(null, ?, ?)",(last_query_log_id,id))
+        con.commit()
         return best
     
     # query the database for matching exceptions
@@ -196,11 +210,22 @@ class HelpMeOutService(object):
         #cleaned_error = re.sub(u'["\u201c].*?["\u201d]','%',error) # get rid of quotes - straight or unicode
         res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg LIKE ?",(error,))
         if res==None:
+            cur.execute("insert into querylog values(null, datetime('now'), 1, 2, ?, ?, ?)",(error,code,stacktrace))
+            con.commit()
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes
         if len(arr)==0:
+            cur.execute("insert into querylog values(null, datetime('now'), 1, 1, ?, ?, ?)",(error,code,stacktrace))
+            con.commit()
             return 'NO_RESULT'
         best = self.find_best_exception_match(code,stacktrace,arr)
+        best_ids = [int(r['id'][0]) for r in best]
+        cur.execute("insert into querylog values (null, datetime('now'), 1, 0, ?, ?, ?)",(error,code,stacktrace))
+        res = con.execute("select last_insert_rowid() from querylog")
+        last_query_log_id = [r for r in res][0][0]
+        for id in best_ids:
+            cur.execute("insert into fixidlog values (null, ?, ?)",(last_query_log_id,id))
+        con.commit()
         return best
 
     #dump the entire database out
