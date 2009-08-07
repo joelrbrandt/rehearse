@@ -20,6 +20,9 @@ if form.has_key('type'):
 else:
 	table = "<p>View a diff by setting \"type\" and \"id\" in the url.</p><p>type=0: compiler errors<br>type=1: runtime exceptions</p><pre>html://rehearse.stanford.edu/helpmeout-www/detail.psp?type=0&id=1</pre>"
 
+#get comments
+res = con.execute("select comment from comments where type = ? and fix_id = ?",(form['type'],form['id']))
+comments = [r for r in res]
 %>
 <html>
 <head>
@@ -27,7 +30,7 @@ else:
           content="text/html; charset=ISO-8859-1" />
 
     <style type="text/css">
-
+		h1 {font-family:Arial}
         table.diff {font-family:Courier; border:medium;}
         .diff_header {background-color:#e0e0e0}
         td.diff_header {text-align:right}
@@ -39,8 +42,12 @@ else:
 <title>HelpMeOut Detail Page</title>
 </head>
 <body bgcolor="#ffffff">
-<h1>Detail page</h1>
+<h1>HelpMeOut Fix Detail Page</h1>
 <%= table %>
+<hr>
+Comments:
+<%= comments %>
+<hr>
 <table class="diff" summary="Legends">
         <tr> <th colspan="2"> Legends </th> </tr>
         <tr> <td> <table border="" summary="Colors">
