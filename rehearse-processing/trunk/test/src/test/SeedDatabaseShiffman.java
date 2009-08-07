@@ -27,7 +27,7 @@ public class SeedDatabaseShiffman extends UISpecTestCase {
 		window = getMainWindow();
 	}
 
-	public void testAddSyntaxFixes() throws IOException, TokenStreamException {
+	private void testAddSyntaxFixes() throws IOException, TokenStreamException {
 		assertTrue(window != null);
 		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
