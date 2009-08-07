@@ -1,11 +1,11 @@
 Alias /helpmeout/ /project/helpmeout-server/
 Alias /helpmeout /project/helpmeout-server/
-PythonInterpPerDirectory On
 
-<Location /helpmeout/www>
+
+<Location /helpmeout-www>
 	SetHandler mod_python
 	PythonHandler helpmeout
-	PythonPath "['/project/helpmeout-server/www'] + sys.path"
+	PythonPath "['/project/helpmeout-www'] + sys.path"
 	PythonAutoReload On
 	PythonDebug On
 </Location>
