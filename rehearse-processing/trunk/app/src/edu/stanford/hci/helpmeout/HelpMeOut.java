@@ -45,7 +45,7 @@ public class HelpMeOut {
   // make it a Singleton
   private static HelpMeOut instance = new HelpMeOut();
   private HelpMeOutServerProxy serverProxy = HelpMeOutServerProxy.getInstance();
-  
+
   private HelpMeOut(){}
   public static HelpMeOut getInstance() {
     return instance;
@@ -97,7 +97,7 @@ public class HelpMeOut {
    */
   private void store(String error, String s0, String s1) {
     if((error!=null)&&(s0!=null)&&(s1!=null)) {
-     
+
       try {
         serverProxy.store2(error, s0, s1);
       }catch (Exception e) {
@@ -186,7 +186,7 @@ public class HelpMeOut {
 
   }
 
- 
+
   /**
    * Query the remote HelpMeOut database for relevant example fixes.
    * Via JSON-RPC
@@ -203,7 +203,7 @@ public class HelpMeOut {
     lastQuerySketchCode = sketchCode;
     try {
       //query database - this call may time out or throw other exceptions
-      
+
       ArrayList<HashMap<String,ArrayList<String>>> result = serverProxy.query(error, code);
       if(result!=null) {
         HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS, error);
@@ -291,7 +291,7 @@ public class HelpMeOut {
 
       try {
         //smarter token-based patch
-     
+
         String patchedText = tokenBasedAutoPatch(originalCode,f.fixedCode);
         boolean patchSuccess = (patchedText!=null);
 
@@ -308,7 +308,7 @@ public class HelpMeOut {
         for(boolean b : patchFlags) {
           if(b) {patchSuccess = true; break;}
         }
-        */
+         */
         //if we didn't, give up and let user merge manually
         if(!patchSuccess) throw new Exception("could not apply any patches");
 
@@ -329,16 +329,17 @@ public class HelpMeOut {
     pasteIntoEditor(lineToChange,lastQueryEditor,pasteText);
   }
 
-  
-  
-  private String tokenBasedAutoPatch(String line1, String line2) {
+
+
+  public String tokenBasedAutoPatch(String line1, String line2) {
+
     //token comparator tests equality of token types, not content
     Comparator<Token> ct = new Comparator<Token>() {
       public int compare(Token o1, Token o2) {
         return o2.getType()-o1.getType();
       }
     };
-    
+
     //tokenize each line
     PdeMatchProcessor proc = new PdeMatchProcessor();
     List<Token> tokens1,tokens2;
@@ -346,20 +347,22 @@ public class HelpMeOut {
       tokens1 = proc.getUnfilteredTokenArray(line1);
       tokens2 = proc.getUnfilteredTokenArray(line2);
     } catch (TokenStreamException e) {
-      
+
       e.printStackTrace();
       return null;
     } 
-    
+
     // do a diff on the token level
     Diff<Token> diff = new Diff<Token>(tokens1, tokens2,ct);
     List<Difference> differences = diff.diff();
-    
+    for(Difference d:differences) {
+      System.out.println(d);
+    }
     // now transform tokens1 into tokens2 by stepping through diffs
     List<Token> tokensOut = new ArrayList<Token>();
     int diffIndex =0;
     for(int i=0; i<tokens1.size(); i++) {
-  
+
       Difference d = differences.get(diffIndex);
       //copy everything that's unchanged until next difference
       if(i<d.getDeletedStart()) {
@@ -368,16 +371,20 @@ public class HelpMeOut {
         //now were at the difference
         //handle deletion - skip forward in ptr
         if(d.getDeletedEnd()!=Difference.NONE) {
-          i+=d.getDeletedEnd()-d.getDeletedStart();
-        }
+          i=d.getDeletedEnd();
+        } 
         //handle addition - insert into output
         if(d.getAddedEnd()!=Difference.NONE) {
           tokensOut.addAll(tokens2.subList(d.getAddedStart(), d.getAddedEnd()+1));
+          if(d.getDeletedEnd()==Difference.NONE) {
+            tokensOut.add(tokens1.get(i));
+          }
         }
+
         diffIndex++;
         if(diffIndex>=differences.size()) {
           //copy remaining
-          tokensOut.addAll(tokens1.subList(i, tokens1.size()-1));
+          tokensOut.addAll(tokens1.subList(i+1, tokens1.size())); //subList 1st arg is inclusive, 2nd arg is exclusive
           break;
         }
       }
@@ -389,34 +396,34 @@ public class HelpMeOut {
     }
     return result;
   }
-  
-  
+
+
   /** Search for the best line of code based on a fuzzy string matching algorithm trades of closeness of match and distance 
    * from a suggested location
-    * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
+   * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
    * @return the line we have chosen as the most likely line needing to be fixed
    */
-//  private int searchFileForBestLine(String fix) {
-//    diff_match_patch dmp = new diff_match_patch();
-//    dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-//    try {
-//      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
-//      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
-//      if (offset == -1) {
-//        return 0;
-//
-//      } else {
-//        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
-//        return line;
-//      }
-//    } catch (Exception e) {
-//      //for some reqson we failed in diff_match_patch
-//      return 0;
-//    }
-//    
-//    
-//  }
-  
+  //  private int searchFileForBestLine(String fix) {
+  //    diff_match_patch dmp = new diff_match_patch();
+  //    dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
+  //    try {
+  //      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
+  //      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
+  //      if (offset == -1) {
+  //        return 0;
+  //
+  //      } else {
+  //        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
+  //        return line;
+  //      }
+  //    } catch (Exception e) {
+  //      //for some reqson we failed in diff_match_patch
+  //      return 0;
+  //    }
+  //    
+  //    
+  //  }
+
   /**
    * Search for the best line of code based on a fuzzy string matching algorithm OVER TOKENIZED CODE
    * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
@@ -430,9 +437,9 @@ public class HelpMeOut {
       fix = proc.process(fix);
       diff_match_patch dmp = new diff_match_patch();
       dmp.Match_Threshold = 1.0f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-      
+
       int l = lastQueryLine;
-      
+
       int loc = getLineStartOffet(program,l); //get line start offset of lastQueryLine in processed program textlastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
       int offset = dmp.match_main(program, fix, loc); // This only searches in the currently viewed tab
       if (offset == -1) {
@@ -446,11 +453,11 @@ public class HelpMeOut {
     } catch (TokenStreamException e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.TOKENIZER_ERROR, e.getMessage());
       return 0;
-     
+
     } catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.DIFF_MATCH_PATCH_ERROR, e.getMessage());
     }
-    
+
     // ...
     return -1;
   }
@@ -466,7 +473,7 @@ public class HelpMeOut {
     }
     return 0;
   }
-  
+
   /** return character offset of line# lineIndex in String program; zero-based */
   public int getLineStartOffet(String program, int lineIndex) {
     String lines[] = program.split("\n");
@@ -476,7 +483,7 @@ public class HelpMeOut {
     }
     return chars;
   }
-  
+
   /** Search one line above and one line below the error line to see if the fix
    *  is not the error line itself, but one above or below.  This manifests itself
    *  in missing semicolon errors, for example.
@@ -654,7 +661,7 @@ public class HelpMeOut {
         tool.setLabelText("HelpMeOut is disabled.\nEnable HelpMeOut in Tools > HelpMeOutPreferences.");
       }
     }
-    
+
     HelpMeOutServerProxy.getInstance().setUsage(usage);
   }
 }
