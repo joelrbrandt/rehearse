@@ -4,6 +4,12 @@ from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
 con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+stored = False
+if form.has_key('comment') and form.has_key('type') and form.has_key('id'):
+	cur = con.cursor()
+	cur.execute("insert into comments values (null,datetime('now'),?,?,?)",(form['type'],form['id'],form['comment']))
+	con.commit();
+	stored = True
 %>
 
 <html>
@@ -21,9 +27,19 @@ con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
 
 <body bgcolor="#ffffff">
 	<h1>HelpMeOut Add Comment</h1>
-	Received the following comment:
+<% 
+if stored:%>
+	<p>We received and stored the following comment:
 	Id: <%= form['id']%><br>
 	Type: <%= form['type']%><br>
 	Comment: <%= form['comment']%><br>
-	Thanks!<br>
+	Thanks for your contribution!</p>
+	<p><a href="detail.psp?type=<%=form['type']%>&id=<%=form['id']%>">Detail page for this fix</a>&nbsp;|&nbsp;<a href="list.psp">List of fixes that need comments</a></p>
+<%
+else:
+%>
+	<p>We did not receive a comment submission and did not store anything.<br>
+	<a href="list.psp">List of fixes that need comments</a></p> 
+<%
+#%>
 </body>
