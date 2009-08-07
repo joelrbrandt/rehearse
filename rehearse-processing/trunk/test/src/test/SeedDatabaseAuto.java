@@ -25,7 +25,7 @@ import edu.stanford.hci.helpmeout.HelpMeOutPreferences.Usage;
 import edu.stanford.hci.processing.RehearseBase;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
-public class SeedDatabase extends UISpecTestCase {
+public class SeedDatabaseAuto extends UISpecTestCase {
 
 	private Window window;
 
@@ -38,7 +38,7 @@ public class SeedDatabase extends UISpecTestCase {
 		assertTrue(window != null);
 		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
-		HelpMeOut.getInstance().setUsage(Usage.DISABLED);
+		HelpMeOut.getInstance().setUsage(Usage.QUERY_AND_SUBMIT);//change for a dryrun
 
 
 		seedDataBaseWithSyntaxFixes(editor);
@@ -47,16 +47,16 @@ public class SeedDatabase extends UISpecTestCase {
 	private  void seedDataBaseWithSyntaxFixes(RehearseEditor editor) throws IOException, TokenStreamException {
 		List<String> errors = new ArrayList<String>();
 		List<String> pdeFiles = getPdeList();
-
-		for(String fileToOpen:pdeFiles.subList(0, 10)) {
+		int errorsPerFile = 10;
+		for(String fileToOpen:pdeFiles) { //pdeFiles.subList(0,max)
 
 			//String fileToOpen = pdeFiles.get((int)(Math.random()*pdeFiles.size()));
 			String content = loadFile(fileToOpen);
 			
 			//create n errors per file
-			for(int i=0; i<10; i++) {
+			for(int i=0; i<errorsPerFile; i++) {
 				//load the file and tokenize it
-				String messedUp = deleteOneToken(content);
+				String messedUp = modifyOneToken(content);//deleteOneToken(content);//modifyOneToken(content);//deleteOneToken(content);
 
 				JEditTextArea textarea = editor.getTextArea();
 				textarea.setText(messedUp);
@@ -69,7 +69,7 @@ public class SeedDatabase extends UISpecTestCase {
 					//if we have an error, then re-run so we save it correctly
 					
 					//and submit the fixed version
-					//HelpMeOut.getInstance().processNoError(content);
+					HelpMeOut.getInstance().processNoError(content);
 				}
 			}
 		}
@@ -98,6 +98,32 @@ public class SeedDatabase extends UISpecTestCase {
 		//}
 	}
 
+	private String modifyOneToken(String content)  throws TokenStreamException {
+		PdeMatchProcessor proc = new PdeMatchProcessor();
+		List<Token> tokens = proc.getUnfilteredTokenArray(content);
+		
+		//find a random non-ws, non-comment token
+		int ttype1 = PdeTokenTypes.WS;
+		int index1=0;
+		while ((ttype1 == PdeTokenTypes.WS) || (ttype1 == PdeTokenTypes.SL_COMMENT) || (ttype1 == PdeTokenTypes.ML_COMMENT)) {
+			index1 = (int)(Math.random()*(tokens.size()-1));
+			ttype1 = tokens.get(index1).getType();
+		}
+		//find a random non-ws, non-comment token
+		int ttype2 = PdeTokenTypes.WS;
+		int index2=0;
+		while ((index2==index1) || (ttype2 == PdeTokenTypes.WS) || (ttype2 == PdeTokenTypes.SL_COMMENT) || (ttype2 == PdeTokenTypes.ML_COMMENT)) {
+			index2 = (int)(Math.random()*(tokens.size()-1));
+			ttype2 = tokens.get(index2).getType();
+		}
+		
+		tokens.get(index1).setText(tokens.get(index2).getText());
+		String messedUp = proc.tokenArrayToString(tokens);
+		return messedUp;
+	}
+	
+	
+
 	private String deleteOneToken(String content) throws TokenStreamException {
 		PdeMatchProcessor proc = new PdeMatchProcessor();
 		List<Token> tokens = proc.getUnfilteredTokenArray(content);
@@ -106,7 +132,7 @@ public class SeedDatabase extends UISpecTestCase {
 		int ttype = PdeTokenTypes.WS;
 		int randomIndex=0;
 		while ((ttype == PdeTokenTypes.WS) || (ttype == PdeTokenTypes.SL_COMMENT) || (ttype == PdeTokenTypes.ML_COMMENT)) {
-			randomIndex = (int)(Math.random()*tokens.size()-1);
+			randomIndex = (int)(Math.random()*(tokens.size()-1));
 			ttype = tokens.get(randomIndex).getType();
 		}
 
@@ -118,7 +144,8 @@ public class SeedDatabase extends UISpecTestCase {
 		String messedUp = proc.tokenArrayToString(tokens);
 		return messedUp;
 	}
-
+	
+	
 	private static String loadFile(String fileToOpen) throws IOException {
 
 		BufferedReader in = new BufferedReader(new FileReader(fileToOpen));
