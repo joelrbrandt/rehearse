@@ -144,7 +144,7 @@ public class HelpMeOutExceptionTracker {
         }
       }
     } catch (Exception e) {
-      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL);
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL,error);
       e.printStackTrace();
       if(tool!=null) {
 
@@ -156,7 +156,7 @@ public class HelpMeOutExceptionTracker {
 
   /** mark the previously recorded runtime exception as resolved */
   public void resolveRuntimeException() {
-    HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED);
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED,eInfo.getExceptionClass());
     try {
 
       String result = serverProxy.storeexception(eInfo, source);

@@ -101,7 +101,11 @@ public class HelpMeOutServerProxy {
   protected String cleanRuntimeError(String error) {
     String cleaned_error=null;
     //TODO: what is the right behavior for Syntax error, insert "AssignmentOperator Expression" to complete Expression ?
-    if(error.contains("\u201c") || error.contains("\"") || error.contains("\u201d")) {
+    if(error.startsWith("java.lang.ArrayIndexOutOfBoundsException:")) {
+      cleaned_error = "java.lang.ArrayIndexOutOfBoundsException: %";
+      
+    }
+    else if(error.contains("\u201c") || error.contains("\"") || error.contains("\u201d")) {
       cleaned_error = error.replaceAll("[\"\u201c].*?[\"\u201d]", "%");
     }
     if (cleaned_error!=null) {
