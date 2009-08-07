@@ -1,0 +1,42 @@
+<%
+from cgi import escape
+from urllib import unquote
+from pysqlite2 import dbapi2 as sqlite
+import difflib
+con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+res = con.execute("select compilererrors.id, compilererrors.errmsg,count(*) as count from compilererrors, querylog,fixidlog where compilererrors.id = fixidlog.fix_id and fixidlog.log_id = querylog.id group by compilererrors.id order by count desc")
+#[0] has id, [1] has desc, [2] has count
+rows = [r for r in res]
+%>
+<html>
+<head>
+	<meta http-equiv="Content-Type"
+	content="text/html; charset=ISO-8859-1" />
+
+	<style type="text/css">
+	h1 {font-family:Arial}
+	h2 {font-family:Arial}
+	p  {font-family:Arial}
+	</style>
+	<title>HelpMeOut Fixes That Need Comments</title>
+</head>
+
+<body bgcolor="#ffffff">
+<h1>HelpMeOut Fixes That Need Comments</h1>
+<h2>Compiler Errors</h2>
+<table>
+<tr>
+	<td># of times fix was queried</td>
+	<td>error message</td>
+</tr>
+<%
+for row in rows:
+%>
+	<tr><td><%=row[2]%></td><td><a href="detail.psp?type=0&id=<%=row[0]%>"><%=row[1]%></a></td></tr>
+<%
+#
+%>
+</table>
+<h2>Runtime Errors</h2>
+...
+</body>
