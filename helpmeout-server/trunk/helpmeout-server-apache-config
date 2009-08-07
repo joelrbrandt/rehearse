@@ -1,10 +1,13 @@
 Alias /helpmeout/ /project/helpmeout-server/
 Alias /helpmeout /project/helpmeout-server/
 
+Alias /helpmeout-www/ /project/helpmeout-www/
+Alias /helpmeout-www /project/helpmeout-www/
 
 <Location /helpmeout-www>
-	SetHandler mod_python .psp
+	AddHandler mod_python .psp
 	PythonHandler mod_python.psp
+	PythonPath "['/project/helpmeout-www'] + sys.path"
 	PythonAutoReload On
 	PythonDebug On
 </Location>
