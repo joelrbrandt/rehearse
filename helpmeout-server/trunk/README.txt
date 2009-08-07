@@ -2,8 +2,11 @@ helpmeout-server documentation
 ==============================
 To see apache errors
 sudo tail -f  /var/log/apache2/error.log
-To retload
+To reload
 sudo /etc/init.d/apache2 reload
+
+Apache's configuration files are in /etc/apache2/
+look at sites-available/default (also symlinked as sites-enabled/000-default)
 
 here's quick rundown on files:
 
