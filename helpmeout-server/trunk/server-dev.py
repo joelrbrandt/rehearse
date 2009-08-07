@@ -22,7 +22,7 @@ class HelpMeOutService(object):
         con.execute('create table if not exists compilererrors(id INTEGER PRIMARY KEY,timestamp,errmsg,diff,votes INTEGER DEFAULT 0)')
         con.execute('CREATE TABLE if not exists exceptions(id INTEGER PRIMARY KEY,timestamp VARCHAR,errmsg VARCHAR,line VARCHAR,stacktrace VARCHAR,diff VARCHAR, votes INTEGER DEFAULT 0)')
         con.execute('CREATE TABLE if not exists querylog(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, status INTEGER, error VARCHAR, code VARCHAR, stacktrace VARCHAR)')
-        con.execute('CREATE TABLE if not exists comments(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, fix_id INTEGER)')
+        con.execute('CREATE TABLE if not exists comments(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, fix_id INTEGER, comment VARCHAR)')
         con.execute('CREATE TABLE if not exists fixidlog(id INTEGER PRIMARY KEY, log_id INTEGER, fix_id INTEGER)')
         return con
     
