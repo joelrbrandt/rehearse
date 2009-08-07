@@ -1,6 +1,6 @@
 Alias /helpmeout/ /project/helpmeout-server/
 Alias /helpmeout /project/helpmeout-server/
-PythonInterPerDirectory On
+PythonInterpPerDirectory On
 
 <Location /helpmeout/www>
 	SetHandler mod_python
