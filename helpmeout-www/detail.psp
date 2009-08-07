@@ -31,6 +31,8 @@ comments = [r for r in res]
 
     <style type="text/css">
 		h1 {font-family:Arial}
+		h2 {font-family:Arial}
+		p  {font-family:Arial}
         table.diff {font-family:Courier; border:medium;}
         .diff_header {background-color:#e0e0e0}
         td.diff_header {text-align:right}
@@ -45,8 +47,19 @@ comments = [r for r in res]
 <h1>HelpMeOut Fix Detail Page</h1>
 <%= table %>
 <hr>
-Comments:
-<%= comments %>
+<h3>Comments: </h3>
+<%= 
+str = ""
+for(comment in comments) :
+	str+="<p>%s</p>"%comment
+str %>
+<hr>
+<h3>Add a Comment:</h3>
+<form name="input_form" action="add_comment.psp" method="post">
+<input type="hidden" name="id" value="<%=form['id']%>">
+<input type="hidden" name="type" value="<%=form['type']%>">
+<input type="text" name="comment" size="50"> <input type="submit" value="Submit">
+</form>
 <hr>
 <table class="diff" summary="Legends">
         <tr> <th colspan="2"> Legends </th> </tr>

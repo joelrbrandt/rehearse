@@ -1,0 +1,29 @@
+<%
+from cgi import escape
+from urllib import unquote
+from pysqlite2 import dbapi2 as sqlite
+import difflib
+con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+%>
+
+<html>
+<head>
+	<meta http-equiv="Content-Type"
+	content="text/html; charset=ISO-8859-1" />
+
+	<style type="text/css">
+	h1 {font-family:Arial}
+	h2 {font-family:Arial}
+	p  {font-family:Arial}
+	</style>
+	<title>HelpMeOut Detail Page</title>
+</head>
+
+<body bgcolor="#ffffff">
+	<h1>HelpMeOut Add Comment</h1>
+	Received the following comment:
+	Id: <%= form['id']%><br>
+	Type: <%= form['type']%><br>
+	Comment: <%= form['comment']%><br>
+	Thanks!<br>
+</body>
