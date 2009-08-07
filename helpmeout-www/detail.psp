@@ -48,11 +48,12 @@ comments = [r for r in res]
 <%= table %>
 <hr>
 <h3>Comments: </h3>
-<%= 
+<% 
 str = ""
-for(comment in comments) :
-	str+="<p>%s</p>"%comment
-str %>
+for comment in commentsq :
+  str+="<p>%s</p>"%comment
+%>
+<%= str %>
 <hr>
 <h3>Add a Comment:</h3>
 <form name="input_form" action="add_comment.psp" method="post">
