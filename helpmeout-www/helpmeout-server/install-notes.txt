@@ -1,0 +1,49 @@
+Installation notes
+==================
+
+bjoern, 6/29/09
+
+Steps I took to get helpmeout-server to run on rehearse.stanford.edu.
+Mainly installation of additional Python modules, which also had some non-Python dependencies
+
+
+JSONRPC
+-------
+$ svn checkout http://svn.json-rpc.org/trunk/python-jsonrpc
+$ cd python-jsonrpc
+$ sudo python setup.py install
+
+
+PYSQLITE
+--------
+http://initd.org/pub/software/pysqlite/doc/install-source.html
+
+$ sudo apt-get install gcc
+$ sudo apt-get install sqlite3 libsqlite3-dev
+$ sudo apt-get install python2.5-dev
+$ wget http://oss.itsystementwicklung.de/download/pysqlite/2.4/2.4.1/pysqlite-2.4.1.tar.gz
+$ tar -xvf pysqlite-2.4.1.tar.gz 
+$ cd pysqlite-2.4.1/
+$ python setup.py build
+$ sudo python setup.py install
+
+PYGMENTS
+--------
+$ sudo easy_install Pygments
+
+
+---
+
+Other packages I installed for my own benefit:
+
+Mercurial
+---------
+sudo apt-get install mercurial
+
+
+NFS mount rehearse from OS X:
+-----------------------------
+Follow instructions on http://fastessen.blogspot.com/2009/04/nfs-mount-ubuntu-linux-drive-on-mac-os.html
+
+caphill$ mount -t nfs rehearse:/home/bjoern /Volumes/rehearse/bjoern
+caphill$ mount -t nfs rehearse:/project/helpmeout-server /Volumes/rehearse/helpmeout-server

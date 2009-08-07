@@ -1,0 +1,20 @@
+Alias /helpmeout/ /project/helpmeout-server/
+Alias /helpmeout /project/helpmeout-server/
+
+
+<Location /helpmeout-www>
+	SetHandler mod_python
+	PythonHandler helpmeout
+	PythonPath "['/project/helpmeout-www'] + sys.path"
+	PythonAutoReload On
+	PythonDebug On
+</Location>
+
+<Location /helpmeout>
+	AddHandler mod_python .py
+	PythonHandler jsonrpc
+	ModMimeUsePathInfo On
+	PythonPath "['/project/helpmeout-server'] + sys.path"
+	PythonAutoReload On
+	PythonDebug On
+</Location>
