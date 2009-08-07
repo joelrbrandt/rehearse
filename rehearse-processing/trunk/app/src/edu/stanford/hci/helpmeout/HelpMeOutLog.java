@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class HelpMeOutLog {
   
@@ -166,5 +168,17 @@ public class HelpMeOutLog {
   
   public String getErrorLogAsString() {
     return err.toString();
+  }
+  /** return all lines matching a given event type */
+  public List<String> query(String eventType) {
+    List<String> matches = new ArrayList<String>();
+    String[] lines = log.toString().split("\n");
+    for(int i=0; i<lines.length; i++) {
+      String[] fields = lines[i].split("\t");
+      if(eventType.equals(fields[2])) {
+        matches.add(lines[i]);
+      }
+    }
+    return matches;
   }
 }

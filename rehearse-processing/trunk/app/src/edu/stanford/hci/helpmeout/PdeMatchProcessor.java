@@ -80,5 +80,13 @@ public class PdeMatchProcessor {
       return tokens;
     }
   }
+  
+  public String tokenArrayToString(List<Token> tokens) {
+    String program = "";
+    for(Token tok:tokens) {
+      program +=tok.getText();
+    }
+    return program;
+  }
 
 }

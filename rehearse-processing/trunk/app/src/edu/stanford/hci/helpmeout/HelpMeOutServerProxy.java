@@ -76,9 +76,17 @@ public class HelpMeOutServerProxy {
 
     if(error.startsWith("The local variable") && error.endsWith("may not have been initialized")) {
       cleaned_error= error.replaceFirst("The local variable .*? may", "The local variable % may");
-    } else if( error.startsWith("The function ") && error.endsWith(" does not exist.")) {
+    } 
+    else if( error.startsWith("The function ") && error.endsWith(" does not exist.")) {
       cleaned_error = error.replaceFirst("The function .*? does", "The function % does");
-    } else if(error.contains("\u201c") || error.contains("\"") || error.contains("\u201d")) {
+    } 
+    else if (error.startsWith("unexpected token:")) {
+      cleaned_error = "unexpected token: %";
+    } 
+    //else if (error.startsWith("expecting ") && error.contains(", found ")) {
+    //  cleaned_error = "expecting %, found %";
+    //}
+    else if(error.contains("\u201c") || error.contains("\"") || error.contains("\u201d")) {
       cleaned_error = error.replaceAll("[\"\u201c].*?[\"\u201d]", "%");
     }
     if (cleaned_error!=null) {
