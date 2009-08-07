@@ -50,7 +50,8 @@ class HelpMeOutService(object):
              # generate a html diff report
             file1 = difflib.restore(all_lines,1)
             file2 = difflib.restore(all_lines,2)
-            table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
+            # use more context for exceptions
+            table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=1)
 
             # hack: for now make sure everything we return is a list of strings
             ranked_results.append((ratio,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
