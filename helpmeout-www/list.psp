@@ -24,15 +24,16 @@ rows = [r for r in res]
 <body bgcolor="#ffffff">
 <h1>HelpMeOut Fixes That Need Comments</h1>
 <h2>Compiler Errors</h2>
-<table>
+<table border="1">
 <tr>
-	<td># of times fix was queried</td>
-	<td>error message</td>
+	<td bgcolor="#cccccc"><b>times queried</b></td>
+	<td bgcolor="#cccccc"><b>error message</b></td>
 </tr>
 <%
 for row in rows:
 %>
-	<tr><td><%=row[2]%></td><td><a href="detail.psp?type=0&id=<%=row[0]%>"><%=row[1]%></a></td></tr>
+	<tr><td><%=row[2]%></td><td><a 
+href="detail.psp?type=0&id=<%=row[0]%>"><%=row[1].encode('utf-8')%></a></td></tr>
 <%
 #
 %>

@@ -10,6 +10,7 @@ if form.has_key('comment') and form.has_key('type') and form.has_key('id'):
 	cur.execute("insert into comments values (null,datetime('now'),?,?,?)",(form['type'],form['id'],form['comment']))
 	con.commit();
 	stored = True
+#
 %>
 
 <html>
@@ -26,7 +27,7 @@ if form.has_key('comment') and form.has_key('type') and form.has_key('id'):
 </head>
 
 <body bgcolor="#ffffff">
-	<h1>HelpMeOut Add Comment</h1>
+<h1>HelpMeOut Add Comment</h1>
 <% 
 if stored:%>
 	<p>We received and stored the following comment:
@@ -41,5 +42,6 @@ else:
 	<p>We did not receive a comment submission and did not store anything.<br>
 	<a href="list.psp">List of fixes that need comments</a></p> 
 <%
-#%>
+#
+%>
 </body>

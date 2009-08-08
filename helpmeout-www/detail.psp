@@ -1,4 +1,5 @@
 <%
+#can't use id > 9 for some reason
 from cgi import escape
 from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
@@ -7,22 +8,25 @@ con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
 
 if form.has_key('type'):
 	if int(form['type']) == 0:
-	  res = con.execute("select diff from compilererrors where id = ?",(form['id']))
+	  res = con.execute("select diff,errmsg from compilererrors where id = ?",(form['id']))
 	else:
-	  res = con.execute("select diff from exceptions where id = ?", (form['id']))
-	diff = [r for r in res][0][0]
+	  res = con.execute("select diff,errmsg from exceptions where id = ?", (form['id']))
+	row = [r for r in res][0]
+	diff = row[0]
+	errmsg = row[1]
 	all_lines = diff.splitlines(1)
 	htmlDiff = difflib.HtmlDiff()
 	# generate a html diff report
 	file1 = difflib.restore(all_lines,1)
 	file2 = difflib.restore(all_lines,2)
 	table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=False)
+	#get comments
+	res = con.execute("select comment from comments where type = ? and fix_id = ?",(form['type'],form['id']))
+	comments = [r for r in res]
 else:
 	table = "<p>View a diff by setting \"type\" and \"id\" in the url.</p><p>type=0: compiler errors<br>type=1: runtime exceptions</p><pre>html://rehearse.stanford.edu/helpmeout-www/detail.psp?type=0&id=1</pre>"
+	comments = ""
 
-#get comments
-res = con.execute("select comment from comments where type = ? and fix_id = ?",(form['type'],form['id']))
-comments = [r for r in res]
 %>
 <html>
 <head>
@@ -31,7 +35,7 @@ comments = [r for r in res]
 
     <style type="text/css">
 		h1 {font-family:Arial}
-		h2 {font-family:Arial}
+		h3 {font-family:Arial}
 		p  {font-family:Arial}
         table.diff {font-family:Courier; border:medium;}
         .diff_header {background-color:#e0e0e0}
@@ -45,15 +49,20 @@ comments = [r for r in res]
 </head>
 <body bgcolor="#ffffff">
 <h1>HelpMeOut Fix Detail Page</h1>
+<h3>Error Message</h3>
+<p><%= errmsg %></p>
+<hr>
+<h3>Code</h3>
 <%= table %>
 <hr>
 <h3>Comments: </h3>
 <% 
-str = ""
-for comment in commentsq :
-  str+="<p>%s</p>"%comment
+s = ""
+for comment in comments:
+  s+="<p>%s</p>"%comment
+#
 %>
-<%= str %>
+<%= s %>
 <hr>
 <h3>Add a Comment:</h3>
 <form name="input_form" action="add_comment.psp" method="post">
