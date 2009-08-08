@@ -1,5 +1,4 @@
 <%
-#can't use id > 9 for some reason
 from cgi import escape
 from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
@@ -28,27 +27,55 @@ else:
 	comments = ""
 
 %>
-<html>
-<head>
-    <meta http-equiv="Content-Type"
-          content="text/html; charset=UTF-8" />
 
-    <style type="text/css">
-		h1 {font-family:Arial}
-		h3 {font-family:Arial}
-		p  {font-family:Arial}
-        table.diff {font-family:Courier; border:medium;}
-        .diff_header {background-color:#e0e0e0}
-        td.diff_header {text-align:right}
-        .diff_next {background-color:#c0c0c0}
-        .diff_add {background-color:#aaffaa}
-        .diff_chg {background-color:#ffff77}
-        .diff_sub {background-color:#ffaaaa}
-    </style>
-<title>HelpMeOut Detail Page</title>
-</head>
-<body bgcolor="#ffffff">
-<h1>HelpMeOut Fix Detail Page</h1>
+<!-- TEMPLATE HEADER STARTS HERE -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>HelpMeOut</title>
+<style type="text/css">
+<!--
+body {
+	font: 100% Verdana, Arial, Helvetica, sans-serif;
+	background: #E1DED2;
+	margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	padding: 0;
+	text-align: center; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+	color: #000000;
+}
+.oneColElsCtr #container {
+	width: 46em;
+	background: #FFFFFF;
+	margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	border: 1px solid #000000;
+	text-align: left; /* this overrides the text-align: center on the body element. */
+}
+.oneColElsCtr #mainContent {
+	padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+}
+h1 {font-family:Arial}
+h3 {font-family:Arial}
+p  {font-family:Arial}
+table.diff {font-family:Courier; border:medium;}
+.diff_header {background-color:#e0e0e0}
+td.diff_header {text-align:right}
+.diff_next {background-color:#c0c0c0}
+.diff_add {background-color:#aaffaa}
+.diff_chg {background-color:#ffff77}
+.diff_sub {background-color:#ffaaaa}
+-->
+</style></head>
+
+<body class="oneColElsCtr">
+
+<div id="container">
+  <div id="mainContent">
+     
+    <div align="center"><img src="hmo-web-header-600.png" alt="HelpMeOut" width="600" height="115"  vspace="10"/></div>
+<!-- TEMPLATE HEADER ENDS HERE -->
+
+<h1>Details For A Fix</h1>
 <h3>Error Message</h3>
 <p><%= errmsg %></p>
 <hr>
@@ -63,6 +90,11 @@ for comment in comments:
 #
 %>
 <%= s %>
+<%
+#show the add form if we got the right parameter
+if form.has_key('add') and form['add']==1 :
+	
+%>
 <hr>
 <h3>Add a Comment:</h3>
 <form name="input_form" action="add_comment.psp" method="post">
@@ -70,6 +102,9 @@ for comment in comments:
 <input type="hidden" name="type" value="<%=form['type']%>">
 <input type="text" name="comment" size="50"> <input type="submit" value="Submit">
 </form>
+<%
+# end if
+%>
 <hr>
 <table class="diff" summary="Legends">
         <tr> <th colspan="2"> Legends </th> </tr>
@@ -90,6 +125,7 @@ class="diff_add">&nbsp;Added&nbsp;</td></tr>
                   </table></td> </tr>
     </table>
 
+<!-- TEMPLATE FOOTER STARTS HERE-->
 </body>
 </html>
-
+<!-- TEMPLATE FOOTER ENDS HERE-->
