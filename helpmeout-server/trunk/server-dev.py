@@ -24,6 +24,7 @@ class HelpMeOutService(object):
         con.execute('CREATE TABLE if not exists querylog(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, status INTEGER, error VARCHAR, code VARCHAR, stacktrace VARCHAR)')
         con.execute('CREATE TABLE if not exists comments(id INTEGER PRIMARY KEY, timestamp VARCHAR, type INTEGER, fix_id INTEGER, comment VARCHAR)')
         con.execute('CREATE TABLE if not exists fixidlog(id INTEGER PRIMARY KEY, log_id INTEGER, fix_id INTEGER)')
+        con.execute('CREATE TABLE if not exists idelog(id INTEGER PRIMARY KEY, timestamp VARCHAR, log VARCHAR)')
         return con
     
     def find_best_exception_match(self,code,querytrace,arr,num_results=3) :
@@ -130,6 +131,15 @@ class HelpMeOutService(object):
     @ServiceMethod
     def echo(self,msg):
         return msg
+    
+    # store an IDE log into the db
+    @ServiceMethod
+    def storeidelog(self,log):
+        con = self.connect()
+        cur = con.cursor()
+        cur.execute("insert into idelog values (null,datetime('now'),?)",(log,))
+        con.commit()
+        return "Stored log in db"
     
     # store a record into the db
     @ServiceMethod
