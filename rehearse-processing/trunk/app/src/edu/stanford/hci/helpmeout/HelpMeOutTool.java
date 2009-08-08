@@ -171,6 +171,11 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
         HelpMeOut.getInstance().handleVoteDownAction(Integer.parseInt(map.get("id")));
         
       } 
+      else if("detail".matches(map.get("action"))) {
+        //launch web browser
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_MORE_DETAIL, map.get("id"));        
+        HelpMeOut.getInstance().handleShowDetailAction(Integer.parseInt(map.get("id")));
+      }
       else {
         //just print for now
         Set<String> keys = map.keySet();

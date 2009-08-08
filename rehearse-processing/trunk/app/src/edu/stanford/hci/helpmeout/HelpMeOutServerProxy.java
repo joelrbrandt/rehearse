@@ -22,7 +22,7 @@ public class HelpMeOutServerProxy {
    */
   private HelpMeOutPreferences.Usage usage = null;
   
-  private static final long TIMEOUT = 5L;
+  private static final long TIMEOUT = 10L;
   protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
   private ServiceProxy proxy = new ServiceProxy(SERVICE_URL);
 

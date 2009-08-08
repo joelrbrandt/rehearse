@@ -152,9 +152,16 @@ public class HelpMeOut {
         // also remove <a href="">n</a> and <a href="">t</a> links because they are distracting
         suggestions+= ((ArrayList<String>)m.get("table")).get(0).replaceAll("<br />", "").replaceAll(">[nt]</a>", "></a>&nbsp;");
 
-        // add links to vote up/down and to copy a fix 
-        suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
+        // add links to detail page, vote up/down and to copy a fix 
+        suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=detail\">more info</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
 
+        //add the comment, if there is one
+        if(m.containsKey("comment")) {
+          String comment = ((ArrayList<String>)m.get("comment")).get(0);
+          if((comment!=null) && !("".equals(comment.trim()))){
+            suggestions += "<p>"+comment+"<br><br></p>";
+          }
+        }
         // assemble fixed code lines and save to currentFixes
         // so we can copy+paste easily later
         if(m.containsKey("new")) {
@@ -171,6 +178,7 @@ public class HelpMeOut {
 
           currentFixes.put(i, new FixInfo(fixId,brokenLines,fixedLines));
         }
+        
 
       }
 
@@ -663,5 +671,10 @@ public class HelpMeOut {
     }
 
     HelpMeOutServerProxy.getInstance().setUsage(usage);
+  }
+  public void handleShowDetailAction(int index) {
+    int id = currentFixes.get(index).id;
+    int type = errorType.ordinal();
+    BrowserControl.displayURL("http://rehearse.stanford.edu/helpmeout-www/detail.psp?id="+id+"&type="+type);
   }
 }
