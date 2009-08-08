@@ -4,9 +4,19 @@ from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
 con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
-res = con.execute("select compilererrors.id, compilererrors.errmsg,count(*) as count from compilererrors, querylog,fixidlog where compilererrors.id = fixidlog.fix_id and fixidlog.log_id = querylog.id group by compilererrors.id order by count desc")
-#[0] has id, [1] has desc, [2] has count
-rows = [r for r in res]
+
+# execute this if you want to list ALL items, not just the ones without comments 
+# res = con.execute("select compilererrors.id, compilererrors.errmsg,count(*) as count from compilererrors, querylog,fixidlog where compilererrors.id = fixidlog.fix_id and fixidlog.log_id = querylog.id group by compilererrors.id order by count desc")
+
+# execute this to only retrieve items that have not been commented on yet
+compres = con.execute("SELECT compilererrors.id, compilererrors.errmsg, COUNT(*) AS count, comments.id FROM compilererrors JOIN fixidlog ON compilererrors.id = fixidlog.fix_id JOIN querylog ON fixidlog.log_id = querylog.id LEFT JOIN comments ON comments.fix_id = fixidlog.fix_id WHERE querylog.type = 0 AND comments.id IS NULL GROUP BY compilererrors.id ORDER BY count DESC")
+
+exres = con.execute("SELECT exceptions.id, exceptions.errmsg, COUNT(*) AS count, comments.id FROM exceptions JOIN fixidlog ON exceptions.id = fixidlog.fix_id JOIN querylog ON fixidlog.log_id = querylog.id LEFT JOIN comments ON comments.fix_id = fixidlog.fix_id WHERE querylog.type = 1 AND comments.id IS NULL GROUP BY exceptions.id ORDER BY count DESC")
+
+
+#[0] has id, [1] has desc, [2] has count, [3] has null or doesn't exist
+comprows = [r for r in compres]
+exrows = [r for r in exres]
 %>
 <html>
 <head>
@@ -30,14 +40,37 @@ rows = [r for r in res]
 	<td bgcolor="#cccccc"><b>error message</b></td>
 </tr>
 <%
-for row in rows:
+for row in comprows:
 %>
-	<tr><td><%=row[2]%></td><td><a 
-href="detail.psp?type=0&id=<%=row[0]%>"><%=unicode(row[1]).encode('utf-8')%></a></td></tr>
+	<tr>
+	<td><%=row[2]%></td>
+	<td><a href="detail.psp?type=0&id=<%=row[0]%>">
+	<%=unicode(row[1]).encode('utf-8')%></a></td>
+	</tr>
 <%
 #
 %>
 </table>
+
 <h2>Runtime Errors</h2>
-...
+<table border="1">
+<tr>
+        <td bgcolor="#cccccc"><b>times queried</b></td>
+        <td bgcolor="#cccccc"><b>error message</b></td>
+</tr>
+<%
+for row in exrows:
+%>
+        <tr>
+        <td><%=row[2]%></td>
+        <td><a href="detail.psp?type=1&id=<%=row[0]%>">
+        <%=unicode(row[1]).encode('utf-8')%></a></td>
+        </tr>
+
+<%                             
+#
+%>
+</table>
+
+
 </body>
