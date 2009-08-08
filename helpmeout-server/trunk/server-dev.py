@@ -42,6 +42,7 @@ class HelpMeOutService(object):
             old_lines = [l[2:] for l in all_lines if l.startswith('-')]
             new_lines = [l[2:] for l in all_lines if l.startswith('+')]
             votes = einfo[3]
+            comment = einfo[4]
             #clean fix trace
             lines = trace.splitlines(1)
             good_lines = [l for l in lines if (l.strip().startswith("at") and not l.strip().startswith("at bsh."))]
@@ -57,7 +58,7 @@ class HelpMeOutService(object):
             table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=1)
 
             # hack: for now make sure everything we return is a list of strings
-            ranked_results.append((ratio,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
+            ranked_results.append((ratio,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,''],'comment':[comment,'']}))
             
         #sort by decreasing similarity ranking 
         ranked_results.sort(reverse=True)
@@ -79,6 +80,7 @@ class HelpMeOutService(object):
         for diff in diffs:
             fixid = diff[0]
             votes = diff[2]
+            comment = diff[3]
             max_sim = 0.0 #maximum similarity metric found so far
             all_lines = diff[1].splitlines(1)
         
@@ -112,7 +114,7 @@ class HelpMeOutService(object):
             table = htmlDiff.make_table(file1,file2,"Before&nbsp;(Broken)","After&nbsp;(Fixed)",context=True,numlines=0)
             
             # hack: for now make sure everything we return is a list of strings
-            ranked_diffs.append((max_sim,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,'']}))
+            ranked_diffs.append((max_sim,votes,{'id':[str(fixid),''],'old':old_lines,'new':new_lines,'table':[table,''],'comment':[comment,'']}))
             
         #sort by decreasing similarity ranking 
         ranked_diffs.sort(reverse=True)
@@ -175,17 +177,19 @@ class HelpMeOutService(object):
         return "Updated vote"
     
     #query the database
+    #error comes in pre-cleaned in java - this did not work: cleaned_error = re.sub(u'[\u201c].*?[\u201d]','%',error)
     @ServiceMethod
     def query(self,error,code):
         con = self.connect()
         cur = con.cursor()
-        #cleaned_error = re.sub(u'[\u201c].*?[\u201d]','%',error) # get rid of quotes - straight or unicode
-        res = con.execute("select id,diff,votes from compilererrors where errmsg LIKE ?",(error,))
+        # note: assumption is that there is at most one comment for each error.
+        # otherwise we should group_concat(comment) but our sqlite3 version doesn't support it yet
+        res = con.execute("SELECT compilererrors.id,diff,votes,comment FROM compilererrors LEFT JOIN comments ON compilererrors.id=comments.fix_id WHERE (comments.type IS NULL OR comments.type=0) AND errmsg LIKE ?",(error,))
         if res==None:
             cur.execute("insert into querylog values (null, datetime('now'), 0, 2, ?, ?, '')",(error,code))
             con.commit()
             return 'ERROR'
-        arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes
+        arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes, d[3] the comment or None
         if len(arr)==0:
             cur.execute("insert into querylog values (null, datetime('now'), 0, 1, ?, ?, '')",(error,code))
             con.commit()
@@ -207,13 +211,12 @@ class HelpMeOutService(object):
     def queryexception(self,error,code,stacktrace):
         con = self.connect()
         cur = con.cursor()
-        #cleaned_error = re.sub(u'["\u201c].*?["\u201d]','%',error) # get rid of quotes - straight or unicode
-        res = con.execute("select id,stacktrace,diff,votes from exceptions where errmsg LIKE ?",(error,))
+        res = con.execute("SELECT exceptions.id,stacktrace,diff,votes,comment FROM exceptions LEFT JOIN comments on exceptions.id=comments.fix_id WHERE (comments.type IS NULL OR comments.type=1) AND errmsg LIKE ?",(error,))
         if res==None:
             cur.execute("insert into querylog values(null, datetime('now'), 1, 2, ?, ?, ?)",(error,code,stacktrace))
             con.commit()
             return 'ERROR'
-        arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes
+        arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes, d[4] the comment
         if len(arr)==0:
             cur.execute("insert into querylog values(null, datetime('now'), 1, 1, ?, ?, ?)",(error,code,stacktrace))
             con.commit()
