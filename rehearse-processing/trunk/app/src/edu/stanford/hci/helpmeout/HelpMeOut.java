@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import processing.app.Base;
 import processing.app.Editor;
 import processing.app.SketchCode;
 import antlr.Token;
@@ -26,6 +27,7 @@ import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 public class HelpMeOut {
 
+  private static final String HELPMEOUT_WWW_DETAIL_URL = "http://rehearse.stanford.edu/helpmeout-www/detail.psp";
   //private class to store info of queried fixes
   class FixInfo {
 
@@ -282,6 +284,9 @@ public class HelpMeOut {
    * NOTE: all line numbers in this method should be relative to current tab!
    */
   public void handleCopyAction(int i) {
+    
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_COPY_FIX, makeTypeAndIdStringFromIndex(i));
+    
     assert(lastQueryEditor != null);
     String pasteText;
     FixInfo f = currentFixes.get(i);
@@ -577,14 +582,15 @@ public class HelpMeOut {
    * @param i suggestion id extracted from link
    */
   public void handleVoteUpAction(int i) {
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_VOTE_UP, makeTypeAndIdStringFromIndex(i));
     voteAndRequery(currentFixes.get(i).id, 1);
-
   }
   /**
    * Event handler for clicks on the vote down link in the helpmeout ui.
    * @param i suggestion id extracted from link
    */    
   public void handleVoteDownAction(int i) {
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_VOTE_DOWN, makeTypeAndIdStringFromIndex(i));
     voteAndRequery(currentFixes.get(i).id, -1);      
   }
 
@@ -674,7 +680,14 @@ public class HelpMeOut {
   }
   public void handleShowDetailAction(int index) {
     int id = currentFixes.get(index).id;
+    int type = errorType.ordinal(); 
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_MORE_DETAIL,makeTypeAndIdStringFromIndex(index));        
+    Base.openURL(HELPMEOUT_WWW_DETAIL_URL+"?id="+id+"&type="+type);
+    
+  }
+  private String makeTypeAndIdStringFromIndex(int index) {
+    int id = currentFixes.get(index).id;
     int type = errorType.ordinal();
-    BrowserControl.displayURL("http://rehearse.stanford.edu/helpmeout-www/detail.psp?id="+id+"&type="+type);
+    return "TYPE:"+type+";ID:"+id;
   }
 }
