@@ -55,6 +55,7 @@ public class HelpMeOutLog {
   public static final String DIFF_MATCH_PATCH_ERROR = "diff_match_patch() failed.";
   public static final String INFO = "Info"; //generic info message
   public static final String CLICKED_MORE_DETAIL = "Clicked more detail link";
+  public static final String STORE_FAIL_IDELOG = "Storing IDE Log failed.";
   
   public static String CLEANED_QUERY = "Cleaned up query.";
   
@@ -105,13 +106,23 @@ public class HelpMeOutLog {
     writeError(event,"");
   }
   
-  public void saveToFile(String filename) {
+  /** Write the current log to the database using service method storeidelog(log) */
+  public void saveToDatabase() {
+    //write log to database
     try {
-      BufferedWriter out = new BufferedWriter(new FileWriter(filename, true)); // true appends to log file
+     HelpMeOutServerProxy.getInstance().storeidelog(getLogAsString());
+   } catch (Exception e) {
+     System.err.println(STORE_FAIL_IDELOG+" "+e.getMessage());
+   }
+  }
+  /** Write current log to the specified file; either appends or overwrites */
+  public void saveToFile(String filename, boolean append) {
+    try {
+      BufferedWriter out = new BufferedWriter(new FileWriter(filename, append)); // true appends to log file
       out.write(log.toString());
       out.close();
     } catch (IOException e) {
-      System.out.println("Error writing HelpMeOut log file");
+      System.err.println("Error writing HelpMeOut log file");
     }
   }
   

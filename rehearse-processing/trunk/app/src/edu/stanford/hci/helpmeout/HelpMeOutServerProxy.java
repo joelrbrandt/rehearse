@@ -201,5 +201,22 @@ public class HelpMeOutServerProxy {
   public void setUsage(HelpMeOutPreferences.Usage usage) {
     this.usage = usage;
   }
+  
+  /** save our ide log to the database 
+   * @throws TimeoutException 
+   * @throws ExecutionException 
+   * @throws InterruptedException */
+  public void storeidelog(final String log) throws InterruptedException, ExecutionException, TimeoutException {
+    FutureTask<?> theTask = new FutureTask<Object>(
+        new Callable<Object>() {
+          public Object call() throws Exception {
+            proxy.call("storeidelog",log);
+            return null;
+          }
+        });
+    new Thread(theTask).start();
+    theTask.get(TIMEOUT*2,TimeUnit.SECONDS);
+ 
+  }
 
 }

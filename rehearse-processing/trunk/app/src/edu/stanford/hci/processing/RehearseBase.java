@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -12,6 +14,7 @@ import javax.swing.JPopupMenu;
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.helpmeout.HelpMeOutPreferences;
+import edu.stanford.hci.helpmeout.HelpMeOutServerProxy;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 import processing.app.Base;
 import processing.app.Editor;
@@ -69,8 +72,11 @@ public class RehearseBase extends Base {
 	   // This is done first so preferences.txt is written before we write to it.
 	   boolean retval = super.handleQuit();
 	   
+	   //save to database
+	   HelpMeOutLog.getInstance().saveToDatabase();
+	   
 	   // Write to HelpMeOut log
-	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt");
+	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt",true);
 	   
 	   //Write HelpMeOut preferences to preferences.txt
 	   //TODO: Maybe move this into HelpMeOutPreferences.save() ?
