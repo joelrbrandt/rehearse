@@ -155,7 +155,11 @@ public class HelpMeOut {
         suggestions+= ((ArrayList<String>)m.get("table")).get(0).replaceAll("<br />", "").replaceAll(">[nt]</a>", "></a>&nbsp;");
 
         // add links to detail page, vote up/down and to copy a fix 
-        suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=detail\">more info</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | <a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
+        suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=detail\">more info</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=findline\">find line</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
 
         //add the comment, if there is one
         if(m.containsKey("comment")) {
@@ -293,7 +297,9 @@ public class HelpMeOut {
 
     // The line we're fixing may not be the exact line the error was thrown on.
     int lineToChange = searchTokenStreamForBestLine(f.brokenCode);//searchFileForBestLine(f.brokenCode);
-
+    if(lineToChange < 0) {
+      lineToChange=0;
+    }
     // If we've changed which line we're patching, we also need to update
     // which "original" code is displayed to the user.
     String originalCode = lastQueryEditor.getLineText(lineToChange);
@@ -440,7 +446,7 @@ public class HelpMeOut {
   /**
    * Search for the best line of code based on a fuzzy string matching algorithm OVER TOKENIZED CODE
    * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
-   * @return the line we have chosen as the most likely line needing to be fixed
+   * @return the line we have chosen as the most likely line needing to be fixed; or -1 if we couldn't find one.
    */
   private int searchTokenStreamForBestLine(String fix) {
     PdeMatchProcessor proc = new PdeMatchProcessor();
@@ -457,7 +463,7 @@ public class HelpMeOut {
       int offset = dmp.match_main(program, fix, loc); // This only searches in the currently viewed tab
       if (offset == -1) {
         HelpMeOutLog.getInstance().write(HelpMeOutLog.INFO, "match_main() did not return useful offset (-1).");
-        return 0;
+        return -1;
       } else {
         int line = getLineOfOffset(program,offset);//get line of found offset in tokenized pgm
         HelpMeOutLog.getInstance().write(HelpMeOutLog.INFO, "match_main() returned offset "+Integer.toString(offset)+" at line "+Integer.toString(line));
@@ -465,7 +471,7 @@ public class HelpMeOut {
       }
     } catch (TokenStreamException e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.TOKENIZER_ERROR, e.getMessage());
-      return 0;
+      return -1;
 
     } catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.DIFF_MATCH_PATCH_ERROR, e.getMessage());
@@ -689,5 +695,22 @@ public class HelpMeOut {
     int id = currentFixes.get(index).id;
     int type = errorType.ordinal();
     return "TYPE:"+type+";ID:"+id;
+  }
+
+  /** find the best line for a fix and highlight it */
+  public void handleFindLineAction(int i) {
+    HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_FIND_LINE, makeTypeAndIdStringFromIndex(i));
+    
+    assert(lastQueryEditor != null);
+    FixInfo f = currentFixes.get(i);
+    
+    int lineToChange = searchTokenStreamForBestLine(f.brokenCode);//searchFileForBestLine(f.brokenCode);
+    if((lineToChange >=0) && (lineToChange<lastQueryEditor.getLineCount())) {
+      lastQueryEditor.setSelection(
+                                   lastQueryEditor.getLineStartOffset(lineToChange),
+                                   lastQueryEditor.getLineStopOffset(lineToChange));
+    } else {
+      lastQueryEditor.setSelection(0,0);
+    }
   }
 }

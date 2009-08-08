@@ -54,8 +54,9 @@ public class HelpMeOutLog {
   public static final String TOKENIZER_ERROR = "Tokenizing string during match calculation failed.";
   public static final String DIFF_MATCH_PATCH_ERROR = "diff_match_patch() failed.";
   public static final String INFO = "Info"; //generic info message
-  public static final String CLICKED_MORE_DETAIL = "Clicked more detail link";
+  public static final String CLICKED_MORE_DETAIL = "Clicked more detail link.";
   public static final String STORE_FAIL_IDELOG = "Storing IDE Log failed.";
+  public static final String CLICKED_FIND_LINE = "Clicked find line link.";
   
   public static String CLEANED_QUERY = "Cleaned up query.";
   

@@ -167,6 +167,8 @@ public class HelpMeOutTool implements Tool, HyperlinkListener {
       else if("detail".matches(map.get("action"))) {
         //launch web browser
         HelpMeOut.getInstance().handleShowDetailAction(Integer.parseInt(map.get("id")));
+      }else if("findline".matches(map.get("action"))) {
+        HelpMeOut.getInstance().handleFindLineAction(Integer.parseInt(map.get("id")));
       }
       else {
         //just print for now
