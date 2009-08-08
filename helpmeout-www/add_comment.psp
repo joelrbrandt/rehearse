@@ -12,28 +12,21 @@ if form.has_key('comment') and form.has_key('type') and form.has_key('id'):
 	stored = True
 #
 %>
-
-<html>
-<head>
-	<meta http-equiv="Content-Type"
-	content="text/html; charset=ISO-8859-1" />
-
+<%@ include file="header.html"%>
 	<style type="text/css">
 	h1 {font-family:Arial}
 	h2 {font-family:Arial}
 	p  {font-family:Arial}
 	</style>
-	<title>HelpMeOut Detail Page</title>
-</head>
-
-<body bgcolor="#ffffff">
 <h1>HelpMeOut Add Comment</h1>
 <% 
-if stored:%>
-	<p>We received and stored the following comment:
-	Id: <%= form['id']%><br>
-	Type: <%= form['type']%><br>
-	Comment: <%= form['comment']%><br>
+if stored:
+  #
+%>
+	We received and stored the following comment:<br>
+	<b>Id:</b> <%= form['id']%><br>
+	<b>Type:</b> <%= form['type']%><br>
+	<b>Comment:</b> <%= form['comment']%><br>
 	Thanks for your contribution!</p>
 	<p><a href="detail.psp?type=<%=form['type']%>&id=<%=form['id']%>">Detail page for this fix</a>&nbsp;|&nbsp;<a href="list.psp">List of fixes that need comments</a></p>
 <%
@@ -44,4 +37,4 @@ else:
 <%
 #
 %>
-</body>
+<%@ include file="footer.html"%>

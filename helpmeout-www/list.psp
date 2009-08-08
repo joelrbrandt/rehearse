@@ -18,20 +18,12 @@ exres = con.execute("SELECT exceptions.id, exceptions.errmsg, COUNT(*) AS count,
 comprows = [r for r in compres]
 exrows = [r for r in exres]
 %>
-<html>
-<head>
-	<meta http-equiv="Content-Type"
-	content="text/html; charset=UTF-8" />
-
+<%@ include file="header.html"%>
 	<style type="text/css">
 	h1 {font-family:Arial}
 	h2 {font-family:Arial}
 	p  {font-family:Arial}
 	</style>
-	<title>HelpMeOut Fixes That Need Comments</title>
-</head>
-
-<body bgcolor="#ffffff">
 <h1>HelpMeOut Fixes That Need Comments</h1>
 <h2>Compiler Errors</h2>
 <table border="1">
@@ -44,7 +36,7 @@ for row in comprows:
 %>
 	<tr>
 	<td><%=row[2]%></td>
-	<td><a href="detail.psp?type=0&id=<%=row[0]%>">
+	<td><a href="detail.psp?type=0&id=<%=row[0]%>&add=1">
 	<%=unicode(row[1]).encode('utf-8')%></a></td>
 	</tr>
 <%
@@ -63,7 +55,7 @@ for row in exrows:
 %>
         <tr>
         <td><%=row[2]%></td>
-        <td><a href="detail.psp?type=1&id=<%=row[0]%>">
+        <td><a href="detail.psp?type=1&id=<%=row[0]%>&add=1">
         <%=unicode(row[1]).encode('utf-8')%></a></td>
         </tr>
 
@@ -71,6 +63,4 @@ for row in exrows:
 #
 %>
 </table>
-
-
-</body>
+<%@ include file="footer.html"%>
