@@ -11,7 +11,7 @@ rows = [r for r in res]
 <html>
 <head>
 	<meta http-equiv="Content-Type"
-	content="text/html; charset=ISO-8859-1" />
+	content="text/html; charset=UTF-8" />
 
 	<style type="text/css">
 	h1 {font-family:Arial}
@@ -33,7 +33,7 @@ rows = [r for r in res]
 for row in rows:
 %>
 	<tr><td><%=row[2]%></td><td><a 
-href="detail.psp?type=0&id=<%=row[0]%>"><%=row[1].encode('utf-8')%></a></td></tr>
+href="detail.psp?type=0&id=<%=row[0]%>"><%=unicode(row[1]).encode('utf-8')%></a></td></tr>
 <%
 #
 %>

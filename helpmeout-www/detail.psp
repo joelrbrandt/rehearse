@@ -5,15 +5,15 @@ from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
 con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
-
+x = form['id']
 if form.has_key('type'):
 	if int(form['type']) == 0:
-	  res = con.execute("select diff,errmsg from compilererrors where id = ?",(form['id']))
+	  res = con.execute("select diff,errmsg from compilererrors where id = ?",(form['id'],))
 	else:
-	  res = con.execute("select diff,errmsg from exceptions where id = ?", (form['id']))
+	  res = con.execute("select diff,errmsg from exceptions where id = ?", (form['id'],))
 	row = [r for r in res][0]
 	diff = row[0]
-	errmsg = row[1]
+	errmsg = unicode(row[1]).encode('utf8','replace')
 	all_lines = diff.splitlines(1)
 	htmlDiff = difflib.HtmlDiff()
 	# generate a html diff report
@@ -31,7 +31,7 @@ else:
 <html>
 <head>
     <meta http-equiv="Content-Type"
-          content="text/html; charset=ISO-8859-1" />
+          content="text/html; charset=UTF-8" />
 
     <style type="text/css">
 		h1 {font-family:Arial}
