@@ -11,7 +11,7 @@ from jsonrpc import handleCGI, ServiceMethod
 from pysqlite2 import dbapi2 as sqlite
 import difflib
 from pygments import highlight
-from pygments.lexers import JavaLexer
+from pygments.lexers import CppLexer
 from tokenlineformatter import TokenLineFormatter
 import re
 
