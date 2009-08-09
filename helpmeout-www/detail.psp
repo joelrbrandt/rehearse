@@ -3,7 +3,13 @@ from cgi import escape
 from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
-con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+if form.has_key('db') and form['db']=='arduino':
+  	con = sqlite.connect("/project/helpmeout-server/db/helpmeout-arduino.sqlite")
+	db = 'arduino'
+else:
+	con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+	db='processing'
+
 x = form['id']
 if form.has_key('type'):
 	if int(form['type']) == 0:
@@ -72,6 +78,7 @@ if form.has_key('add') and int(form['add'])==1 and len(comments)==0:
 <input type="hidden" name="id" value="<%=form['id']%>">
 <input type="hidden" name="type" value="<%=form['type']%>">
 <input type="text" name="comment" size="50"> <input type="submit" value="Submit">
+<input type="hidden" name="db" value="<%=db%>">
 </form>
 <%
 # end if

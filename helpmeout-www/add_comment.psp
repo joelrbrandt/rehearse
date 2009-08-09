@@ -3,7 +3,13 @@ from cgi import escape
 from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
-con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+if form.has_key('db') and form['db']=='arduino':
+	con = sqlite.connect("/project/helpmeout-server/db/helpmeout-arduino.sqlite")
+	db='arduino'
+else:
+	con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+	db='processing'
+
 stored = False
 if form.has_key('comment') and form.has_key('type') and form.has_key('id'):
 	cur = con.cursor()
@@ -24,11 +30,15 @@ if stored:
   #
 %>
 	We received and stored the following comment:<br>
+	<b>Database:</b> <%= db %><br>
 	<b>Id:</b> <%= form['id']%><br>
 	<b>Type:</b> <%= form['type']%><br>
 	<b>Comment:</b> <%= form['comment']%><br>
 	Thanks for your contribution!</p>
-	<p><a href="detail.psp?type=<%=form['type']%>&id=<%=form['id']%>">Detail page for this fix</a>&nbsp;|&nbsp;<a href="list.psp">List of fixes that need comments</a></p>
+	<p><a 
+href="detail.psp?type=<%=form['type']%>&id=<%=form['id']%>&db=<%=db%>">Detail 
+page for this fix</a>&nbsp;|&nbsp;<a href="list.psp?db=<%=db%>">List of 
+fixes that need comments</a></p>
 <%
 else:
 %>

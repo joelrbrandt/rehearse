@@ -3,7 +3,12 @@ from cgi import escape
 from urllib import unquote
 from pysqlite2 import dbapi2 as sqlite
 import difflib
-con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+if form.has_key('db') and form['db']=='arduino':
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout-arduino.sqlite")
+  db='arduino'
+else:
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+  db='processing'
 
 if form.has_key('all') and int(form['all'])==1:
   # execute this to only retrieve items that have not been commented on yet
@@ -40,7 +45,8 @@ for row in comprows:
 %>
 	<tr>
 	<td><%=row[2]%></td>
-	<td><a href="detail.psp?type=0&id=<%=row[0]%>&add=1">
+	<td><a 
+href="detail.psp?type=0&id=<%=row[0]%>&add=1&db=<%=db%>">
 	<%=unicode(row[1]).encode('utf-8')%></a></td>
 	</tr>
 <%
