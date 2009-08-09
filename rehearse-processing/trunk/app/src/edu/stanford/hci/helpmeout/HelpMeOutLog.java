@@ -26,15 +26,15 @@ public class HelpMeOutLog {
   public static final String STARTED_COMPILED_RUN = "Compiled run started.";
   public static final String STARTED_INTERACTIVE_RUN = "Interactive run started.";
   public static final String COMPILE_BROKEN = "Compilation broken.";
-  public static final String COMPILE_FIXED = "Compilation fixed: saving fix to database.";
-  public static final String COMPILE_FIXED_ALREADY = "Compilation fixed: nothing to do.";
+  public static final String COMPILE_FIXED = "Compilation succeeded: saving fix to database.";
+  public static final String COMPILE_FIXED_ALREADY = "Compilation succeeded.";
   public static final String EXCEPTION_OCCURRED = "Runtime exception in user code.";
   public static final String EXCEPTION_FIXED = "Runtime exception fixed: saving fix to database.";
   public static final String QUERY_SUCCESS = "Query for Compile error succeeded.";
   public static final String QUERY_FAIL = "Query for Compile error failed.";
-  public static final String STORE_FAIL_COMPILE = "Couldn't store compilation error";
-  public static final String STORE_FAIL_EXCEPTION = "Couldn't store runtime exception";
-  public static final String STORE_FAIL_NULL= "Store called with at least one null argument";
+  public static final String STORE_FAIL_COMPILE = "Couldn't store compilation error.";
+  public static final String STORE_FAIL_EXCEPTION = "Couldn't store runtime exception.";
+  public static final String STORE_FAIL_NULL= "Store called with at least one null argument.";
   public static final String CLICKED_COPY_FIX = "Clicked on copy link.";
   public static final String CLICKED_VOTE_UP = "Clicked on vote up link.";
   public static final String CLICKED_VOTE_DOWN = "Clicked on vote down link.";
@@ -46,19 +46,20 @@ public class HelpMeOutLog {
   public static final String NEW_SESSION = "--- NEW SESSION ---";
   public static final String QUERY_EMPTY = "Query returned no results.";
    
-  public static final String TYPE_LOG = "LOG";
-  public static final String TYPE_ERR = "ERR";
   public static final String QUERYEXCEPTION_FAIL = "Query for Exception failed.";
   public static final String QUERYEXCEPTION_SUCCESS = "Query for Exception succeeded.";
   public static final String QUERYEXCEPTION_EMPTY = "Query for Exception returned no results.";
   public static final String TOKENIZER_ERROR = "Tokenizing string during match calculation failed.";
   public static final String DIFF_MATCH_PATCH_ERROR = "diff_match_patch() failed.";
-  public static final String INFO = "Info"; //generic info message
   public static final String CLICKED_MORE_DETAIL = "Clicked more detail link.";
   public static final String STORE_FAIL_IDELOG = "Storing IDE Log failed.";
   public static final String CLICKED_FIND_LINE = "Clicked find line link.";
-  
-  public static String CLEANED_QUERY = "Cleaned up query.";
+  public static final String INFO = "Info"; //generic info message
+  public static final String CLEANED_QUERY = "Cleaned up query.";
+
+  public static final String TYPE_LOG = "LOG";
+  public static final String TYPE_ERR = "ERR";
+
   
   SimpleDateFormat dateFormat =
     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
@@ -86,7 +87,7 @@ public class HelpMeOutLog {
     out.append(text);
     log.append(text);
     if (writeToStdOut) {
-      System.out.println(text);
+      System.out.print(text);
     }
   }
   
@@ -100,7 +101,7 @@ public class HelpMeOutLog {
     err.append(text);
     log.append(text);
     if (writeToStdOut) {
-      System.err.println(text);
+      System.err.print(text);
     }
   }
   public void writeError(String event) {

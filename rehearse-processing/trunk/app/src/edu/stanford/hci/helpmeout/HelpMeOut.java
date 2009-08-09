@@ -15,7 +15,6 @@ import antlr.TokenStreamException;
 import bsh.EvalError;
 import bsh.Interpreter;
 import edu.stanford.hci.helpmeout.HelpMeOutPreferences.Usage;
-import edu.stanford.hci.helpmeout.diff_match_patch.Patch;
 
 /**
  * HelpMeOut
@@ -117,7 +116,7 @@ public class HelpMeOut {
     this.errorType = errorType;
 
     if(tool!=null) {
-      tool.setLabelText("Querying...");
+      tool.setLabelText("Searching for suggestions in the HelpMeOut database...");
     }
 
     currentFixes.clear();
@@ -135,6 +134,7 @@ public class HelpMeOut {
     "    .diff_chg {background-color:#ffff77}"+
     "    .diff_sub {background-color:#ffaaaa}"+
     "    div {font-family:Arial,Helvetica; font-size:9px;}"+
+    "    a  {color:#8D2A2B; font-weight:bold;}"+
     "</style>"+
     "</head><body>";
 
@@ -156,10 +156,10 @@ public class HelpMeOut {
 
         // add links to detail page, vote up/down and to copy a fix 
         suggestions += "<div><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=detail\">more info</a> | "+
-        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">thumbs up</a> | "+
-        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">thumbs down</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=up\">vote up</a> | "+
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=down\">vote down</a> | "+
         "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=findline\">find line</a> | "+
-        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy this fix</a></div>";
+        "<a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?id="+Integer.toString(i)+"&action=copy\">copy fix</a></div>";
 
         //add the comment, if there is one
         if(m.containsKey("comment")) {
@@ -195,7 +195,7 @@ public class HelpMeOut {
 
     //now show the suggestion in the HelpMeOut window
     if(tool!=null) {
-      tool.setLabelText(suggestions);
+      tool.setHtml(suggestions);
     }
 
   }
@@ -220,7 +220,8 @@ public class HelpMeOut {
 
       ArrayList<HashMap<String,ArrayList<String>>> result = serverProxy.query(error, code);
       if(result!=null) {
-        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS, error);
+        
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS, makeIdListFromQueryResult(result));
         showQueryResult(result, error, ErrorType.COMPILE);
       } else {
         if(tool!=null) {
@@ -240,9 +241,23 @@ public class HelpMeOut {
     }
   }
 
+  protected String makeIdListFromQueryResult(ArrayList<HashMap<String, ArrayList<String>>> result) {
+    String ids ="IDs:";
+    try{
+      for(HashMap<String,ArrayList<String>> m:result) {
+        if(m.containsKey("id")) {
+          ids+=((ArrayList<String>)m.get("id")).get(0)+",";
+        }
+      }
+    }catch (Exception e) {
+
+    }
+    return ids;
+  }
+  
   public void processNoError(String code) {
     if(tool!=null) {
-      tool.setLabelText("Code compiled successfully. No need to help you out (yet).");
+      tool.setLabelText("Your code compiled successfully. There's no need to help you out.");
     }
     switch(codeState) {
     case BROKEN:
@@ -309,31 +324,17 @@ public class HelpMeOut {
     if (linesInFix <= 1) {
 
       try {
-        //smarter token-based patch
+        //first, try to apply smart, token-based patch
 
         String patchedText = tokenBasedAutoPatch(originalCode,f.fixedCode);
         boolean patchSuccess = (patchedText!=null);
 
-        //first, try to auto-apply patch
-        /*
-        diff_match_patch dmp = new diff_match_patch();
-        LinkedList<Patch> pList = dmp.patch_make(f.brokenCode, f.fixedCode);
-        Object[] pResult = dmp.patch_apply(pList, originalCode);
-        String patchedText = (String)pResult[0];
-        boolean[] patchFlags = (boolean[])pResult[1];
-        boolean patchSuccess = false;
-
-        //see if we actually applied anything
-        for(boolean b : patchFlags) {
-          if(b) {patchSuccess = true; break;}
-        }
-         */
         //if we didn't, give up and let user merge manually
         if(!patchSuccess) throw new Exception("could not apply any patches");
 
         //otherwise, copy our patch (fingers crossed)
         pasteText = "\n// HELPMEOUT AUTO-PATCH. ORIGINAL: "+originalCode+"\n"+patchedText+"\n";
-        HelpMeOutLog.getInstance().writeError(HelpMeOutLog.AUTO_PATCH_SUCCESS);
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.AUTO_PATCH_SUCCESS);
 
       } catch (Exception e) { //diff-match-path can throw StringIndexOutOfBoundsException
         pasteText = commentCode(currentFixes.get(i).fixedCode, originalCode);
@@ -374,9 +375,10 @@ public class HelpMeOut {
     // do a diff on the token level
     Diff<Token> diff = new Diff<Token>(tokens1, tokens2,ct);
     List<Difference> differences = diff.diff();
-    for(Difference d:differences) {
-      System.out.println(d);
-    }
+//    for(Difference d:differences) {
+//      System.out.println(d);
+//    }
+    
     // now transform tokens1 into tokens2 by stepping through diffs
     List<Token> tokensOut = new ArrayList<Token>();
     int diffIndex =0;
@@ -416,32 +418,6 @@ public class HelpMeOut {
     return result;
   }
 
-
-  /** Search for the best line of code based on a fuzzy string matching algorithm trades of closeness of match and distance 
-   * from a suggested location
-   * @param fix the broken version of chosen fix from the database that we are going to copy into the editor
-   * @return the line we have chosen as the most likely line needing to be fixed
-   */
-  //  private int searchFileForBestLine(String fix) {
-  //    diff_match_patch dmp = new diff_match_patch();
-  //    dmp.Match_Threshold = 0.9f; // this number probably needs tweaking; higher = more liberal matches; between 0 and 1
-  //    try {
-  //      int loc = lastQueryEditor.getTextArea().getLineStartOffset(lastQueryLine);
-  //      int offset = dmp.match_main(lastQueryEditor.getText(), fix, loc); // This only searches in the currently viewed tab
-  //      if (offset == -1) {
-  //        return 0;
-  //
-  //      } else {
-  //        int line = lastQueryEditor.getTextArea().getLineOfOffset(offset);
-  //        return line;
-  //      }
-  //    } catch (Exception e) {
-  //      //for some reqson we failed in diff_match_patch
-  //      return 0;
-  //    }
-  //    
-  //    
-  //  }
 
   /**
    * Search for the best line of code based on a fuzzy string matching algorithm OVER TOKENIZED CODE
@@ -503,71 +479,6 @@ public class HelpMeOut {
     return chars;
   }
 
-  /** Search one line above and one line below the error line to see if the fix
-   *  is not the error line itself, but one above or below.  This manifests itself
-   *  in missing semicolon errors, for example.
-   *  
-   *  We do this currently by doing a diff match/patch on each of the three lines:
-   *  the error line and the lines above and below, and choosing the line with the
-   *  least number of patches between it and the fixed line.
-   *  
-   * @param fix broken version of the chosen fix from the database that we are going to copy into the editor
-   * @return the line we have chosen as the most likely line needing to be fixed
-   */
-  //  private int searchNearbyForBetterLine(String fix) {
-  //    diff_match_patch dmp = new diff_match_patch();
-  //    LinkedList<Patch> pList = dmp.patch_make(lastQueryEditor.getLineText(lastQueryLine), fix);
-  //    double bestScore = patchEqualityScore(pList, lastQueryEditor.getLineText(lastQueryLine).length(), fix.length());
-  //    int bestLine = lastQueryLine;
-  //    
-  //    // check above
-  //    if (lastQueryLine > 0) {
-  //      int above = lastQueryLine-1;
-  //      pList = dmp.patch_make(lastQueryEditor.getLineText(above), fix);
-  //      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(above).length(), fix.length());
-  //      if (score > bestScore) {
-  //        bestScore = score;
-  //        bestLine = above;
-  //      }
-  //    }
-  //
-  //    //check below
-  //    if (lastQueryLine < lastQueryEditor.getTextArea().getLineCount()) {
-  //      int below = lastQueryLine+1;
-  //      pList = dmp.patch_make(lastQueryEditor.getLineText(below), fix);
-  //      double score = patchEqualityScore(pList, lastQueryEditor.getLineText(below).length(), fix.length());
-  //      if (score > bestScore) {
-  //        bestScore = score;
-  //        bestLine = below;
-  //      }
-  //    }
-  //    
-  //    return bestLine;
-  //  }
-
-  /** 
-   * Computes how close a patch already is to the target text
-   * by summing the length of the number of "EQUAL" sections of the patch.
-   * 
-   * This uses the algorithm defined in Python's difflib.ratio() function
-   *  
-   * @param pList list of patches
-   * @param errorLength the length of the error code string
-   * @param fixLength the length of the broken code in the fix
-   * @return the ratio of equal characters over total characters in the two strings
-   */
-  //  private double patchEqualityScore(LinkedList<Patch> pList, int errorLength, int fixLength) {
-  //    double ratio = 0;
-  //    for (Patch p : pList) {
-  //      for (Diff d : p.diffs) {
-  //        if (d.operation == Operation.EQUAL)
-  //          ratio += d.text.length();
-  //      }
-  //    }
-  //    
-  //    ratio = ratio*2/(errorLength+fixLength);
-  //    return ratio;
-  //  }
 
   private String commentCode(String fix, String original) {
     String comment = "// --- HELPMEOUT ---\n";
@@ -674,16 +585,15 @@ public class HelpMeOut {
   public Editor getEditor() {
     return lastQueryEditor;
   }
+  
   public void setUsage(Usage usage) {
-    if (usage == Usage.DISABLED) {
-      if (tool != null) {
-        //TODO: tool is probably going to be null. Maybe check for usage in HelpMeOut.registerTool() instead?
-        tool.setLabelText("HelpMeOut is disabled.\nEnable HelpMeOut in Tools > HelpMeOutPreferences.");
-      }
+    //TODO: tool is probably going to be null. Maybe check for usage in HelpMeOut.registerTool() instead?
+    if (tool != null) {
+      tool.reportUsage(usage);
     }
-
     HelpMeOutServerProxy.getInstance().setUsage(usage);
   }
+  
   public void handleShowDetailAction(int index) {
     int id = currentFixes.get(index).id;
     int type = errorType.ordinal(); 

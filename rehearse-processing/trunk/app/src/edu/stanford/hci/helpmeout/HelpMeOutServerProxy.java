@@ -90,7 +90,7 @@ public class HelpMeOutServerProxy {
       cleaned_error = error.replaceAll("[\"\u201c].*?[\"\u201d]", "%");
     }
     if (cleaned_error!=null) {
-      HelpMeOutLog.getInstance().write(HelpMeOutLog.CLEANED_QUERY, cleaned_error);
+      //HelpMeOutLog.getInstance().write(HelpMeOutLog.CLEANED_QUERY, cleaned_error);
       return cleaned_error;
     } else {
       return error;
@@ -109,7 +109,7 @@ public class HelpMeOutServerProxy {
       cleaned_error = error.replaceAll("[\"\u201c].*?[\"\u201d]", "%");
     }
     if (cleaned_error!=null) {
-      HelpMeOutLog.getInstance().write(HelpMeOutLog.CLEANED_QUERY, cleaned_error);
+      //HelpMeOutLog.getInstance().write(HelpMeOutLog.CLEANED_QUERY, cleaned_error);
       return cleaned_error;
     } else {
       return error;
@@ -198,9 +198,7 @@ public class HelpMeOutServerProxy {
     theTask.get(TIMEOUT,TimeUnit.SECONDS);
   }
   
-  public void setUsage(HelpMeOutPreferences.Usage usage) {
-    this.usage = usage;
-  }
+  
   
   /** save our ide log to the database 
    * @throws TimeoutException 
@@ -217,6 +215,12 @@ public class HelpMeOutServerProxy {
     new Thread(theTask).start();
     theTask.get(TIMEOUT*2,TimeUnit.SECONDS);
  
+  }
+  public void setUsage(HelpMeOutPreferences.Usage usage) {
+    this.usage = usage;
+  }
+  public HelpMeOutPreferences.Usage getUsage() {
+    return usage;
   }
 
 }

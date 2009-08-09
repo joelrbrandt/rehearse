@@ -61,7 +61,7 @@ public class HelpMeOutExceptionTracker {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         serverProxy.queryexception(error, code, trace);
       if(result!=null) {
-        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, error);
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, HelpMeOut.getInstance().makeIdListFromQueryResult(result));
         HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
       } else {
         if(tool!=null) {
@@ -136,7 +136,7 @@ public class HelpMeOutExceptionTracker {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         serverProxy.queryexception(error, code, trace);
       if(result!=null) {
-        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, error);
+        HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, HelpMeOut.getInstance().makeIdListFromQueryResult(result));
         HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
       } else {
         if(tool!=null) {
@@ -158,9 +158,7 @@ public class HelpMeOutExceptionTracker {
   public void resolveRuntimeException() {
     HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED,eInfo.getExceptionClass());
     try {
-
-      String result = serverProxy.storeexception(eInfo, source);
-      
+      serverProxy.storeexception(eInfo, source);
     }catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.STORE_FAIL_EXCEPTION);
       e.printStackTrace();
