@@ -5,14 +5,11 @@ from pysqlite2 import dbapi2 as sqlite
 import difflib
 con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
 
-# execute this if you want to list ALL items, not just the ones without comments 
-# res = con.execute("select compilererrors.id, compilererrors.errmsg,count(*) as count from compilererrors, querylog,fixidlog where compilererrors.id = fixidlog.fix_id and fixidlog.log_id = querylog.id group by compilererrors.id order by count desc")
-
-if form.has_key['all'] && int(form['all']==1):
+if form.has_key('all') and int(form['all'])==1:
   # execute this to only retrieve items that have not been commented on yet
-  compres = con.execute("SELECT compilererrors.id, compilererrors.errmsg, COUNT(*) AS count FROM compilererrors LEFT JOIN fixidlog ON compilererrors.id = fixidlog.fix_id JOIN querylog ON fixidlog.log_id = querylog.id WHERE querylog.type = 0 GROUP BY compilererrors.id ORDER BY count DESC")
+  compres = con.execute("SELECT compilererrors.id, compilererrors.errmsg, COUNT(fixidlog.id) AS count FROM compilererrors LEFT JOIN fixidlog ON compilererrors.id = fixidlog.fix_id LEFT JOIN querylog ON fixidlog.log_id = querylog.id WHERE querylog.type = 0 OR querylog.type IS NULL GROUP BY compilererrors.id ORDER BY count DESC")
 
-  exres = con.execute("SELECT exceptions.id, exceptions.errmsg, COUNT(*) AS count FROM exceptions LEFT JOIN fixidlog ON exceptions.id = fixidlog.fix_id JOIN querylog ON fixidlog.log_id = querylog.id WHERE querylog.type = 1 GROUP BY exceptions.id ORDER BY count DESC")
+  exres = con.execute("SELECT exceptions.id, exceptions.errmsg, COUNT(fixidlog.id) AS count FROM exceptions LEFT JOIN fixidlog ON exceptions.id = fixidlog.fix_id LEFT JOIN querylog ON fixidlog.log_id = querylog.id WHERE querylog.type = 1 OR querylog.type IS NULL GROUP BY exceptions.id ORDER BY count DESC")
   title = "List of all HelpMeOut bug fixes"
 else:
   # execute this to only retrieve items that have not been commented on yet

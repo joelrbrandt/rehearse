@@ -63,7 +63,7 @@ for comment in comments:
 <%= s %>
 <%
 #show the add form if we got the right parameter
-if form.has_key('add') and int(form['add'])==1 :
+if form.has_key('add') and int(form['add'])==1 and len(comments)==0:
 	
 %>
 <hr>
