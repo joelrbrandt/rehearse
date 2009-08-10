@@ -101,8 +101,8 @@ class HelpMeOutService(object):
             #version2: tokenized distance metric
             old_string = ''.join([l for l in old_lines]) #zip lines back up
             #tokenize both 
-            token_error_line = highlight(error_line, JavaLexer(), TokenLineFormatter())
-            token_old_string = highlight(old_string, JavaLexer(), TokenLineFormatter())
+            token_error_line = highlight(error_line, JavaLexer(), TokenLineFormatter("processing"))
+            token_old_string = highlight(old_string, JavaLexer(), TokenLineFormatter("processing"))
             for line in token_old_string.splitlines(1):
                 s = difflib.SequenceMatcher(None,token_error_line,line)
                 ratio = s.ratio()
