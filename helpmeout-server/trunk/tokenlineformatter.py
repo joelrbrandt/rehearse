@@ -17,6 +17,8 @@ __all__ = ['TokenLineFormatter']
 
 class TokenLineFormatter(Formatter):
     def __init__(self,language="processing"):
+        Formatter.__init__(self)
+         
         if(language=="processing"):
             functions = ['delay','draw','exit','loop','noLoop','popStyle','pushStyle','redraw','setup','size','cursor','frameRate','noCursor','binary','boolean','byte','char','float','hex','int','str','unbinary','unhex','join','match','matchAll','nf','nfc','nfp','nfs','split','splitTokens','trim',
             'append','arrayCopy','concat','expand','reverse','shorten','sort','splice','subset',
