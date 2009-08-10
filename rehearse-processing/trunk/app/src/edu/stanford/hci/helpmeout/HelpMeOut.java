@@ -586,12 +586,13 @@ public class HelpMeOut {
     return lastQueryEditor;
   }
   
-  public void setUsage(Usage usage) {
+  public void updatePreferences(Usage usage, boolean uploadLogs) {
     //TODO: tool is probably going to be null. Maybe check for usage in HelpMeOut.registerTool() instead?
     if (tool != null) {
       tool.reportUsage(usage);
     }
     HelpMeOutServerProxy.getInstance().setUsage(usage);
+    HelpMeOutServerProxy.getInstance().setUploadLogs(uploadLogs);
   }
   
   public void handleShowDetailAction(int index) {

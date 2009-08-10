@@ -78,18 +78,9 @@ public class RehearseBase extends Base {
 	   // Write to HelpMeOut log
 	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt",true);
 	   
-	   //Write HelpMeOut preferences to preferences.txt
-	   //TODO: Maybe move this into HelpMeOutPreferences.save() ?
-	   File prefsFile = getSettingsFile(Preferences.PREFS_FILE);
-	   String usage = HelpMeOutPreferences.getUsage().toString();
-	   try {
-	      BufferedWriter out = new BufferedWriter(new FileWriter(prefsFile, true)); // true appends
-	      out.write("helpmeout.usage="+usage);
-	      out.close();
-	    } catch (IOException e) {
-	      System.out.println("Error writing HelpMeOut preferences");
-	    }
-	   
+	   //Append HelpMeOut preferences to Processing preferences file
+	   HelpMeOutPreferences.save(getSettingsFile(Preferences.PREFS_FILE));
+
 	   return retval;
 	 }
 
@@ -164,8 +155,7 @@ public class RehearseBase extends Base {
 
 	    // run static initialization that grabs all the prefs
 	    Preferences.init(null);
-	    String usage = Preferences.get("helpmeout.usage");
-	    HelpMeOutPreferences.setInitialUsage(usage);
+	    HelpMeOutPreferences.load();
 
 	    // setup the theme coloring fun
 	    Theme.init();

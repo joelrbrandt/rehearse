@@ -21,6 +21,7 @@ public class HelpMeOutServerProxy {
    * Set from HelpMeOutPreferences.
    */
   private HelpMeOutPreferences.Usage usage = null;
+  private boolean uploadLogs;
   
   private static final long TIMEOUT = 10L;
   protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
@@ -205,22 +206,26 @@ public class HelpMeOutServerProxy {
    * @throws ExecutionException 
    * @throws InterruptedException */
   public void storeidelog(final String log) throws InterruptedException, ExecutionException, TimeoutException {
-    FutureTask<?> theTask = new FutureTask<Object>(
-        new Callable<Object>() {
-          public Object call() throws Exception {
-            proxy.call("storeidelog",log);
-            return null;
-          }
-        });
-    new Thread(theTask).start();
-    theTask.get(TIMEOUT*2,TimeUnit.SECONDS);
- 
+    if (uploadLogs) {
+      FutureTask<?> theTask = new FutureTask<Object>(
+          new Callable<Object>() {
+            public Object call() throws Exception {
+              proxy.call("storeidelog",log);
+              return null;
+            }
+          });
+      new Thread(theTask).start();
+      theTask.get(TIMEOUT*2,TimeUnit.SECONDS);
+    }
   }
   public void setUsage(HelpMeOutPreferences.Usage usage) {
     this.usage = usage;
   }
   public HelpMeOutPreferences.Usage getUsage() {
     return usage;
+  }
+  public void setUploadLogs(boolean uploadLogs) {
+    this.uploadLogs = uploadLogs;
   }
 
 }
