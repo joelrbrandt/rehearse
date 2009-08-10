@@ -24,7 +24,7 @@ public class HelpMeOutServerProxy {
   private boolean uploadLogs;
   
   private static final long TIMEOUT = 10L;
-  protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-dev.py"; //URL of DB server to hit with JSON-RPC calls
+  protected static final String SERVICE_URL = "http://rehearse.stanford.edu/helpmeout/server-processing-01.py"; //URL of DB server to hit with JSON-RPC calls
   private ServiceProxy proxy = new ServiceProxy(SERVICE_URL);
 
 
