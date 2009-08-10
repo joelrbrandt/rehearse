@@ -79,7 +79,7 @@ class TokenLineFormatter(Formatter):
 
         for ttype, value in tokensource:
             #if it's a comment or a literal abstract it
-            if is_token_subtyte(ttype,Token.Comment) \
+            if is_token_subtype(ttype,Token.Comment) \
             or is_token_subtype(ttype,Token.Literal):
                 outfile.write(STANDARD_TYPES[ttype])
             
