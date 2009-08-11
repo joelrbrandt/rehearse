@@ -345,6 +345,15 @@ void setup() {
 #for f in compilerFixes:
 #  print 'fixes.add(new Fix("%s","%s"));' % (f[0].replace("\n","\\n").replace('"','\\"'),f[1].replace("\n","\\n").replace('"','\\"'))
 
-for f in runtimeFixes:
-   print 'fixes.add(new Fix("%s","%s"));' % (f[0].replace("\n","\\n").replace('"','\\"'),f[1].replace("\n","\\n").replace('"','\\"'))
+i=0
+for fix in runtimeFixes:
+   #print 'fixes.add(new Fix("%s","%s"));' % (f[0].replace("\n","\\n").replace('"','\\"'),f[1].replace("\n","\\n").replace('"','\\"'))
+   f = open(str(i)+'-broken.txt','w')
+   f.write(fix[0])
+   f.close()
    
+   f = open(str(i)+'-fixed.txt','w')
+   f.write(fix[1])
+   f.close()
+   
+   i=i+1

@@ -1,0 +1,5 @@
+
+int [] myArray = new int[3];
+void setup() {
+  myArray[0] = 5;
+}

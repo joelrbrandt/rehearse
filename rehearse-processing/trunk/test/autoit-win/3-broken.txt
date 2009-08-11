@@ -1,0 +1,7 @@
+
+int[] myArray = new int[100];
+void setup(){
+  for(int i=0; i<200; i++) {
+    myArray[i] = 0;
+  }
+}
