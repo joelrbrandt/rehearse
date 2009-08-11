@@ -5,15 +5,12 @@ import java.awt.Image;
 
 import javax.swing.JFrame;
 
-import edu.stanford.hci.helpmeout.HelpMeOut;
-import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
-import edu.stanford.hci.processing.editor.RehearseEditor;
-
+import processing.core.PApplet;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
-import processing.app.debug.RuntimeRunnerException;
-import processing.core.PApplet;
+import edu.stanford.hci.helpmeout.ExceptionInfo;
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 
 public class RehearsePApplet extends PApplet {
 	
@@ -114,6 +111,11 @@ public class RehearsePApplet extends PApplet {
 		try {
 			if (i.getNameSpace().getMethod(m.toString(), new Class[0]) != null)	{
 				i.eval(m.toString() + "()");
+			} else {
+			  if (m.toString().equals("draw")) {
+			    // We do this to match the default implementation of the draw() method in PApplet.java
+			    finished=true;
+			  }
 			}
 		} catch (UtilEvalError e) {
 			throw new RuntimeException(e);
@@ -123,4 +125,22 @@ public class RehearsePApplet extends PApplet {
 		  	throw new RuntimeException(e);
 		}
 	}
+
+  /* (non-Javadoc)
+   * @see processing.core.PApplet#stop()
+   */
+  @Override
+  public void stop() {
+    System.err.println("RehearsePApplet.stop()");
+    // check if waitForNextLine is true
+    
+    if (i.getWatchForNextLine()) {
+    // if so, resolve since we executed the error-causing line and finished without a problem
+    HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
+    
+    }
+    super.stop();
+  }
+	
+	
 }

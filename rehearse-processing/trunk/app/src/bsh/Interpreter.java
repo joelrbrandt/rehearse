@@ -563,6 +563,7 @@ implements Runnable, ConsoleInterface,Serializable
 							node.dump(">");
 
 						Object ret = node.eval( callstack, this );
+						
 
 						// sanity check during development
 						if ( callstack.depth() > 1 )
@@ -822,7 +823,8 @@ implements Runnable, ConsoleInterface,Serializable
 			    }
 			    // eval
 				retVal = node.eval( callstack, this );
-                
+
+				
 				// sanity check during development
 				if ( callstack.depth() > 1 )
 					throw new InterpreterError(
@@ -1654,6 +1656,10 @@ implements Runnable, ConsoleInterface,Serializable
       // This case probably won't happen.
       return 0;
     }
+  }
+
+  public boolean getWatchForNextLine() {
+    return watchForNextLine;
   }
 
 	//	public void setLastExecutedLine(int lastExecutedLine) {

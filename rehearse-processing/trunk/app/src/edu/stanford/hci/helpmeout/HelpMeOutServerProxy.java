@@ -188,18 +188,21 @@ public class HelpMeOutServerProxy {
     errorvoteAux("errorvoteexception",id,vote);
   }
   private void errorvoteAux(final String which, final int id, final int vote) throws InterruptedException, ExecutionException, TimeoutException {
-    FutureTask<?> theTask = new FutureTask<Object>(
-        new Callable<Object>() {
-          public Object call() throws Exception {
-            proxy.call(which,id,vote);
-            return null;
-          }
-        });
-    new Thread(theTask).start();
-    theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    if (usage == HelpMeOutPreferences.Usage.QUERY_AND_SUBMIT) {
+      FutureTask<?> theTask = new FutureTask<Object>(
+
+          new Callable<Object>() {
+            public Object call() throws Exception {
+              proxy.call(which,id,vote);
+              return null;
+            }
+          });
+      new Thread(theTask).start();
+      theTask.get(TIMEOUT,TimeUnit.SECONDS);
+    }
   }
-  
-  
+
+
   
   /** save our ide log to the database 
    * @throws TimeoutException 

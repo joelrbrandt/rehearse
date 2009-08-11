@@ -78,6 +78,8 @@ public class ExceptionInfo {
    
     //store environment of accessible variables and values
     //this.environment = (HashMap<String, String>) i.makeSnapshotModel().getVariableMap();
+   
+    
    }
 
   public String getSourceCode() {
@@ -115,4 +117,5 @@ public class ExceptionInfo {
   public int getExecutionCount() {
     return executionCount;
   }
+
 }

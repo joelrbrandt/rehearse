@@ -11,6 +11,7 @@ import processing.app.debug.RuntimeRunnerException;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.TargetError;
+import edu.stanford.hci.helpmeout.ExceptionInfo;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
 
@@ -214,5 +215,5 @@ public class HelpMeOutExceptionTracker {
   public boolean notifyLineReached(int line, int executionCount) {
     return (eInfo.getExecutionCount() == executionCount);
   }
-
+  
 }

@@ -227,6 +227,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			Object obj;
 			try {
 				obj = interpreter.eval(source, true);
+
 			} catch (ModeException e) {
 				if (e.isJavaMode()) {
 					throw new RuntimeException("We don't do java mode yet!");
