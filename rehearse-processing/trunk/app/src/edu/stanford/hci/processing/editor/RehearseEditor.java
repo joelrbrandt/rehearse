@@ -34,6 +34,7 @@ import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.SyntaxDocument;
 import processing.app.syntax.TextAreaPainter;
 import processing.app.syntax.TextAreaPainter.Highlight;
+import processing.core.PApplet;
 import bsh.CallStack;
 import bsh.ConsoleInterface;
 import bsh.EvalError;
@@ -136,8 +137,14 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		// clear previous context
 		if (canvasFrame != null)
 			canvasFrame.dispose();
-		if (applet != null)
+		if (applet != null) {
+		  // We want to explicitly call the superclass stop() function here
+		  // because our overridden stop() handles some exception tracking info,
+		  // namely watching to see if the exception was resolved on the last line
+		  // of the program.
+			applet.resolveException = false;
 			applet.stop();
+		}
 
 		canvasFrame = new JFrame();
 		canvasFrame.setLayout(new BorderLayout());
@@ -262,6 +269,9 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
           int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch();
           interpreter.setLineToWatch(lineToWatch+1); //interpreter is 1-indexed
           
+        } else {
+          // Just in case the interpreter is reused
+          interpreter.setLineToWatch(-1);
         }
         return true;
       }
