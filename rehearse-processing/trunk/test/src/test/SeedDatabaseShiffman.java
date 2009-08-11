@@ -31,7 +31,7 @@ public class SeedDatabaseShiffman extends UISpecTestCase {
 		assertTrue(window != null);
 		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
-		HelpMeOut.getInstance().setUsage(Usage.QUERY_AND_SUBMIT);//change for a dryrun
+		HelpMeOut.getInstance().updatePreferences(Usage.QUERY_AND_SUBMIT,false);//change for a dryrun
 		List<Fix> syntaxFixes = getShiffmansSyntaxFixes();
 		for(Fix f:syntaxFixes) {
 			JEditTextArea textarea = editor.getTextArea();
@@ -54,23 +54,29 @@ public class SeedDatabaseShiffman extends UISpecTestCase {
 		assertTrue(window != null);
 		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
-		HelpMeOut.getInstance().setUsage(Usage.QUERY_AND_SUBMIT);//change for a dryrun
+		HelpMeOut.getInstance().updatePreferences(Usage.QUERY_AND_SUBMIT,false);//change for a dryrun
 		List<Fix> runtimeFixes = getShiffmansRuntimeFixes();
-		for(Fix f:runtimeFixes) {
-			JEditTextArea textarea = editor.getTextArea();
+		Window w;
+		for(final Fix f:runtimeFixes) {
+			final JEditTextArea  textarea = editor.getTextArea();
 			textarea.setText(f.before);
 			
-			Window w = WindowInterceptor.run(new Trigger() {
-				public void run() {
-					editor.handleInteractiveRun();
-				}
-			});
+			w = WindowInterceptor.run(new Trigger() {	public void run() {editor.handleInteractiveRun();} });
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			textarea.setText(f.after);
-			w = WindowInterceptor.run(new Trigger() {
-				public void run() {
-					editor.handleInteractiveRun();
-				}
-			});
+			w = WindowInterceptor.run(new Trigger() {	public void run() {editor.handleInteractiveRun();} });
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			
+			
 		}
 		
 		
@@ -108,15 +114,26 @@ public class SeedDatabaseShiffman extends UISpecTestCase {
 	}
 	private List<Fix> getShiffmansRuntimeFixes() {
 		List<Fix> fixes = new ArrayList<Fix>();
+		//9 different exceptions - 7 can be caught by helpmeout
 		//this is still problematic - we are only saving 5 or 7 or these.
+		//negative array index
 		fixes.add(new Fix("\nint [] myArray = new int[10];\nvoid setup() {\n  myArray[-1]=0;\n}\n","\nint [] myArray = new int[10];\nvoid setup() {\n  myArray[1]=0;\n}\n"));
+		//can't access [10] for array[10]
 		fixes.add(new Fix("\nint [] myArray = new int[10];\nvoid setup() {\n  myArray[10]=0;\n}\n","\nint [] myArray = new int[10];\nvoid setup() {\n  myArray[9]=0; //int[10] goes from 0..9\n}\n"));
-		fixes.add(new Fix("\nint[] myArray = new int[100];\nvoid setup(){}\nvoid draw(){\n  myArray[mouseX] = 0;\n}\n","\nint[] myArray = new int[100];\nvoid setup(){}\nvoid draw(){\n  int index = constrain(mouseX,0,myArray.length-1);\n  myArray[index] = 0;\n}\n"));
-		fixes.add(new Fix("\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<200; i++) {\n    myArray[i] = 0;\n  }\n}\n","\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<myArray.length; i++) {\n    myArray[i] = 0;\n  }\n}\n"));
+		
+		//access array[mouseX] hard to detect b/c we generate new input each time
+		//fixes.add(new Fix("\nint[] myArray = new int[100];\nvoid setup(){}\nvoid draw(){\n  myArray[mouseX] = 0;\n}\n","\nint[] myArray = new int[100];\nvoid setup(){}\nvoid draw(){\n  int index = constrain(mouseX,0,myArray.length-1);\n  myArray[index] = 0;\n}\n"));
+		
+		//access array[i] i=0..200 for new array[100] - fix changes # loop runs - can't detect
+		//fixes.add(new Fix("\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<200; i++) {\n    myArray[i] = 0;\n  }\n}\n","\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<myArray.length; i++) {\n    myArray[i] = 0;\n  }\n}\n"));
+		
+		//access array[i] i=0..200 for new array[100] - fix adds a conditions - fine
 		fixes.add(new Fix("\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<200; i++) {\n    myArray[i] = 0;\n  }\n}\n","\nint[] myArray = new int[100];\nvoid setup(){\n  for(int i=0; i<200; i++) {\n    if(i<myArray.length) {\n      myArray[i] = 0;\n    }\n  }\n}\n"));
+		//below are all null ptr exceptions
 		fixes.add(new Fix("\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing thing;\nvoid setup() {\n}\nvoid draw() {\n  thing.display();\n}\n","\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing thing;\nvoid setup() {\n  thing = new Thing();\n}\nvoid draw() {\n  thing.display();\n}\n"));
 		fixes.add(new Fix("\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing thing;\nvoid setup() {\n  Thing thing = new Thing();\n}\nvoid draw() {\n  thing.display();\n}\n","\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing thing;\nvoid setup() {\n  thing = new Thing();\n}\nvoid draw() {\n  thing.display();\n}\n"));
 		fixes.add(new Fix("\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing[] things = new Thing[10];\nvoid setup(){\n}\nvoid draw(){\n  for (int i=0; i<10; i++) {\n    things[i].display();\n  }\n}\n","\nclass Thing {\n  public Thing() { super(); }\n  public void display(){}\n}\nThing[] things = new Thing[10];\nvoid setup(){\n  for (int i=0; i<10; i++) {\n    things[i] = new Thing();\n  }\n}\nvoid draw(){\n  for (int i=0; i<10; i++) {\n    things[i].display();\n  }\n}\n"));
+		//array not initialized
 		fixes.add(new Fix("\nint [] myArray;\nvoid setup() {\n  myArray[0] = 5;\n}\n","\nint [] myArray = new int[3];\nvoid setup() {\n  myArray[0] = 5;\n}\n"));
 		return fixes;
 	}

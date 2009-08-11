@@ -38,7 +38,7 @@ public class SeedDatabaseAuto extends UISpecTestCase {
 		assertTrue(window != null);
 		final RehearseEditor editor = (RehearseEditor)window.getAwtContainer();
 		EditorConsole.setEditor(editor);
-		HelpMeOut.getInstance().setUsage(Usage.QUERY_AND_SUBMIT);//change for a dryrun
+		HelpMeOut.getInstance().updatePreferences(Usage.QUERY_AND_SUBMIT, false);//change for a dryrun
 
 
 		seedDataBaseWithSyntaxFixes(editor);
