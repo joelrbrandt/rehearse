@@ -1,0 +1,6 @@
+# lines starting with hash are comments
+# other lines have format BROKEN_FILE_NAME,FIXED_FILE_NAME
+00-broken.txt,00-fixed.txt
+01-broken.txt,01-fixed.txt
+02-broken.txt,02-fixed.txt
+## EOF
