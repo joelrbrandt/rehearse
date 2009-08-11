@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import processing.app.Base;
 import processing.app.Editor;
+import processing.app.Preferences;
 import processing.app.SketchCode;
 import antlr.Token;
 import antlr.TokenStreamException;
@@ -593,6 +594,9 @@ public class HelpMeOut {
     }
     HelpMeOutServerProxy.getInstance().setUsage(usage);
     HelpMeOutServerProxy.getInstance().setUploadLogs(uploadLogs);
+    
+    Preferences.set("helpmeout.usage", usage.toString());
+    Preferences.set("helpmeout.uploadLogs", Boolean.toString(uploadLogs));
   }
   
   public void handleShowDetailAction(int index) {

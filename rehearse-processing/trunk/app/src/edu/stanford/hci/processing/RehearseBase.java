@@ -68,20 +68,13 @@ public class RehearseBase extends Base {
 	
 	 public boolean handleQuit() {
 	   
-	   // Handle regular quit behavior
-	   // This is done first so preferences.txt is written before we write to it.
-	   boolean retval = super.handleQuit();
-	   
 	   //save to database
 	   HelpMeOutLog.getInstance().saveToDatabase();
 	   
 	   // Write to HelpMeOut log
 	   HelpMeOutLog.getInstance().saveToFile(Base.getSketchbookFolder().getAbsolutePath() + File.separator + "helpmeoutlog.txt",true);
 	   
-	   //Append HelpMeOut preferences to Processing preferences file
-	   HelpMeOutPreferences.save(getSettingsFile(Preferences.PREFS_FILE));
-
-	   return retval;
+	   return super.handleQuit();
 	 }
 
 	
