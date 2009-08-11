@@ -181,23 +181,16 @@ public class HelpMeOutExceptionTracker {
   public int getLineToWatch() {
     assert(eInfo!=null);
 
-    // compute character offset in source - make sure we're on the right line 
-    diff_match_patch d = new diff_match_patch();
-    
-    int oldCharIndex = getCharIndexFromLine(eInfo.getSourceCode(), eInfo.getExceptionAbsouteLineNum()); //returns 0-based absolute line#
-    int newCharIndex = d.diff_xIndex(d.diff_main(eInfo.getSourceCode(), source), oldCharIndex);
-    int newLineIndex = getLineFromCharIndex(source,newCharIndex);
-    return newLineIndex;
+    return getLineToWatchAux(eInfo.getSourceCode(), source, eInfo.getExceptionAbsouteLineNum());
   }
 
   public int getCharIndexFromLine(String source, int line) { //zero-indexed
     int newlinesToConsume = line; //zero-indexed
     int charIndex = 0;
     while (newlinesToConsume > 0) {
-      charIndex++;
       if (source.charAt(charIndex) == '\n') newlinesToConsume--;
+      charIndex++;
     }
-    if (line >= 1) charIndex++; // move past the newline
     return charIndex;
   }
 
@@ -207,6 +200,17 @@ public class HelpMeOutExceptionTracker {
       if (newSource.charAt(i) == '\n') newLine++;
     }
     return newLine; 
+  }
+  
+  public int getLineToWatchAux(String s1, String s2, int absLineNum) {
+
+    // compute character offset in source - make sure we're on the right line 
+    diff_match_patch d = new diff_match_patch();
+    
+    int oldCharIndex = getCharIndexFromLine(s1, absLineNum); //returns 0-based absolute line#
+    int newCharIndex = d.diff_xIndex(d.diff_main(s1, s2), oldCharIndex);
+    int newLineIndex = getLineFromCharIndex(s2,newCharIndex);
+    return newLineIndex;
   }
 
   /**
