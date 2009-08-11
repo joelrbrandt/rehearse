@@ -157,6 +157,7 @@ public class HelpMeOutExceptionTracker {
 
   /** mark the previously recorded runtime exception as resolved */
   public void resolveRuntimeException() {
+    if(eInfo!=null) {
     HelpMeOutLog.getInstance().write(HelpMeOutLog.EXCEPTION_FIXED,eInfo.getExceptionClass());
     try {
       serverProxy.storeexception(eInfo, source);
@@ -165,6 +166,10 @@ public class HelpMeOutExceptionTracker {
       e.printStackTrace();
     }
     eInfo = null;
+    } else {
+      HelpMeOutLog.getInstance().writeError(HelpMeOutLog.INFO,"tried to resolveRuntimeException when there was no eInfo stored.");
+    }
+    
   }
 
   /** given the old, broken source and Exception info we have in this object,

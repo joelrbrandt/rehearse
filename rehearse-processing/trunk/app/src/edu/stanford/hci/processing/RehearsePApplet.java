@@ -137,6 +137,8 @@ public class RehearsePApplet extends PApplet {
     if (i.getWatchForNextLine()) {
     // if so, resolve since we executed the error-causing line and finished without a problem
     HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
+    i.setLineToWatch(-1);
+    i.setWatchForNextLine(false);
     
     }
     super.stop();

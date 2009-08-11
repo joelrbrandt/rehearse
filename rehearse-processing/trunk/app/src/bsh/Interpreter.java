@@ -1662,6 +1662,13 @@ implements Runnable, ConsoleInterface,Serializable
     return watchForNextLine;
   }
 
+  /**
+   * @param watchForNextLine the watchForNextLine to set
+   */
+  public void setWatchForNextLine(boolean watchForNextLine) {
+    this.watchForNextLine = watchForNextLine;
+  }
+
 	//	public void setLastExecutedLine(int lastExecutedLine) {
 	//		this.lastExecutedLine = lastExecutedLine;
 	//	}
