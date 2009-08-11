@@ -1,5 +1,6 @@
 #include <Array.au3>
 #include <String.au3>
+#include "RunInteractiveFix.au3"
 
 ; start processing, paste broken text, run interactively, fix text, run again, close without saving
 Local $brokenArray[1]
@@ -28,6 +29,10 @@ _ArrayDelete($fixedArray,0)
 
 _ArrayDisplay($brokenArray,"These are the broken filenames we read")
 _ArrayDisplay($fixedArray,"These are the fied filenames we read")
-For $i = 1 To _ArrayMaxIndex($brokenArray) Step 1
+For $i = 0 To _ArrayMaxIndex($brokenArray) Step 1
 	;run the whole shebang in here
+	;RunInteractiveFix($brokenArray[$i],$fixedArray[$i])	
+	;query only
+	RunInteractiveFix($brokenArray[$i])	
+
 Next

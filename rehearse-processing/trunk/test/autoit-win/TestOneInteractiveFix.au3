@@ -1,2 +1,2 @@
 #include "RunInteractiveFix.au3"
-RunInteractiveFix("00-broken.txt","00-fixed.txt")
+RunInteractiveFix("0-broken.txt","0-fixed.txt")

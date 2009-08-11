@@ -3,7 +3,8 @@
 #include <String.au3>
 
 ; start processing, paste broken text, run interactively, fix text, run again, close without saving
-Func RunInteractiveFix( $brokenFilename,  $fixedFilename) 
+; if second parameter is not supplied, only query and snapshot, don't fix
+Func RunInteractiveFix( $brokenFilename,  $fixedFilename="") 
 	;read broken code into VarGetType
 	$fbroken = FileOpen($brokenFilename, 0)
 	; Check if file opened for reading OK
@@ -14,16 +15,17 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename)
 	$broken = FileRead($fbroken)
 	FileClose($fbroken)
 
-	;read fixed code into VarGetType
-	$ffixed = FileOpen($fixedFilename, 0)
-	; Check if file opened for reading OK
-	If $ffixed = -1 Then
-		MsgBox(0, "Error", "Unable to open file.")
-		Exit
+	If $fixedFilename <> "" Then
+		;read fixed code into VarGetType
+		$ffixed = FileOpen($fixedFilename, 0)
+		; Check if file opened for reading OK
+		If $ffixed = -1 Then
+			MsgBox(0, "Error", "Unable to open file.")
+			Exit
+		EndIf
+		$fixed = FileRead($ffixed)
+		FileClose($ffixed)
 	EndIf
-	$fixed = FileRead($ffixed)
-	FileClose($ffixed)
-
 
 
 	AutoItSetOption("MouseCoordMode",0) ;use mouse coords relative to window
@@ -48,16 +50,20 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename)
 
 	Sleep(5000); sleep for 5 seconds
 
-	;insert fixed code
-	WinActivate("Processing 0167")
-	Send("^a");select everything
-	Send($fixed,1) ;send raw
-	MouseClick("left",22,60) ; click interactive run
 
-	Sleep(5000); sleep for 5 seconds
+	If $fixedFilename <> "" Then 
+		;insert fixed code
+		WinActivate("Processing 0167")
+		Send("^a");select everything
+		Send($fixed,1) ;send raw
+		MouseClick("left",22,60) ; click interactive run
 
-	; Capture full screen
-	_ScreenCapture_Capture(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
+		Sleep(5000); sleep for 5 seconds
+	Else
+		; Capture full screen
+		_ScreenCapture_Capture($brokenFilename & ".jpg")		
+	EndIf
+	
 
 	;Make sure Processing is active again
 	WinActivate("Processing 0167")
