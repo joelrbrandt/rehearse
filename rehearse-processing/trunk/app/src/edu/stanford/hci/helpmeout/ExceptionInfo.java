@@ -48,7 +48,7 @@ public class ExceptionInfo {
     } else {
       t = e;
       // This grabs the true java exception from the end of whatever the error message is right now
-      String patternStr = "(.*?)([A-Za-z\\.]+)$";
+      String patternStr = "(.*?)([A-Za-z\\.]+\\.[A-Za-z]+)$";
       Pattern pattern = Pattern.compile(patternStr);
       Matcher matcher = pattern.matcher(e.getMessage());
       boolean matchFound = matcher.find();
