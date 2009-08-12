@@ -33,11 +33,11 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename="")
 
 
 	;launch app using run.sh script
-	Run("c:\cygwin\bin\bash.exe -c 'cd ~/build/rehearse/build/windows;./run.sh'")
+	Run("c:\cygwin\bin\bash.exe -c 'cd ~/build/rehearse/build/windows;./run.sh >log.txt'")
 	WinWaitActive("Processing 0167") ;wait until it is active
 
 	;insert code
-	;Send("{ENTER}int x;{ENTER}x++{ENTER}") ;paste our file in
+	Sleep(100);
 	Send($broken,1) ;send raw
 
 	;show helpmeout window
@@ -54,7 +54,9 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename="")
 	If $fixedFilename <> "" Then 
 		;insert fixed code
 		WinActivate("Processing 0167")
+		Sleep(100);
 		Send("^a");select everything
+		Sleep(100);
 		Send($fixed,1) ;send raw
 		MouseClick("left",22,60) ; click interactive run
 

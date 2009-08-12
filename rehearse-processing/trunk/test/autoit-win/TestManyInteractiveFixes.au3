@@ -31,8 +31,8 @@ _ArrayDisplay($brokenArray,"These are the broken filenames we read")
 _ArrayDisplay($fixedArray,"These are the fied filenames we read")
 For $i = 0 To _ArrayMaxIndex($brokenArray) Step 1
 	;run the whole shebang in here
-	;RunInteractiveFix($brokenArray[$i],$fixedArray[$i])	
+ 	RunInteractiveFix($brokenArray[$i],$fixedArray[$i])	
 	;query only
-	RunInteractiveFix($brokenArray[$i])	
+	;RunInteractiveFix($brokenArray[$i])	
 
 Next
