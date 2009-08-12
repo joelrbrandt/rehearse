@@ -67,17 +67,12 @@ public class HelpMeOutExceptionTracker {
         HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, HelpMeOut.getInstance().makeIdListFromQueryResult(result));
         HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
       } else {
-        if(tool!=null) {
-          tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-        }
+        HelpMeOut.getInstance().showNoResult(error);
       }
     } catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL);
       e.printStackTrace();
-      if(tool!=null) {
-        tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-      }
-      //e.printStackTrace();
+      HelpMeOut.getInstance().showNoResult(error);
     }
   }
 
@@ -150,17 +145,12 @@ public class HelpMeOutExceptionTracker {
         HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, HelpMeOut.getInstance().makeIdListFromQueryResult(result));
         HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
       } else {
-        if(tool!=null) {
-          tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-        }
+        HelpMeOut.getInstance().showNoResult(error);
       }
     } catch (Exception e) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERYEXCEPTION_FAIL,error);
       e.printStackTrace();
-      if(tool!=null) {
-
-        tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-      }
+      HelpMeOut.getInstance().showNoResult(error);
       //e.printStackTrace();
     }
   }

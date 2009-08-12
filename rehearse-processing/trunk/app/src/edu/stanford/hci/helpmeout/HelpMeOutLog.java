@@ -56,6 +56,7 @@ public class HelpMeOutLog {
   public static final String CLICKED_FIND_LINE = "Clicked find line link.";
   public static final String INFO = "Info"; //generic info message
   public static final String CLEANED_QUERY = "Cleaned up query.";
+  public static final String GOOGLE = "Googled for error";
 
   public static final String TYPE_LOG = "LOG";
   public static final String TYPE_ERR = "ERR";

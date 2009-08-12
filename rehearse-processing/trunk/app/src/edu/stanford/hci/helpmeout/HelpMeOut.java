@@ -1,5 +1,7 @@
 package edu.stanford.hci.helpmeout;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -111,6 +113,32 @@ public class HelpMeOut {
     }
   }
 
+  protected void showNoResult(String error) {
+    if (tool != null) {
+      String suggestions ="<html><head>"+
+      "<style type=\"text/css\">"+
+      "body {margin:7px; font-family:Arial,Helvetica; background-color:#f0f0f0;}"+
+      "    div {font-family:Arial,Helvetica; font-size:9px;}"+
+      "    a  {color:#8D2A2B; font-weight:bold;}"+
+      "</style>"+
+      "</head><body>";
+      suggestions+="<h3>Error Message:</h3>"+error+"";
+      suggestions+="<p>HelpMeOutQuery did not return any suggestions.</p>";
+      
+      String encodedError="";
+      try {
+        encodedError = URLEncoder.encode(error, "utf-8");
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+      }
+      suggestions+="<div><p><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?action=google&error="+encodedError+"\">Search Google for this error</a></p></div>";
+      suggestions+="</body></html>";
+
+      //now show the suggestion in the HelpMeOut window
+      tool.setHtml(suggestions);      
+    }
+  }
+
   protected void showQueryResult(ArrayList<HashMap<String,ArrayList<String>>> result, String error, ErrorType errorType) {
 
     // Set the error type so voting knows which table to update
@@ -185,12 +213,19 @@ public class HelpMeOut {
 
           currentFixes.put(i, new FixInfo(fixId,brokenLines,fixedLines));
         }
-        
+
 
       }
 
       i++;
     }
+    String encodedError="";
+    try {
+      encodedError = URLEncoder.encode(error, "utf-8");
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
+    suggestions+="<div><p><a class=\"thumb_link\" href=\"http://rehearse.stanford.edu/?action=google&error="+encodedError+"\">Search Google for this error</a></p></div>";
     suggestions+="</body></html>";
 
 
@@ -221,24 +256,18 @@ public class HelpMeOut {
 
       ArrayList<HashMap<String,ArrayList<String>>> result = serverProxy.query(error, code);
       if(result!=null) {
-        
+
         HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERY_SUCCESS, makeIdListFromQueryResult(result));
         showQueryResult(result, error, ErrorType.COMPILE);
       } else {
-        if(tool!=null) {
-          tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-        }
+        showNoResult(error);
       }
     } catch(TimeoutException te) {
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL,"Timeout");
-      if(tool!=null) {
-        tool.setLabelText("HelpMeOutQuery did not return any suggestions because of a network timeout.");
-      }
+      showNoResult(error);
     }catch (Exception e) { //can end up here with a timeout exception
       HelpMeOutLog.getInstance().writeError(HelpMeOutLog.QUERY_FAIL,e.getMessage());
-      if(tool!=null) {
-        tool.setLabelText("HelpMeOutQuery did not return any suggestions.");
-      }
+      showNoResult(error);
     }
   }
 
@@ -255,7 +284,7 @@ public class HelpMeOut {
     }
     return ids;
   }
-  
+
   public void processNoError(String code) {
     if(tool!=null) {
       tool.setLabelText("Your code compiled successfully. There's no need to help you out.");
@@ -304,9 +333,9 @@ public class HelpMeOut {
    * NOTE: all line numbers in this method should be relative to current tab!
    */
   public void handleCopyAction(int i) {
-    
+
     HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_COPY_FIX, makeTypeAndIdStringFromIndex(i));
-    
+
     assert(lastQueryEditor != null);
     String pasteText;
     FixInfo f = currentFixes.get(i);
@@ -376,10 +405,10 @@ public class HelpMeOut {
     // do a diff on the token level
     Diff<Token> diff = new Diff<Token>(tokens1, tokens2,ct);
     List<Difference> differences = diff.diff();
-//    for(Difference d:differences) {
-//      System.out.println(d);
-//    }
-    
+    //    for(Difference d:differences) {
+    //      System.out.println(d);
+    //    }
+
     // now transform tokens1 into tokens2 by stepping through diffs
     List<Token> tokensOut = new ArrayList<Token>();
     int diffIndex =0;
@@ -586,7 +615,7 @@ public class HelpMeOut {
   public Editor getEditor() {
     return lastQueryEditor;
   }
-  
+
   public void updatePreferences(Usage usage, boolean uploadLogs) {
     //TODO: tool is probably going to be null. Maybe check for usage in HelpMeOut.registerTool() instead?
     if (tool != null) {
@@ -594,17 +623,17 @@ public class HelpMeOut {
     }
     HelpMeOutServerProxy.getInstance().setUsage(usage);
     HelpMeOutServerProxy.getInstance().setUploadLogs(uploadLogs);
-    
+
     Preferences.set("helpmeout.usage", usage.toString());
     Preferences.set("helpmeout.uploadLogs", Boolean.toString(uploadLogs));
   }
-  
+
   public void handleShowDetailAction(int index) {
     int id = currentFixes.get(index).id;
     int type = errorType.ordinal(); 
     HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_MORE_DETAIL,makeTypeAndIdStringFromIndex(index));        
     Base.openURL(HELPMEOUT_WWW_DETAIL_URL+"?id="+id+"&type="+type);
-    
+
   }
   private String makeTypeAndIdStringFromIndex(int index) {
     int id = currentFixes.get(index).id;
@@ -615,10 +644,10 @@ public class HelpMeOut {
   /** find the best line for a fix and highlight it */
   public void handleFindLineAction(int i) {
     HelpMeOutLog.getInstance().write(HelpMeOutLog.CLICKED_FIND_LINE, makeTypeAndIdStringFromIndex(i));
-    
+
     assert(lastQueryEditor != null);
     FixInfo f = currentFixes.get(i);
-    
+
     int lineToChange = searchTokenStreamForBestLine(f.brokenCode);//searchFileForBestLine(f.brokenCode);
     if((lineToChange >=0) && (lineToChange<lastQueryEditor.getLineCount())) {
       lastQueryEditor.setSelection(
