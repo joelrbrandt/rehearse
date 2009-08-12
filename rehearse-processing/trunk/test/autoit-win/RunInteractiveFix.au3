@@ -38,7 +38,9 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename="")
 
 	;insert code
 	Sleep(100);
-	Send($broken,1) ;send raw
+	ClipPut($broken);
+	Send("^v");
+	;Send($broken,1) ;send raw
 
 	;show helpmeout window
 	MouseClick("left",132,34) ;click on menu tools
@@ -56,8 +58,10 @@ Func RunInteractiveFix( $brokenFilename,  $fixedFilename="")
 		WinActivate("Processing 0167")
 		Sleep(100);
 		Send("^a");select everything
-		Sleep(100);
-		Send($fixed,1) ;send raw
+		Sleep(500);
+		;Send($fixed,1) ;send raw
+		ClipPut($fixed);
+		Send("^v");
 		MouseClick("left",22,60) ; click interactive run
 
 		Sleep(5000); sleep for 5 seconds
