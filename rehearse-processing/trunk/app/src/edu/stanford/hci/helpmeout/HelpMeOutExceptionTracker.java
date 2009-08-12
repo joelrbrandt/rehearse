@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import processing.app.SketchCode;
 import processing.app.debug.RunnerException;
@@ -90,12 +92,15 @@ public class HelpMeOutExceptionTracker {
     SketchCode sc = null;
     int relativeLine = -1;
     
+    Throwable t = err;
+    
     try {
       // if this EvalError just wraps a different Exception thrown by the script, then use that target
-      Throwable t;
+      
       if(err instanceof TargetError) {
         t = ((TargetError)err).getTarget();
       } else {
+       
         t = err;
       }
 
@@ -123,12 +128,17 @@ public class HelpMeOutExceptionTracker {
       e.printStackTrace();
     }
 
+   
+    
+    
     String error = eInfo.getExceptionClass();
     String code = eInfo.getExceptionLine();
     String trace = eInfo.getStackTrace();
     int line = eInfo.getExceptionRelativeLineNum();
     HelpMeOutTool tool = HelpMeOut.getInstance().getTool();
 
+    
+   
     // make sure we save the EvalError and Interpreter in HelpMeOut in case it needs to call this method after a re-query
     // save error and code in case we need to copy/paste fix
     HelpMeOut.getInstance().saveExceptionInfo(err, i, error, code, line);

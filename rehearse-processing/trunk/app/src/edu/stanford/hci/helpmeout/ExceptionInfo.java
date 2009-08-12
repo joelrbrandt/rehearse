@@ -3,6 +3,8 @@ package edu.stanford.hci.helpmeout;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import processing.app.SketchCode;
 import bsh.EvalError;
@@ -41,12 +43,23 @@ public class ExceptionInfo {
     // if this EvalError just wraps a different Exception thrown by the script, then use that target
     if(e instanceof TargetError) {
       t = ((TargetError)e).getTarget();
+      // store exception class name
+      this.exceptionClass =t.getClass().getCanonicalName();
     } else {
       t = e;
+      // This grabs the true java exception from the end of whatever the error message is right now
+      String patternStr = "(.*?)([A-Za-z\\.]+)$";
+      Pattern pattern = Pattern.compile(patternStr);
+      Matcher matcher = pattern.matcher(e.getMessage());
+      boolean matchFound = matcher.find();
+      if (matchFound) {
+        String match = matcher.group(2);
+        this.exceptionClass = match;
+      } else {
+        this.exceptionClass = "bsh.EvalError"; //HACK
+      }
     }
     
-    // store exception class name
-    this.exceptionClass =t.getClass().getCanonicalName();
     // and error message
     this.exceptionMessage = t.getMessage();
     
