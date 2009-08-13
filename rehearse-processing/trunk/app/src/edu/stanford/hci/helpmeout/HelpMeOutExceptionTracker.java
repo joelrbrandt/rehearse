@@ -63,7 +63,7 @@ public class HelpMeOutExceptionTracker {
     try {
       ArrayList<HashMap<String,ArrayList<String>>> result = 
         serverProxy.queryexception(error, code, trace);
-      if(result!=null) {
+      if(result!=null && error != "bsh.EvalError") { // if error is bsh.EvalError, results returned will probably be too general to be useful
         HelpMeOutLog.getInstance().write(HelpMeOutLog.QUERYEXCEPTION_SUCCESS, HelpMeOut.getInstance().makeIdListFromQueryResult(result));
         HelpMeOut.getInstance().showQueryResult(result, error, HelpMeOut.ErrorType.RUN);
       } else {
@@ -223,6 +223,9 @@ public class HelpMeOutExceptionTracker {
 
   public boolean notifyLineReached(int line, int executionCount) {
     return (eInfo.getExecutionCount() == executionCount);
+  }
+  public void resetEInfo() {
+    eInfo = null;
   }
   
 }

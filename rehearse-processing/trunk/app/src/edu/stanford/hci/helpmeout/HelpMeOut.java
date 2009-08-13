@@ -610,10 +610,12 @@ public class HelpMeOut {
       lastQueryCode = null;
       lastQueryLine = -1;
 
-
       //store last query parameters for runtime exceptions
       lastEvalError=null;
       lastInterpreter=null;
+      
+      // reset eInfo
+      HelpMeOutExceptionTracker.getInstance().resetEInfo();
     }
   }
   public Editor getEditor() {
