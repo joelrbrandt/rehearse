@@ -412,12 +412,14 @@ public class HelpMeOut {
     // now transform tokens1 into tokens2 by stepping through diffs
     List<Token> tokensOut = new ArrayList<Token>();
     int diffIndex =0;
-    for(int i=0; i<tokens1.size(); i++) {
+    int maxLen = Math.max(tokens1.size(), tokens2.size());
+    for(int i=0; i<maxLen; i++) {
 
       Difference d = differences.get(diffIndex);
       //copy everything that's unchanged until next difference
       if(i<d.getDeletedStart()) {
-        tokensOut.add(tokens1.get(i));
+        if (i < tokens1.size())
+          tokensOut.add(tokens1.get(i));
       } else {
         //now were at the difference
         //handle deletion - skip forward in ptr
@@ -427,7 +429,7 @@ public class HelpMeOut {
         //handle addition - insert into output
         if(d.getAddedEnd()!=Difference.NONE) {
           tokensOut.addAll(tokens2.subList(d.getAddedStart(), d.getAddedEnd()+1));
-          if(d.getDeletedEnd()==Difference.NONE) {
+          if(d.getDeletedEnd()==Difference.NONE && i < tokens1.size()) {
             tokensOut.add(tokens1.get(i));
           }
         }
@@ -435,7 +437,9 @@ public class HelpMeOut {
         diffIndex++;
         if(diffIndex>=differences.size()) {
           //copy remaining
-          tokensOut.addAll(tokens1.subList(i+1, tokens1.size())); //subList 1st arg is inclusive, 2nd arg is exclusive
+          if (i < tokens1.size()-1) {
+            tokensOut.addAll(tokens1.subList(i+1, tokens1.size())); //subList 1st arg is inclusive, 2nd arg is exclusive
+          }
           break;
         }
       }
