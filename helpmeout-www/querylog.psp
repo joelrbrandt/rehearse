@@ -18,26 +18,33 @@ title = "HelpMeOut Queries"
 rows = [r for r in res]
 %>
 <%@ include file="header.html"%>
-	<style type="text/css">
-	h1 {font-family:Arial}
-	h2 {font-family:Arial}
-	p  {font-family:Arial}
-	</style>
+        <style type="text/css">
+        h1 {font-family:Arial}
+        h2 {font-family:Arial}
+        p  {font-family:Arial}
+        </style>
 <h1><%= title %></h1>
 <table border="1">
 <tr>
-	<td bgcolor="#cccccc"><b>id</b></td>
-	<td bgcolor="#cccccc"><b>timestamp</b></td>
-	<td bgcolor="#cccccc"><b>type</b></td>
-	<td bgcolor="#cccccc"><b>error</b></td>
-	<td bgcolor="#cccccc"><b>fix id</b></td>
+        <td bgcolor="#cccccc"><b>id</b></td>
+        <td bgcolor="#cccccc"><b>timestamp</b></td>
+        <td bgcolor="#cccccc"><b>type</b></td>
+        <td bgcolor="#cccccc"><b>error</b></td>
+        <td bgcolor="#cccccc"><b>fix id</b></td>
 </tr>
 <%
 lastId=-1
 fixids = []
 lastrow = ["-2","","","",""]
+firstrun = True
 rows.append(lastrow)
 for row in rows:
+  if firstrun:
+    lastId=int(row[0])
+    lastrow = row
+    fixids = [row[4]]
+    firstrun = False
+    continue
   if(int(row[0])!=lastId):
     # output last row
     lastId=int(row[0])
@@ -47,9 +54,15 @@ for row in rows:
   <td><%= lastrow[1]%></td>
   <td><%= lastrow[2]%></td>
   <td><%= lastrow[3]%></td>
-  <td><%= ','.join([str(f) for f in 
-fixids])%></td>
-	</tr>
+  <td>
+  <%
+    for id in fixids:
+  %>
+  <a href="detail.psp?type=<%= lastrow[2] %>&id=<%= id %>&db=processing"><%= id %></a>
+  <%
+  %>
+  </td>
+</tr>
 <%
     lastrow=row
     fixids = [row[4]]

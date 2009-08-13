@@ -10,8 +10,8 @@ else:
 	con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
 	db='processing'
 
-x = form['id']
-if form.has_key('type'):
+if form.has_key('type') and form.has_key('id'):
+        x = form['id']
 	if int(form['type']) == 0:
 	  res = con.execute("select diff,errmsg from compilererrors where id = ?",(form['id'],))
 	else:
@@ -31,6 +31,7 @@ if form.has_key('type'):
 else:
 	table = "<p>View a diff by setting \"type\" and \"id\" in the url.</p><p>type=0: compiler errors<br>type=1: runtime exceptions</p><pre>html://rehearse.stanford.edu/helpmeout-www/detail.psp?type=0&id=1</pre>"
 	comments = ""
+        errmsg = ""
 
 %>
 
