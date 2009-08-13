@@ -46,14 +46,14 @@ for row in rows:
   <td><%= lastrow[1]%></td>
   <td><%= lastrow[2]%></td>
   <td><%= lastrow[3]%></td>
-  <td><%= lastrow[4]%></td>
+  <td><%= ''.join([str(f)+"," for f in fixids]%></td>
 	</tr>
 <%
     lastrow=row
-    lastrow[4] = [row[4]]
+    fixids = [row[4]]
   else:
     #append fixid
-    lastrow[4].append(row[4])
+    fixids.append(row[4])
 #
 %>
 </table>
