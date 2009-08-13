@@ -33,16 +33,27 @@ rows = [r for r in res]
 	<td bgcolor="#cccccc"><b>fix id</b></td>
 </tr>
 <%
+lastId=-1
+fixids = []
+lastrow = ["-2","","","",""]
+rows.append(lastrow)
 for row in rows:
+  if(int(row[0])!=lastId):
+    # output last row
 %>
 	<tr>
-  <td><%= row[0]%></td>
-  <td><%= row[1]%></td>
-  <td><%= row[2]%></td>
-  <td><%= row[3]%></td>
-  <td><%= row[4]%></td>
+  <td><%= lastrow[0]%></td>
+  <td><%= lastrow[1]%></td>
+  <td><%= lastrow[2]%></td>
+  <td><%= lastrow[3]%></td>
+  <td><%= lastrow[4]%></td>
 	</tr>
 <%
+    lastrow=row
+    lastrow[4] = [row[4]]
+  else:
+    #append fixid
+    lastrow[4].append(row[4])
 #
 %>
 </table>
