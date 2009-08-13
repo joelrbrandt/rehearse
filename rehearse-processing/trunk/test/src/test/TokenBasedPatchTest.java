@@ -24,5 +24,7 @@ public class TokenBasedPatchTest extends TestCase {
 		s = hmo.tokenBasedAutoPatch("public float q = 17;","private int x = 5;");
 		assertTrue(s,s.equals("private int q = 17;"));
 		
+		s = hmo.tokenBasedAutoPatch("int x", "int y=5;");
+		assertTrue(s,s.equals("int x=5;"));
 	}
 }
