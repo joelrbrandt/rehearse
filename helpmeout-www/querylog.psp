@@ -1,0 +1,50 @@
+<%
+from cgi import escape
+from urllib import unquote
+from pysqlite2 import dbapi2 as sqlite
+import difflib
+if form.has_key('db') and form['db']=='arduino':
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout-arduino.sqlite")
+  db='arduino'
+else:
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+  db='processing'
+
+res = con.execute("SELECT querylog.id, timestamp, type, error, fix_id FROM querylog LEFT JOIN fixidlog ON querylog.id = fixidlog.log_id ORDER BY timestamp DESC")
+
+title = "HelpMeOut Queries"
+
+#[0] has id, [1] has timestamp, [2] has type, [3] has error, [4] hase None or fix_id or doesn't exist
+rows = [r for r in res]
+%>
+<%@ include file="header.html"%>
+	<style type="text/css">
+	h1 {font-family:Arial}
+	h2 {font-family:Arial}
+	p  {font-family:Arial}
+	</style>
+<h1><%= title %></h1>
+<table border="1">
+<tr>
+	<td bgcolor="#cccccc"><b>id</b></td>
+	<td bgcolor="#cccccc"><b>timestamp</b></td>
+	<td bgcolor="#cccccc"><b>type</b></td>
+	<td bgcolor="#cccccc"><b>error</b></td>
+	<td bgcolor="#cccccc"><b>fix id</b></td>
+</tr>
+<%
+for row in rows:
+%>
+	<tr>
+  <td><%= row[0]%></td>
+  <td><%= row[1]%></td>
+  <td><%= row[2]%></td>
+  <td><%= row[3]%></td>
+  <td><%= row[4]%></td>
+	</tr>
+<%
+#
+%>
+</table>
+
+<%@ include file="footer.html"%>
