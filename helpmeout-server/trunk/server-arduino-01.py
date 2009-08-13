@@ -137,7 +137,7 @@ class HelpMeOutService(object):
     def storeidelog(self,log):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into idelog values (null,datetime('now'),?)",(log,))
+        cur.execute("insert into idelog values (null,datetime('now','localtime'),?)",(log,))
         con.commit()
         return "Stored log in db"
     
@@ -146,7 +146,7 @@ class HelpMeOutService(object):
     def store(self,error,diff):
         con = self.connect()
         cur = con.cursor()
-        cur.execute("insert into compilererrors values (null,datetime('now'),?,?,0)",(error,diff))
+        cur.execute("insert into compilererrors values (null,datetime('now','localtime'),?,?,0)",(error,diff))
         con.commit()
         return "Stored error in db"
     
@@ -156,7 +156,7 @@ class HelpMeOutService(object):
         cur = con.cursor()
         diff_obj = difflib.ndiff(file1.splitlines(1),file2.splitlines(1))
         diff_str = ''.join(diff_obj)
-        cur.execute("insert into exceptions values (null,datetime('now'),?,?,?,?,0)",(error,line,stacktrace,diff_str))
+        cur.execute("insert into exceptions values (null,datetime('now','localtime'),?,?,?,?,0)",(error,line,stacktrace,diff_str))
         con.commit()
         return "Stored error into table exceptions"
     
@@ -196,19 +196,19 @@ class HelpMeOutService(object):
         # otherwise we should group_concat(comment) but our sqlite3 version doesn't support it yet
         res = con.execute("SELECT compilererrors.id,diff,votes,comment FROM compilererrors LEFT JOIN comments ON compilererrors.id=comments.fix_id WHERE (comments.type IS NULL OR comments.type=0) AND errmsg LIKE ?",(error,))
         if res==None:
-            cur.execute("insert into querylog values (null, datetime('now'), 0, 2, ?, ?, '')",(error,code))
+            cur.execute("insert into querylog values (null, datetime('now','localtime'), 0, 2, ?, ?, '')",(error,code))
             con.commit()
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has diff, d[2] the votes, d[3] the comment or None
         if len(arr)==0:
-            cur.execute("insert into querylog values (null, datetime('now'), 0, 1, ?, ?, '')",(error,code))
+            cur.execute("insert into querylog values (null, datetime('now','localtime'), 0, 1, ?, ?, '')",(error,code))
             con.commit()
             return 'NO_RESULT'
         # we have at least one useful result:
         # go over returned results one by one and check distance
         best = self.find_best_source_match(code,arr)
         best_ids = [int(r['id'][0]) for r in best]
-        cur.execute("insert into querylog values (null, datetime('now'), 0, 0, ?, ?, '')",(error,code))
+        cur.execute("insert into querylog values (null, datetime('now','localtime'), 0, 0, ?, ?, '')",(error,code))
         res = con.execute("select last_insert_rowid() from querylog")
         last_query_log_id = [r for r in res][0][0]
         for id in best_ids:
@@ -223,17 +223,17 @@ class HelpMeOutService(object):
         cur = con.cursor()
         res = con.execute("SELECT exceptions.id,stacktrace,diff,votes,comment FROM exceptions LEFT JOIN comments on exceptions.id=comments.fix_id WHERE (comments.type IS NULL OR comments.type=1) AND errmsg LIKE ?",(error,))
         if res==None:
-            cur.execute("insert into querylog values(null, datetime('now'), 1, 2, ?, ?, ?)",(error,code,stacktrace))
+            cur.execute("insert into querylog values(null, datetime('now','localtime'), 1, 2, ?, ?, ?)",(error,code,stacktrace))
             con.commit()
             return 'ERROR'
         arr = [d for d in res] # d[0] has id, d[1] has stacktrace, d[2] the diff, d[3] the votes, d[4] the comment
         if len(arr)==0:
-            cur.execute("insert into querylog values(null, datetime('now'), 1, 1, ?, ?, ?)",(error,code,stacktrace))
+            cur.execute("insert into querylog values(null, datetime('now','localtime'), 1, 1, ?, ?, ?)",(error,code,stacktrace))
             con.commit()
             return 'NO_RESULT'
         best = self.find_best_exception_match(code,stacktrace,arr)
         best_ids = [int(r['id'][0]) for r in best]
-        cur.execute("insert into querylog values (null, datetime('now'), 1, 0, ?, ?, ?)",(error,code,stacktrace))
+        cur.execute("insert into querylog values (null, datetime('now','localtime'), 1, 0, ?, ?, ?)",(error,code,stacktrace))
         res = con.execute("select last_insert_rowid() from querylog")
         last_query_log_id = [r for r in res][0][0]
         for id in best_ids:
