@@ -786,7 +786,7 @@ public class NameSpace
 			} catch (Exception e) {
 				// Fail silently, it's just not a field.
 				// TODO: Should handle different exceptions differently.
-				System.out.println("No such PApplet field.");
+				//System.out.println("No such PApplet field.");
 			}
 		}
 		

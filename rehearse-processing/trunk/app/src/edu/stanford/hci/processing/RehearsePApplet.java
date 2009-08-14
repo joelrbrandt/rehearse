@@ -133,7 +133,7 @@ public class RehearsePApplet extends PApplet {
    */
   @Override
   public void stop() {
-    System.err.println("RehearsePApplet.stop()");
+    //System.err.println("RehearsePApplet.stop()");
     // check if waitForNextLine is true
 
     if (i.getWatchForNextLine() && resolveException) {
