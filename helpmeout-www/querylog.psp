@@ -22,6 +22,7 @@ rows = [r for r in res]
         h1 {font-family:Arial}
         h2 {font-family:Arial}
         p  {font-family:Arial}
+	table {font-size:70%; border-collapse:collapse}
         </style>
 <h1><%= title %></h1>
 <table border="1">
@@ -35,6 +36,7 @@ rows = [r for r in res]
 <%
 lastId=-1
 fixids = []
+types = ["Compile-time","Runtime"]
 lastrow = ["-2","","","",""]
 firstrun = True
 rows.append(lastrow)
@@ -52,11 +54,12 @@ for row in rows:
 <tr>
   <td><%= lastrow[0]%></td>
   <td><%= lastrow[1]%></td>
-  <td><%= lastrow[2]%></td>
+  <td><%= types[int(lastrow[2])]%></td>
   <td><%= lastrow[3]%></td>
   <td>
   <%
     for id in fixids:
+      if(id is not None):
   %>
   <a href="detail.psp?type=<%= lastrow[2] %>&id=<%= id %>&db=processing"><%= id %></a>
   <%

@@ -32,6 +32,7 @@ exrows = [r for r in exres]
 	h1 {font-family:Arial}
 	h2 {font-family:Arial}
 	p  {font-family:Arial}
+	table {font-size:70%; border:1px solid; border-collapse:collapse;}
 	</style>
 <h1><%= title %></h1>
 <h2>Compiler Errors</h2>
