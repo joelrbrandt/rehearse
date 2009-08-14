@@ -22,27 +22,48 @@ goodqueries = [r[0] for r in res][0]
 res = con.execute("select count(type) from querylog group by type order by type asc")
 typecounts = [r for r in res]
 
-#
-res = con.execute("select count(*) as count,error from querylog group by error order by count desc")
+# count error messages in queries
+res = con.execute("select count(*) as count,error from querylog group by error order by count asc")
 res = [r for r in res]
 counts = [r[0] for r in res]
 msgs = [r[1] for r in res]
+
+
+# count error messages in fixes
+fres = con.execute("select count(*) as count, errmsg from compilererrors group by errmsg order by count desc limit 25")
+fres = [r for r in fres]
+fcounts = [r[0] for r in fres]
+fmsgs = [r[1] for r in fres]
+
+
 from pylab import *
 
 clf()
-
-# hist(counts,bins=range(0,250,10),facecolor=fc) 
-#bins=range(0,max(counts),10)
-#suptitle("Histogram of total lines of code in %s files" % corpusName)
-#xlabel("Lines of code in example")
-#ylabel("Number of examples")
-
-# construct your plot
-bar(range(len(counts)),counts)
-savefig("/project/helpmeout-www/images/querystrings.png")
+figure(1)
+axes([0.5,0.1,0.45,0.8])
+pos = arange(len(msgs))+.5
+barh(pos,counts, align='center')
+yticks(pos,msgs)
+xlabel('times queried')
+title('error queries by error message')
+grid(True)
+savefig("/project/helpmeout-www/images/queryhbar.png",dpi=80)
 
 clf()
-pink()
+figure(figsize=(7.5,7))
+fmsgs.reverse()
+fcounts.reverse()
+axes([0.7,0.1,0.29,0.8])
+pos = arange(len(fmsgs))+.5
+barh(pos,fcounts, align='center')
+yticks(pos,fmsgs)
+xlabel('times queried')
+title('fixes by error message')
+grid(True)
+savefig("/project/helpmeout-www/images/fixhbar.png",dpi=80)
+
+
+clf()
 figure(figsize=(4,4))
 ax = axes([0.1, 0.1, 0.8, 0.8])
 pie([goodqueries,badqueries],labels=["Successful","Unsuccessful"],colors=['g','r'])
@@ -56,21 +77,41 @@ savefig("/project/helpmeout-www/images/querytypes.png")
 <%--HTML starts here--%>
 
 <%@ include file="header.html"%>
+<style type="text/css">
+        h1 {font-family:Arial}
+        h2 {font-family:Arial}
+        p  {font-family:Arial}
+        table {font-size:70%; border:1px solid; 
+border-collapse:collapse;}
+        </style>
+
 <h1>some helpmeout statistics</h1>
 
 <h2>successful & unsuccessful queries</h2>
-Total queries: <%=totalqueries%><br>
-Successful: <%=goodqueries%> (at least one result returned)<br>
-Bad: <%=badqueries%> (no results returned)<br> 
-<img src="images/queryreturns.png"/>
+<table border="1">
+<tr 
+bgcolor="#cccccc"><td>successful</td><td>unsuccessful</td><td>total</td></tr>
+<tr>
+<td><%=goodqueries%></td><td><%=badqueries%></td><td><%=totalqueries%></td>
+</tr>
+</table>
+<!--<img src="images/queryreturns.png"/>-->
 
 <h2>queries by type</h2>
-Compile-time error: <%=typecounts[0]%><br>
-Runtime error: <%=typecounts[1]%><br>
-<img src="images/querytypes.png"/>
+<table border="1"><tr 
+bgcolor="#cccccc"><td>compile-time</td><td>runtime</td></tr>
+<tr>
+<td><%=typecounts[0][0]%></td>
+<td><%=typecounts[1][0]%></td>
+</tr></table>
 
-<h2>counts for types of error msgs queried</h2>
-<img src="images/querystrings.png"/><br>
-<%="<br>".join([str(r[0])+'-'+r[1] for r in res])%>
+<!--<img src="images/querytypes.png"/>-->
 
+<h2>error messages in queries</h2>
+<img src="images/queryhbar.png"/><br>
+<%--"<br>".join([str(r[0])+'-'+r[1] for r in res])--%>
+
+<h2>error messages in fixes (top 25)</h2>
+<img src="images/fixhbar.png"/><br>
+ 
 <%@ include file="footer.html"%>
