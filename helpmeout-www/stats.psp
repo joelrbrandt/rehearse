@@ -1,0 +1,76 @@
+<%
+import os,sys
+
+import matplotlib
+# chose a non-GUI backend
+matplotlib.use( 'Agg' )
+from pysqlite2 import dbapi2 as sqlite
+
+#how many queries were answered?
+  
+con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+
+#count total queries, queries that returned something, queries that returned nothing
+res = con.execute("select count(*) from querylog")
+totalqueries = [r[0] for r in res][0]
+res= con.execute("select count(*) as count from querylog left join fixidlog on querylog.id=fixidlog.log_id where fixidlog.log_id is null")
+badqueries = [r[0] for r in res][0] 
+res= con.execute("select count(distinct querylog.id) from querylog, fixidlog where querylog.id=fixidlog.log_id")
+goodqueries = [r[0] for r in res][0]
+  
+# count compile-time error query counts vs runtime error query counts
+res = con.execute("select count(type) from querylog group by type order by type asc")
+typecounts = [r for r in res]
+
+#
+res = con.execute("select count(*) as count,error from querylog group by error order by count desc")
+res = [r for r in res]
+counts = [r[0] for r in res]
+msgs = [r[1] for r in res]
+from pylab import *
+
+clf()
+
+# hist(counts,bins=range(0,250,10),facecolor=fc) 
+#bins=range(0,max(counts),10)
+#suptitle("Histogram of total lines of code in %s files" % corpusName)
+#xlabel("Lines of code in example")
+#ylabel("Number of examples")
+
+# construct your plot
+bar(range(len(counts)),counts)
+savefig("/project/helpmeout-www/images/querystrings.png")
+
+clf()
+pink()
+figure(figsize=(4,4))
+ax = axes([0.1, 0.1, 0.8, 0.8])
+pie([goodqueries,badqueries],labels=["Successful","Unsuccessful"],colors=['g','r'])
+savefig("/project/helpmeout-www/images/queryreturns.png")
+
+clf()
+pie(typecounts,labels=["Compile-time","Runtime"])
+savefig("/project/helpmeout-www/images/querytypes.png")
+%>
+
+<%--HTML starts here--%>
+
+<%@ include file="header.html"%>
+<h1>some helpmeout statistics</h1>
+
+<h2>successful & unsuccessful queries</h2>
+Total queries: <%=totalqueries%><br>
+Successful: <%=goodqueries%> (at least one result returned)<br>
+Bad: <%=badqueries%> (no results returned)<br> 
+<img src="images/queryreturns.png"/>
+
+<h2>queries by type</h2>
+Compile-time error: <%=typecounts[0]%><br>
+Runtime error: <%=typecounts[1]%><br>
+<img src="images/querytypes.png"/>
+
+<h2>counts for types of error msgs queried</h2>
+<img src="images/querystrings.png"/><br>
+<%="<br>".join([str(r[0])+'-'+r[1] for r in res])%>
+
+<%@ include file="footer.html"%>
