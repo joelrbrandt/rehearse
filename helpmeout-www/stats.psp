@@ -17,7 +17,15 @@ res= con.execute("select count(*) as count from querylog left join fixidlog on q
 badqueries = [r[0] for r in res][0] 
 res= con.execute("select count(distinct querylog.id) from querylog, fixidlog where querylog.id=fixidlog.log_id")
 goodqueries = [r[0] for r in res][0]
-  
+
+#number of fixes returned with each query
+res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=1)")
+onereturned = [r[0] for r in res][0]
+res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=2)")
+tworeturned = [r[0] for r in res][0]
+res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=3)")
+threereturned = [r[0] for r in res][0]
+
 # count compile-time error query counts vs runtime error query counts
 res = con.execute("select count(type) from querylog group by type order by type asc")
 typecounts = [r for r in res]
@@ -37,6 +45,19 @@ fmsgs = [r[1] for r in fres]
 
 
 from pylab import *
+
+fixes = [badqueries, onereturned, tworeturned, threereturned]
+clf()
+figure(figsize=(3.5, 2))
+pos = arange(len(fixes))+.5
+axes([0.1,0.25,0.85,0.5])
+barh(pos, fixes, align='center')
+yticks(pos, [r for r in range(4)])
+xlabel('queries returned')
+ylabel('fixes returned')
+title('fixes returned per query')
+grid(True)
+savefig("/project/helpmeout-www/images/fixesperquery.png", dpi=80)
 
 clf()
 figure(1)
@@ -96,6 +117,15 @@ bgcolor="#cccccc"><td>successful</td><td>unsuccessful</td><td>total</td></tr>
 </tr>
 </table>
 <!--<img src="images/queryreturns.png"/>-->
+
+<h2>number of fixes returned per query</h2>
+<table border="1">
+<tr bgcolor="#cccccc"><td>3</td><td>2</td><td>1</td><td>0</td></tr>
+<tr>
+<td><%=threereturned%></td><td><%=tworeturned%></td><td><%=onereturned%></td><td><%=badqueries%></td>
+</tr>
+</table>
+<img src="images/fixesperquery.png"/>
 
 <h2>queries by type</h2>
 <table border="1"><tr 
