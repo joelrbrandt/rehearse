@@ -1528,6 +1528,11 @@ public class Base {
    */
   static public void openURL(String url) {
     try {
+      //Windows cmd interprets ampersand as a special character
+      //we have to escape it as ^&
+      if(Base.isWindows()) {
+        url = url.replaceAll("&", "^&");
+      }
       platform.openURL(url);
 
     } catch (Exception e) {
