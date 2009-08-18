@@ -1,5 +1,6 @@
 <%
 import os,sys
+os.environ['HOME'] = '/project/helpmeout-www/images'
 
 import matplotlib
 # chose a non-GUI backend
@@ -19,12 +20,10 @@ res= con.execute("select count(distinct querylog.id) from querylog, fixidlog whe
 goodqueries = [r[0] for r in res][0]
 
 #number of fixes returned with each query
-res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=1)")
-onereturned = [r[0] for r in res][0]
-res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=2)")
-tworeturned = [r[0] for r in res][0]
-res = con.execute("select count(*) from (select count(fixidlog.log_id) as count from querylog, fixidlog where querylog.id=fixidlog.log_id group by fixidlog.log_id having count=3)")
-threereturned = [r[0] for r in res][0]
+res = con.execute("select fixes, sum(fixes) from (select count(*) as fixes from querylog join fixidlog on fixidlog.log_id=querylog.id group by querylog.id) group by fixes;")
+res = [r for r in res]
+fixes = [r[0] for r in res]
+fixcounts = [r[1] for r in res]
 
 # count compile-time error query counts vs runtime error query counts
 res = con.execute("select count(type) from querylog group by type order by type asc")
@@ -46,25 +45,23 @@ fmsgs = [r[1] for r in fres]
 
 from pylab import *
 
-fixes = [badqueries, onereturned, tworeturned, threereturned]
+#fixes = [badqueries, onereturned, tworeturned, threereturned]
 clf()
-figure(figsize=(3.5, 2))
-pos = arange(len(fixes))+.5
+figure(figsize=(3, 2))
+pos = arange(len(fixcounts))+.5
 axes([0.1,0.25,0.85,0.5])
-barh(pos, fixes, align='center')
-yticks(pos, [r for r in range(4)])
+barh(pos, fixcounts, align='center')
+yticks(pos, fixes)
 xlabel('queries returned')
-ylabel('fixes returned')
-title('fixes returned per query')
 grid(True)
 savefig("/project/helpmeout-www/images/fixesperquery.png", dpi=80)
 
 clf()
-figure(1)
-axes([0.5,0.1,0.45,0.8])
+figure(figsize=(8,6))
+axes([.66,0.1,0.27,0.8])
 pos = arange(len(msgs))+.5
 barh(pos,counts, align='center')
-yticks(pos,msgs)
+yticks(pos,msgs,fontsize=8)
 xlabel('times queried')
 title('error queries by error message')
 grid(True)
@@ -77,7 +74,7 @@ fcounts.reverse()
 axes([0.7,0.1,0.29,0.8])
 pos = arange(len(fmsgs))+.5
 barh(pos,fcounts, align='center')
-yticks(pos,fmsgs)
+yticks(pos,fmsgs,fontsize=8)
 xlabel('times queried')
 title('fixes by error message')
 grid(True)
@@ -85,13 +82,14 @@ savefig("/project/helpmeout-www/images/fixhbar.png",dpi=80)
 
 
 clf()
-figure(figsize=(4,4))
+figure(figsize=(3.5,3.5))
 ax = axes([0.1, 0.1, 0.8, 0.8])
 pie([goodqueries,badqueries],labels=["Successful","Unsuccessful"],colors=['g','r'])
 savefig("/project/helpmeout-www/images/queryreturns.png")
 
 clf()
-pie(typecounts,labels=["Compile-time","Runtime"])
+figure(figsize=(3.5,3.5))
+pie(typecounts,labels=["Compile-time","Runtime"],colors=['b','y'])
 savefig("/project/helpmeout-www/images/querytypes.png")
 %>
 
@@ -102,46 +100,60 @@ savefig("/project/helpmeout-www/images/querytypes.png")
         h1 {font-family:Arial}
         h2 {font-family:Arial}
         p  {font-family:Arial}
-        table {font-size:70%; border:1px solid; 
+        table {font-size:80%; border:1px solid; 
 border-collapse:collapse;}
         </style>
 
 <h1>some helpmeout statistics</h1>
 
-<h2>successful & unsuccessful queries</h2>
-<table border="1">
-<tr 
-bgcolor="#cccccc"><td>successful</td><td>unsuccessful</td><td>total</td></tr>
-<tr>
-<td><%=goodqueries%></td><td><%=badqueries%></td><td><%=totalqueries%></td>
-</tr>
+<table style="border:none;">
+  <tr>
+    <td>
+      <h2>successful & unsuccessful queries</h2>
+      <table border="1">
+      <tr bgcolor="#cccccc"><td>successful</td><td>unsuccessful</td><td>total</td></tr>
+      <tr>
+      <td><%=goodqueries%></td><td><%=badqueries%></td><td><%=totalqueries%></td>
+      </tr>
+      </table>
+      <img src="images/queryreturns.png"/>
+    </td>
+    <td>
+      <h2>queries by type</h2>
+      <table border="1">
+      <tr bgcolor="#cccccc"><td>compile-time</td><td>runtime</td></tr>
+      <tr>
+      <td><%=typecounts[0][0]%></td>
+      <td><%=typecounts[1][0]%></td>
+      </tr></table>
+      <img src="images/querytypes.png"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2>
+      <h2>number of fixes returned per query</h2>
+      <table border="1">
+      <tr bgcolor="#cccccc"><td>3</td><td>2</td><td>1</td></tr>
+      <tr>
+      <td><%=fixcounts[2]%></td><td><%=fixcounts[1]%></td><td><%=fixcounts[0]%></td>
+      </tr>
+      </table>
+      <img src="images/fixesperquery.png"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2>
+      <h2>error messages in queries</h2>
+      <img src="images/queryhbar.png"/><br>
+      <%--"<br>".join([str(r[0])+'-'+r[1] for r in res])--%>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2>
+      <h2>error messages in fixes (top 25)</h2>
+      <img src="images/fixhbar.png"/><br>
+    </td>
+  </tr>
 </table>
-<!--<img src="images/queryreturns.png"/>-->
-
-<h2>number of fixes returned per query</h2>
-<table border="1">
-<tr bgcolor="#cccccc"><td>3</td><td>2</td><td>1</td><td>0</td></tr>
-<tr>
-<td><%=threereturned%></td><td><%=tworeturned%></td><td><%=onereturned%></td><td><%=badqueries%></td>
-</tr>
-</table>
-<img src="images/fixesperquery.png"/>
-
-<h2>queries by type</h2>
-<table border="1"><tr 
-bgcolor="#cccccc"><td>compile-time</td><td>runtime</td></tr>
-<tr>
-<td><%=typecounts[0][0]%></td>
-<td><%=typecounts[1][0]%></td>
-</tr></table>
-
-<!--<img src="images/querytypes.png"/>-->
-
-<h2>error messages in queries</h2>
-<img src="images/queryhbar.png"/><br>
-<%--"<br>".join([str(r[0])+'-'+r[1] for r in res])--%>
-
-<h2>error messages in fixes (top 25)</h2>
-<img src="images/fixhbar.png"/><br>
  
 <%@ include file="footer.html"%>
