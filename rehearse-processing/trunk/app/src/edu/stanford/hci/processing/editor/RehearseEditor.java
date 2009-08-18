@@ -133,6 +133,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public void handleInteractiveRun() {
 	  HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
 	  
+	  statusEmpty(); //clear the status area
+	  
 		wasLastRunInteractive = true;
 		// clear previous context
 		if (canvasFrame != null)
@@ -259,6 +261,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	private boolean HelpMeOutCompile() {
     try {
+     
       String appletClassName = getSketch().compile();
       if (appletClassName != null) {
         HelpMeOut.getInstance().processNoError(appendCodeFromAllTabs(false));
