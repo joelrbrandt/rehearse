@@ -6,6 +6,7 @@ import matplotlib
 # chose a non-GUI backend
 matplotlib.use( 'Agg' )
 from pysqlite2 import dbapi2 as sqlite
+from collections import defaultdict
 
 #how many queries were answered?
   
@@ -24,6 +25,24 @@ res = con.execute("select fixes, sum(fixes) from (select count(*) as fixes from 
 res = [r for r in res]
 fixes = [r[0] for r in res]
 fixcounts = [r[1] for r in res]
+
+#number of fixes returned with each query per day
+res = con.execute("select time, fixes, sum(fixes) from (select strftime('%Y-%m-%d',querylog.timestamp) as time, count(*) as fixes from querylog, fixidlog where fixidlog.log_id=querylog.id group by querylog.id) group by time, fixes;")
+fixdict = {}
+for r in res:
+  fixdict.setdefault(r[0],[]).append([r[1],r[2]])
+
+# number of fixes submitted per day (compiletime and runtime)
+res = con.execute("select strftime('%Y-%m-%d',timestamp) as time, count(id) from compilererrors group by time;")
+compilersubmissions = [r for r in res]
+res = con.execute("select strftime('%Y-%m-%d',timestamp) as time, count(id) from exceptions group by time;")
+runtimesubmissions = [r for r in res]
+# fixsubmits {date: [compile_fixes_submitted, runtime_fixes_submitted], ...}
+fixsubmits = {}
+for c in compilersubmissions:
+  fixsubmits.setdefault(c[0],[0,0])[0] += c[1]
+for r in runtimesubmissions:
+  fixsubmits.setdefault(r[0],[0,0])[1] += r[1]
 
 # count compile-time error query counts vs runtime error query counts
 res = con.execute("select count(type) from querylog group by type order by type asc")
@@ -56,6 +75,49 @@ xlabel('queries returned')
 grid(True)
 savefig("/project/helpmeout-www/images/fixesperquery.png", dpi=80)
 
+#get max limit
+lims = []
+for key,val in fixdict.iteritems():
+  x = [v[1] for v in val]
+  lims.append(max(x))
+maxx = max(lims)
+
+for date,val in fixdict.iteritems():
+  x = [v[1] for v in val]
+  y = [v[0] for v in val]
+  clf()
+  figure(figsize=(1.5,2))
+  pos = arange(len(y))
+  axes([0.1,0.25,0.85,0.5])
+  barh(pos,x,align='center')
+  yticks(pos,y)
+  xlim(xmax=maxx)
+  title(date)
+  grid(True)
+  savefig("/project/helpmeout-www/images/fixes_"+str(date)+'.png',dpi=80)
+
+# fixes submitted per day
+#get max limit
+lims = []
+for key,val in fixsubmits.iteritems():
+  lims.append(max(val))
+maxx = max(lims)
+
+for date, pair in fixsubmits.iteritems():
+  fixsubmitcounts = [pair[0], pair[1]]
+  clf()
+  figure(figsize=(2.5,1))
+  pos = arange(len(fixsubmitcounts))
+  axes([0.22,0.25,0.75,0.5])
+  barh(pos, fixsubmitcounts, align="center")
+  yticks(pos,['compiler','runtime'],fontsize=8)
+  xlim(xmax=maxx)
+  title(date)
+  grid(True)
+  savefig("/project/helpmeout-www/images/fixsubmits_"+str(date)+".png",dpi=80)
+
+
+# error queries by error message
 clf()
 figure(figsize=(8,6))
 axes([.66,0.1,0.27,0.8])
@@ -102,6 +164,8 @@ savefig("/project/helpmeout-www/images/querytypes.png")
         p  {font-family:Arial}
         table {font-size:80%; border:1px solid; 
 border-collapse:collapse;}
+	.minigraphs {border:none;}
+	.minigraphs td {padding: 20px;}
         </style>
 
 <h1>some helpmeout statistics</h1>
@@ -129,31 +193,60 @@ border-collapse:collapse;}
       <img src="images/querytypes.png"/>
     </td>
   </tr>
+</table>
+<h2>number of fixes returned per query</h2>
+<table border="1">
+<tr bgcolor="#cccccc"><td>3</td><td>2</td><td>1</td></tr>
+<tr>
+<td><%=fixcounts[2]%></td><td><%=fixcounts[1]%></td><td><%=fixcounts[0]%></td>
+</tr>
+</table>
+<img src="images/fixesperquery.png"/>
+<table class="minigraphs">
   <tr>
-    <td colspan=2>
-      <h2>number of fixes returned per query</h2>
-      <table border="1">
-      <tr bgcolor="#cccccc"><td>3</td><td>2</td><td>1</td></tr>
-      <tr>
-      <td><%=fixcounts[2]%></td><td><%=fixcounts[1]%></td><td><%=fixcounts[0]%></td>
-      </tr>
-      </table>
-      <img src="images/fixesperquery.png"/>
-    </td>
-  </tr>
-  <tr>
-    <td colspan=2>
-      <h2>error messages in queries</h2>
-      <img src="images/queryhbar.png"/><br>
-      <%--"<br>".join([str(r[0])+'-'+r[1] for r in res])--%>
-    </td>
-  </tr>
-  <tr>
-    <td colspan=2>
-      <h2>error messages in fixes (top 25)</h2>
-      <img src="images/fixhbar.png"/><br>
-    </td>
+<%
+dates = fixdict.keys()
+dates.sort()
+for date in dates:
+%>
+  <td>
+    <img src="images/fixes_<%=str(date)%>.png"/>
+  </td>
+<%
+%>
   </tr>
 </table>
+<h2>fixes submitted per day</h2>
+<table class="minigraphs">
+<%
+dates = fixsubmits.keys()
+dates.sort()
+rowcounter = 0
+for date in dates:
+  if rowcounter is 0:
+%>
+  <tr>
+<%
+  
+%>
+    <td>
+      <img src="images/fixsubmits_<%=date%>.png"/>
+    </td>
+<%
+  if rowcounter is 2:
+%>
+  </tr>
+<%
+  
+  rowcounter = (rowcounter+1)%3
+%>
+<%
+%>
+</table>
+<h2>error messages in queries</h2>
+<img src="images/queryhbar.png"/><br>
+<%--"<br>".join([str(r[0])+'-'+r[1] for r in res])--%>
+<h2>error messages in fixes (top 25)</h2>
+<img src="images/fixhbar.png"/><br>
  
 <%@ include file="footer.html"%>
