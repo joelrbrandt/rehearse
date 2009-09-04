@@ -64,7 +64,7 @@ td.diff_header {text-align:right}
 <h3>Code</h3>
 <%= table %>
 <hr>
-<h3>Comments: </h3>
+<h3>Explanations: </h3>
 <% 
 s = ""
 for comment in comments:
@@ -78,7 +78,7 @@ if form.has_key('add') and int(form['add'])==1 and len(comments)==0:
 	
 %>
 <hr>
-<h3>Add a Comment:</h3>
+<h3>Add an Explanation:</h3>
 <form name="input_form" action="add_comment.psp" method="post">
 <input type="hidden" name="id" value="<%=form['id']%>">
 <input type="hidden" name="type" value="<%=type%>">

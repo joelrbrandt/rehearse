@@ -1,0 +1,79 @@
+<%
+from cgi import escape
+from urllib import unquote
+from pysqlite2 import dbapi2 as sqlite
+import difflib
+if form.has_key('db') and form['db']=='arduino':
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout-arduino.sqlite")
+  db='arduino'
+else:
+  con = sqlite.connect("/project/helpmeout-server/db/helpmeout.sqlite")
+  db='processing'
+
+res = con.execute("SELECT querylog.id, timestamp, type, error, fix_id, code FROM querylog LEFT JOIN fixidlog ON querylog.id = fixidlog.log_id ORDER BY timestamp DESC")
+
+title = "HelpMeOut Queries"
+
+#[0] has id, [1] has timestamp, [2] has type, [3] has error, [4] hase None or fix_id or doesn't exist
+rows = [r for r in res]
+%>
+<%@ include file="header.html"%>
+        <style type="text/css">
+        h1 {font-family:Arial}
+        h2 {font-family:Arial}
+        p  {font-family:Arial}
+	table {font-size:70%; border-collapse:collapse}
+        </style>
+<h1><%= title %></h1>
+<table border="1">
+<tr>
+        <td bgcolor="#cccccc"><b>id</b></td>
+        <td bgcolor="#cccccc"><b>timestamp</b></td>
+        <td bgcolor="#cccccc"><b>type</b></td>
+        <td bgcolor="#cccccc"><b>error</b></td>
+        <td bgcolor="#cccccc"><b>fix id</b></td>
+</tr>
+<%
+lastId=-1
+fixids = []
+types = ["Compile-time","Runtime"]
+lastrow = ["-2","","","",""]
+firstrun = True
+rows.append(lastrow)
+for row in rows:
+  if firstrun:
+    lastId=int(row[0])
+    lastrow = row
+    fixids = [row[4]]
+    firstrun = False
+    continue
+  if(int(row[0])!=lastId):
+    # output last row
+    lastId=int(row[0])
+%>
+<tr>
+  <td><%= lastrow[0]%></td>
+  <td><%= lastrow[1]%></td>
+  <td><%= types[int(lastrow[2])]%></td>
+  <td><%= lastrow[3]%><br><pre><%= lastrow[5]%></pre></td>
+  <td>
+  <%
+    for id in fixids:
+      if(id is not None):
+  %>
+  <a href="detail.psp?type=<%= lastrow[2] %>&id=<%= id %>&db=processing"><%= id %></a>
+  <%
+  %>
+  </td>
+</tr>
+<%
+    lastrow=row
+    fixids = [row[4]]
+  else:
+    #append fixid
+    fixids.append(row[4])
+#
+%>
+</table>
+
+<%@ include file="footer.html"%>
