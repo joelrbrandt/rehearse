@@ -52,6 +52,7 @@ public class ProcessingEditor extends JFrame implements ActionListener, ConsoleI
 	
 	PrintStream outputStream;
 	
+	
 	Interpreter interpreter;
 	ArrayList<Image> snapshotList = new ArrayList<Image>();
 	
