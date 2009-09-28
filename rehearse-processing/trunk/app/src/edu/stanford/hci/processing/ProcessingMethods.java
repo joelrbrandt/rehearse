@@ -1,13 +1,10 @@
 package edu.stanford.hci.processing;
 
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
-import javax.swing.JFrame;
-
+@Deprecated
 public class ProcessingMethods {
 	ProcessingCanvas canvas;
 	Reader in;

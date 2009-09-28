@@ -1,12 +1,7 @@
 package edu.stanford.hci.processing;
 
 import java.awt.Frame;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -14,7 +9,6 @@ import javax.swing.JPopupMenu;
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.helpmeout.HelpMeOutPreferences;
-import edu.stanford.hci.helpmeout.HelpMeOutServerProxy;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 import processing.app.Base;
 import processing.app.Editor;
@@ -22,6 +16,11 @@ import processing.app.Preferences;
 import processing.app.Theme;
 import processing.core.PApplet;
 
+/**
+ * Entry class for the application. 
+ * Wraps around the Base class from Processing in order to use our
+ * specific Rehearse classes.
+ */
 public class RehearseBase extends Base {
 
 	public RehearseBase(String[] args) {

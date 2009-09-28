@@ -13,6 +13,11 @@ import javax.swing.JComponent;
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.TextAreaPainter;
 
+/**
+ * Handles painting the left sidebar where "print points" or other
+ * line-specific interactions could happen.
+ *
+ */
 public class SidebarPainter extends JComponent {
 
 	private TextAreaPainter textAreaPainter;

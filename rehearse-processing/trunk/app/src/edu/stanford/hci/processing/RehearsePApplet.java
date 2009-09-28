@@ -9,9 +9,12 @@ import processing.core.PApplet;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
-import edu.stanford.hci.helpmeout.ExceptionInfo;
 import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 
+/**
+ * Overrides PApplet & lets the methods called on it (e.g. setup, draw) 
+ * to pass through the interpreter BeanShell instead.
+ */
 public class RehearsePApplet extends PApplet {
 
   public enum MethodType { draw, setup, mouseClicked, 

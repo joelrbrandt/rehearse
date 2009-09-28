@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -14,9 +13,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -34,8 +30,6 @@ import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.SyntaxDocument;
 import processing.app.syntax.TextAreaPainter;
 import processing.app.syntax.TextAreaPainter.Highlight;
-import processing.core.PApplet;
-import bsh.CallStack;
 import bsh.ConsoleInterface;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -58,7 +52,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
 	
-	private static final boolean USEHIGHLIGHT = false;
+	private static final boolean USEHIGHLIGHT = true;
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
@@ -170,8 +164,6 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 				}
 			}
 		});
-		//canvasFrame.setDefaultCloseOperation();
-		//ProcessingMethods methods = new ProcessingMethods(canvas);
 
 		// NOTE: If this line fails with java.lang.NoSuchMethodError you probably have a the BeanShell bshXXX.jar 
 		// in the classpath, e.g., /Library/Java/Extensions on OSX
@@ -188,7 +180,6 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			try {
 				processingClassPath = new URL("file://" + p);
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -196,7 +187,6 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 				try {
 					interpreter.getClassManager().addClassPath(processingClassPath);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
@@ -216,15 +206,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		try {
 			interpreter.eval("package processing.core;");
 		} catch (EvalError e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-
-		//String source = super.getText();
-//		ExecutionTask task = new ExecutionTask(interpreter, source, output);
-//		Thread thread = new Thread(task);
-//		thread.start();
 
 		console.clear();
 		ensureDocumentExistsForEveryTab();

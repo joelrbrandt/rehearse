@@ -3,8 +3,7 @@ package edu.stanford.hci.processing;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JFrame;
-
+@Deprecated
 public class ProcessingCanvas extends Canvas {
 	BufferedImage image;
 	Graphics2D graphics;

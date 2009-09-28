@@ -21,6 +21,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
+/**
+ * A View frame that handles presenting snapshots taken during a run.
+ */
 public class RehearseImageViewer extends JFrame implements ChangeListener, ActionListener {
 	private List<SnapshotModel> snapshots;
 	private int currSnapshotIndex;

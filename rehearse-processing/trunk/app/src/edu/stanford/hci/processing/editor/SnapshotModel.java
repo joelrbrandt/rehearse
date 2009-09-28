@@ -1,6 +1,5 @@
 package edu.stanford.hci.processing.editor;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +8,10 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+/**
+ * Encapsulates an information about a snapshot (image, line number, etc.)
+ * that was captured during a run.
+ */
 public class SnapshotModel {
 
 	// TODO: needs thread protection
