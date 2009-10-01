@@ -33,6 +33,8 @@ import processing.app.syntax.TextAreaPainter.Highlight;
 import bsh.ConsoleInterface;
 import bsh.EvalError;
 import bsh.Interpreter;
+import bsh.Parser;
+import bsh.ParserInfoGetter;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
 	
@@ -410,6 +412,14 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			}
 		}
 	}
+
+  public void testFunction() {
+    String source = appendCodeFromAllTabs();
+    System.out.println(source);
+ 
+    ParserInfoGetter pig = new ParserInfoGetter(); 
+    pig.parseString(source);
+  }
 
 	
 //	class RehearseDocumentListener implements DocumentListener {
