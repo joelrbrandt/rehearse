@@ -1545,7 +1545,13 @@ implements Runnable, ConsoleInterface,Serializable
 	public static boolean getSaveClasses()  {
 		return getSaveClassesDir() != null;
 	}
-
+	
+	
+	/**------------------------------------------------
+	 * New methods added for Rehearse.
+	 *------------------------------------------------
+	 */
+	
 	public boolean isBreakpointAt(int linenumber) {
 		return breakpointLineNumbers.contains(linenumber);
 	}

@@ -172,6 +172,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		// to test, run "java bsh.Console" from terminal - if the beanshell console pops up, you'll have this problem
 		// @see http://www.beanshell.org/manual/quickstart.html#Download_and_Run_BeanShell
 		interpreter = new Interpreter(this, applet);
+		interpreter.setStrictJava(true);
 
 		/* No longer sure this is needed, I think just setting the package solves all problems
 		// Add current classpath to the interpreter's classpath
@@ -418,7 +419,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
     System.out.println(source);
  
     ParserInfoGetter pig = new ParserInfoGetter(); 
-    pig.parseString(source);
+    pig.parseCode(source);
   }
 
 	
