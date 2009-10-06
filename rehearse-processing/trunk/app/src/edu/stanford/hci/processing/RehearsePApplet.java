@@ -2,10 +2,12 @@ package edu.stanford.hci.processing;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 
 import processing.core.PApplet;
+import processing.core.PApplet.RegisteredMethods;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
@@ -150,5 +152,40 @@ public class RehearsePApplet extends PApplet {
     super.stop();
   }
 
+  @Override
+  protected void registerNoArgs(RegisteredMethods meth,
+      String name, Object o) {
+    Class<?> c = o.getClass();
+    try {
+      Method method = c.getDeclaredMethod(name, new Class[] {});
+      method.setAccessible(true);
+      meth.add(o, method);
+
+    } catch (NoSuchMethodException nsme) {
+      die("There is no " + name + "() method in the class " +
+          o.getClass().getName());
+
+    } catch (Exception e) {
+      die("Could not register " + name + " + () for " + o, e);
+    }
+  }
+  
+  @Override
+  protected void registerWithArgs(RegisteredMethods meth,
+      String name, Object o, Class<?> cargs[]) {
+    Class<?> c = o.getClass();
+    try {
+      Method method = c.getDeclaredMethod(name, cargs);
+      method.setAccessible(true);
+      meth.add(o, method);
+
+    } catch (NoSuchMethodException nsme) {
+      die("There is no " + name + "() method in the class " +
+          o.getClass().getName());
+
+    } catch (Exception e) {
+      die("Could not register " + name + " + () for " + o, e);
+    }
+  }
 
 }

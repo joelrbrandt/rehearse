@@ -503,6 +503,8 @@ class Name implements java.io.Serializable
 					result = classNameSpace.getThis( interpreter );
 				else
 					result = classNameSpace.getClassInstance();
+			} else { // If "this" resolves to bsh.This, we replace with RehearsePApplet.
+			  result = interpreter.getApplet();
 			}
 
 			return result;
