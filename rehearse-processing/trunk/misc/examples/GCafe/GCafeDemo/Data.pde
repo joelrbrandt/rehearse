@@ -11,6 +11,7 @@ static final int REPUBLICAN_IN_OFFICE = 10;
 static final int NATIONAL_DEBT = 11;
 static final int NATIONAL_DEBT_GDP_PERCENT = 12;
 static final int CPI = 13;
+static final int USA_TRAFFIC_DEATHS = 14;
 
 class Data {
       
