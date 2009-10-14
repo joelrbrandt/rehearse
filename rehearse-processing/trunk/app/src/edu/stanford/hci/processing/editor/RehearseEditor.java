@@ -84,9 +84,13 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	@Override
 	public void handleStop() {
 		if (wasLastRunInteractive) {
+		  boolean appletWasRunning = canvasFrame.isShowing();
 			applet.stop();
 			canvasFrame.dispose();
-			logRunFeedback(true);
+			// This check is needed since save also calls handleStop.
+			if (appletWasRunning) {
+			  logRunFeedback(true);
+			}
 		} else {
 			super.handleStop();
 		}
