@@ -4,14 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -20,6 +24,7 @@ import javax.swing.JMenu;
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
+import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.RehearsePApplet;
 import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
@@ -72,6 +77,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public void handleRun(boolean present) {
 		wasLastRunInteractive = false;
 		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_COMPILED_RUN);
+		RehearseLogger.getInstance().log(RehearseLogger.EventType.COMPILED_RUN, getSketch(), appendCodeFromAllTabs(false));
 		super.handleRun(present);
 	}
 
@@ -80,6 +86,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		if (wasLastRunInteractive) {
 			applet.stop();
 			canvasFrame.dispose();
+			logRunFeedback(true);
 		} else {
 			super.handleStop();
 		}
@@ -164,6 +171,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 					RehearseImageViewer viewer = new RehearseImageViewer(snapshots);
 					viewer.setVisible(true);
 				}
+				logRunFeedback(true);
 			}
 		});
 
@@ -195,7 +203,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			}
 		}
 		 */
-		
+	 
 		// Compiles the interactive program to check for compile errors.
 		// If it fails, stop running.
 		boolean compiled = HelpMeOutCompile();
@@ -203,7 +211,21 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		  return;
 		}
 
-		String source = appendCodeFromAllTabs();
+    String source = appendCodeFromAllTabs();
+    RehearseLogger.getInstance().log(RehearseLogger.EventType.INTERACTIVE_RUN, getSketch(), source);
+    
+    // Add the sketch classpath to BeanShell interpreter
+    String[] classPaths = getSketch().getClassPath().split(";");
+    for (String classPath : classPaths) {
+      try {
+        File file = new File(classPath);
+        interpreter.getClassManager().addClassPath(file.toURI().toURL());
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
 		
 		// now, add our script to the processing.core package
 		try {
@@ -239,10 +261,46 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			if (obj != null)
 				console.message(obj.toString(), false, false);
 		} catch (EvalError e) {
+		  RehearseLogger.getInstance().log(
+		      RehearseLogger.EventType.RUNTIME_ERROR, getSketch(), e.toString());
 		  HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, interpreter);
 			console.message(e.toString(), true, false);
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public boolean handleSave(boolean immediately) {
+	  RehearseLogger.getInstance().log(
+        RehearseLogger.EventType.SAVE, getSketch(), appendCodeFromAllTabs());
+	  return super.handleSave(immediately);
+	}
+	
+	@Override
+	public boolean handleSaveAs() {
+	  String oldPath = getSketch().getFolder().getAbsolutePath();
+	  boolean saved = super.handleSaveAs();
+	  if (saved) {
+	    String logMessage = "Oldpath: " + oldPath + "\r\n" + appendCodeFromAllTabs();
+	    RehearseLogger.getInstance().log(
+	        RehearseLogger.EventType.SAVE_AS, getSketch(), logMessage);
+	  }
+	  
+	  return saved;
+	}
+	
+	@Override
+	public void handlePaste() {
+    Clipboard clipboard = getToolkit().getSystemClipboard();
+    try {
+      String pasteText = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replace('\r','\n');
+      RehearseLogger.getInstance().log(
+          RehearseLogger.EventType.CODE_PASTE, getSketch(), pasteText);
+    } catch (Exception e) {
+      // Do nothing. Exception will be handled in the superclass.
+    }
+
+	  super.handlePaste();
 	}
 
 	private boolean HelpMeOutCompile() {
@@ -420,6 +478,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
  
     ParserInfoGetter pig = new ParserInfoGetter(); 
     pig.parseCode(source);
+    
+    System.out.println(textarea.getCaretLine());
+    System.out.println(textarea.getCaretPosition());
+    pig.returnNodeAtCaretPosition(textarea.getCaretLine() + 1, textarea.getCaretPosition());
   }
 
 	

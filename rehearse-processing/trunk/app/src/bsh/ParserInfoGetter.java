@@ -3,12 +3,48 @@ package bsh;
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import org.javacc.parser.JavaCCParserConstants;
-
 public class ParserInfoGetter {
   ArrayList<SimpleNode> parsedNodes = new ArrayList<SimpleNode>();
   ArrayList<ThrowawaySegment> throwawaySegments = new ArrayList<ThrowawaySegment>();
 
+  public SimpleNode returnNodeAtCaretPosition(int caretLine, int caretColumn) {
+    ArrayList<SimpleNode> sameLineNodes = new ArrayList<SimpleNode>();
+    for (SimpleNode node : parsedNodes) {
+      if (node.firstToken.beginLine > caretLine) {
+        break;
+      }
+      recursiveFindNodesInLine(sameLineNodes, node, caretLine);
+    }
+    
+    for (SimpleNode node : sameLineNodes) {
+      System.out.println(node.getText());
+    }
+    
+    return null;
+  }
+  
+  private void recursiveFindNodesInLine(ArrayList<SimpleNode> sameLineNodes,
+      SimpleNode node, int caretLine) {
+    for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+      SimpleNode child = node.getChild(i);
+      
+      if (child.firstToken.beginLine <= caretLine &&
+          child.lastToken.endLine >= caretLine) {
+        sameLineNodes.remove(node);
+        sameLineNodes.add(child);
+        
+        if (child.firstToken.beginLine < caretLine ||
+            child.lastToken.endLine > caretLine) {
+          recursiveFindNodesInLine(sameLineNodes, child, caretLine);
+        }
+      }
+      
+      if (child.firstToken.beginLine > caretLine) {
+        break;
+      }
+    }
+  }
+  
   /**
    * Parses code. If there are parse errors, best effort is made to parse
    * the code without the error segments. 

@@ -128,7 +128,8 @@ public class RehearsePApplet extends PApplet {
       throw new RuntimeException(e);
     } catch (EvalError e) {
       HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i); //notify editor in here.
-
+      RehearseLogger.getInstance().log(
+          RehearseLogger.EventType.RUNTIME_ERROR, i.getEditor().getSketch(), e.toString());
       throw new RuntimeException(e);
     }
   }

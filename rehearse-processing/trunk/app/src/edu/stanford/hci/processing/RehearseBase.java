@@ -27,42 +27,49 @@ public class RehearseBase extends Base {
 		super(args);
 	}
 	
+	@Override
+	public void handleOpenReplace(String path) {
+	  RehearseLogger.getInstance().log(RehearseLogger.EventType.OPEN, null, path);
+	  super.handleOpenReplace(path);
+	}
+	
+	@Override
 	protected Editor handleOpen(String path, int[] location) {
-	    System.out.println("handling open in rehearse base");
-	    File file = new File(path);
-	    if (!file.exists()) return null;
+	  RehearseLogger.getInstance().log(RehearseLogger.EventType.OPEN, null, path);
+	  System.out.println("handling open in rehearse base");
+	  File file = new File(path);
+	  if (!file.exists()) return null;
 
-	    // Cycle through open windows to make sure that it's not already open.
-	    for (Editor editor : editors) {
-	      if (editor.getSketch().getMainFilePath().equals(path)) {
-		System.out.println("already open");
-	        editor.toFront();
-	        return editor;
-	      }
+	  // Cycle through open windows to make sure that it's not already open.
+	  for (Editor editor : editors) {
+	    if (editor.getSketch().getMainFilePath().equals(path)) {
+	      System.out.println("already open");
+	      editor.toFront();
+	      return editor;
 	    }
-	    System.out.println("about to make a new rehearse editor");
-	    Editor editor = new RehearseEditor(this, path, location);
+	  }
+	  System.out.println("about to make a new rehearse editor");
+	  Editor editor = new RehearseEditor(this, path, location);
 
-	    // Make sure that the sketch actually loaded
-	    if (editor.getSketch() == null) {
-	      return null;  // Just walk away quietly
-	    }
+	  // Make sure that the sketch actually loaded
+	  if (editor.getSketch() == null) {
+	    return null;  // Just walk away quietly
+	  }
 
-	    editors.add(editor);
+	  editors.add(editor);
 
-	    // now that we're ready, show the window
-	    // (don't do earlier, cuz we might move it based on a window being closed)
-	    editor.setVisible(true);
+	  // now that we're ready, show the window
+	  // (don't do earlier, cuz we might move it based on a window being closed)
+	  editor.setVisible(true);
 
-	    try {
-		//System.out.println("finished: " + editor);
-	    }
-	    catch (Exception e) {
-		e.printStackTrace();
-	    }
+	  try {
+	    //System.out.println("finished: " + editor);
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
 
-
-	    return editor;
+	  return editor;
 	  }
 	
 	 public boolean handleQuit() {

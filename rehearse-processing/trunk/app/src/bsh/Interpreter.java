@@ -1650,6 +1650,10 @@ implements Runnable, ConsoleInterface,Serializable
 	public RehearsePApplet getApplet() {
 		return applet;
 	}
+	
+	public RehearseEditor getEditor() {
+	  return editor;
+	}
 
   public void setLineToWatch(int line) {
     lineToWatch = line;

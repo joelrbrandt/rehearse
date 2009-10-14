@@ -43,9 +43,8 @@ import javax.swing.undo.*;
 
 import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
+import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.editor.RehearseEditor;
-import edu.stanford.hci.processing.editor.RehearseEditorToolbar;
-
 
 /**
  * Main editor panel for the Processing Development Environment.
@@ -960,8 +959,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = newJMenuItem("Paste", 'V');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          textarea.paste();
-          sketch.setModified(true);
+          handlePaste();
         }
       });
     menu.add(item);
@@ -1661,6 +1659,22 @@ public class Editor extends JFrame implements RunnerListener {
   public void internalRunnerClosed() {
     running = false;
     toolbar.deactivate(EditorToolbar.RUN);
+    logRunFeedback(false);
+  }
+  
+  public void logRunFeedback(boolean wasInteractiveRun) {
+    if (!RehearseLogger.LOG_RUN_FEEDBACK)
+      return;
+    
+    int userFeedback = JOptionPane.showOptionDialog(this, "Did the last run do what you expected?", 
+        "Evaluate Last Run", JOptionPane.YES_NO_OPTION, 
+        JOptionPane.QUESTION_MESSAGE, null, null, null);
+    RehearseLogger.EventType type = RehearseLogger.EventType.COMPILED_RUN_FEEDBACK;
+    if (wasInteractiveRun) {
+      type = RehearseLogger.EventType.INTERACTIVE_RUN_FEEDBACK;
+    }
+    RehearseLogger.getInstance().log(type, getSketch(),
+        (userFeedback == JOptionPane.YES_OPTION) ? "YES" : "NO");
   }
 
 
@@ -2204,7 +2218,8 @@ public class Editor extends JFrame implements RunnerListener {
             SketchCode sketchCode = sketch.getCurrentCode();
             // line right now is relative 0-based line # of error in current editor.
             HelpMeOut.getInstance().query(errorMsg,errorLine,line,sketchCode, this);
-            
+            RehearseLogger.getInstance().log(
+                RehearseLogger.EventType.COMPILE_ERROR, getSketch(), e.toString());
           }
           // </HelpMeOut>
         }
