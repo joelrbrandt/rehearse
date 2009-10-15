@@ -46,6 +46,7 @@ else
   cp -rX ../shared/tools "$RESOURCES/"
 
   cp -X ../../app/lib/antlr.jar "$RESOURCES/"
+  cp -X ../../app/lib/javacc.jar "$RESOURCES/"
   cp -X ../../app/lib/ecj.jar "$RESOURCES/"
   cp -X ../../app/lib/jna.jar "$RESOURCES/"
 
@@ -139,7 +140,7 @@ mkdir ../build/macosx/work/classes
 javac \
     -Xlint:deprecation \
     -source 1.5 -target 1.5 \
-    -classpath "$RESOURCES/core.jar:$RESOURCES/antlr.jar:$RESOURCES/ecj.jar:$RESOURCES/jna.jar:$RESOURCES/jj1.0.1.jar:$RESOURCES/stringtree-json-2.0.5.jar" \
+    -classpath "$RESOURCES/core.jar:$RESOURCES/antlr.jar:$RESOURCES/javacc.jar:$RESOURCES/ecj.jar:$RESOURCES/jna.jar:$RESOURCES/jj1.0.1.jar:$RESOURCES/stringtree-json-2.0.5.jar" \
     -d ../build/macosx/work/classes \
     src/processing/app/*.java \
     src/processing/app/debug/*.java \
