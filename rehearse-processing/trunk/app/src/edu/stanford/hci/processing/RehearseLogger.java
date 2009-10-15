@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -32,9 +33,13 @@ public class RehearseLogger {
   
   private static RehearseLogger instance;
   private Logger logger;
+
+  public static String getLogFilePath() {
+    return Base.getSketchbookFolder().getAbsolutePath() + File.separator + "rehearse.log";
+  }
   
   private RehearseLogger() {
-    String logFilePath = Base.getSketchbookFolder().getAbsolutePath() + File.separator + "rehearse.log";
+    String logFilePath = RehearseLogger.getLogFilePath(); 
 
     try {
       FileHandler fileHandler = new FileHandler(logFilePath, true);
@@ -73,5 +78,10 @@ public class RehearseLogger {
     }
     buf.append("\r\n" + message);
     logger.info(buf.toString());
+    for (Handler h : logger.getHandlers()) {
+      if (h instanceof FileHandler) {
+        ((FileHandler) h).flush();
+      }
+    }
   }
 }

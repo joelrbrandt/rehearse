@@ -30,6 +30,7 @@ import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
 import processing.app.Editor;
 import processing.app.EditorToolbar;
+import processing.app.Sketch;
 import processing.app.SketchCode;
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.SyntaxDocument;
@@ -59,7 +60,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
 	
-	private static final boolean USEHIGHLIGHT = true;
+	private static final boolean USEHIGHLIGHT = false;
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
@@ -137,6 +138,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		return null;
 	}
 
+	
 	public void handleInteractiveRun() {
 	  HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
 	  
@@ -486,6 +488,12 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
     System.out.println(textarea.getCaretLine());
     System.out.println(textarea.getCaretPosition());
     pig.returnNodeAtCaretPosition(textarea.getCaretLine() + 1, textarea.getCaretPosition());
+  }
+
+  public void uploadSketchToServer() {
+    // TODO Auto-generated method stub
+    RehearseSketchUploader.uploadSketchToServer(this);
+    
   }
 
 	

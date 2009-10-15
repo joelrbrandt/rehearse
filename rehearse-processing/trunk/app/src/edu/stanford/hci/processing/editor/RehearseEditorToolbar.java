@@ -18,7 +18,7 @@ import processing.app.Theme;
 public class RehearseEditorToolbar extends EditorToolbar {
 
 	  static final String title[] = {
-		  "Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run", "Test Function"
+		  "Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run", "Upload to Server"
 	  };
 
 	  static final int BUTTON_COUNT  = title.length;
@@ -31,7 +31,7 @@ public class RehearseEditorToolbar extends EditorToolbar {
 
 	  static final int INTERACTIVE_RUN     = 6;
 
-	  static final int TEST_FUNCTION = 7;
+	  static final int UPLOAD_TO_SERVER = 7;
 	  
 	  static final int INACTIVE = 0;
 	  static final int ROLLOVER = 1;
@@ -87,7 +87,7 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	    which[buttonCount++] = OPEN;
 	    which[buttonCount++] = SAVE;
 	    which[buttonCount++] = EXPORT;
-	    which[buttonCount++] = TEST_FUNCTION;
+	    which[buttonCount++] = UPLOAD_TO_SERVER;
 	    
 	    currentRollover = -1;
 
@@ -328,8 +328,8 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	        editor.handleExport();
 	      }
 	      break;
-	    case TEST_FUNCTION:
-	      ((RehearseEditor)editor).testFunction();
+	    case UPLOAD_TO_SERVER:
+	      ((RehearseEditor)editor).uploadSketchToServer();
 	      break;
 	    }
 	    

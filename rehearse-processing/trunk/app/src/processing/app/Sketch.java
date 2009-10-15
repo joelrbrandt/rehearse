@@ -1482,7 +1482,7 @@ public class Sketch {
   }
 
 
-  protected boolean exportApplet() throws Exception {
+  public boolean exportApplet() throws Exception {
     return exportApplet(new File(folder, "applet").getAbsolutePath());
   }
 
