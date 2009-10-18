@@ -6,6 +6,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -19,18 +21,15 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import edu.stanford.hci.helpmeout.HelpMeOut;
-import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
-import edu.stanford.hci.helpmeout.HelpMeOutLog;
-import edu.stanford.hci.processing.RehearseLogger;
-import edu.stanford.hci.processing.RehearsePApplet;
-import edu.stanford.hci.processing.ModeException;
 import processing.app.Base;
 import processing.app.Editor;
 import processing.app.EditorToolbar;
-import processing.app.Sketch;
 import processing.app.SketchCode;
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.SyntaxDocument;
@@ -39,11 +38,16 @@ import processing.app.syntax.TextAreaPainter.Highlight;
 import bsh.ConsoleInterface;
 import bsh.EvalError;
 import bsh.Interpreter;
-import bsh.Parser;
 import bsh.ParserInfoGetter;
+import edu.stanford.hci.helpmeout.HelpMeOut;
+import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
+import edu.stanford.hci.helpmeout.HelpMeOutLog;
+import edu.stanford.hci.processing.ModeException;
+import edu.stanford.hci.processing.RehearseLogger;
+import edu.stanford.hci.processing.RehearsePApplet;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
-	
+
 	private JFrame canvasFrame;
 	private RehearsePApplet applet;
 	private PrintStream outputStream;
@@ -54,23 +58,31 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	private boolean wasLastRunInteractive = false;
 	
+	private boolean isInInteractiveRun = false;
+
 	public static boolean logTerminationMessage = true;
 
 	private RehearseLineModel lastExecutedLineModel = null;
-
-	public int linesExecutedCount = 0; // TODO: refactor all this crap also this will overflow
+	private ParserInfoGetter pig = null;
 	
+	public int linesExecutedCount = 0; // TODO: refactor all this crap also this
+										// will overflow
+
 	private static final boolean USEHIGHLIGHT = false;
+	
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
+		this.getTextArea().getDocument().addDocumentListener(new RehearseDocumentListener());
+		
 		if (USEHIGHLIGHT)
-		  getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
+			getTextArea().getPainter().addCustomHighlight(
+					new RehearseHighlight());
 	}
 
 	@Override
 	public EditorToolbar newEditorToolbar(Editor editor, JMenu menu) {
-	    System.out.println("Making a Reherase Editor toolbar");	    
+		System.out.println("Making a Reherase Editor toolbar");
 		return new RehearseEditorToolbar(editor, menu);
 	}
 
@@ -78,49 +90,51 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public void handleRun(boolean present) {
 		wasLastRunInteractive = false;
 		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_COMPILED_RUN);
-		RehearseLogger.getInstance().log(RehearseLogger.EventType.COMPILED_RUN, getSketch(), appendCodeFromAllTabs(false));
+		RehearseLogger.getInstance().log(RehearseLogger.EventType.COMPILED_RUN,
+				getSketch(), appendCodeFromAllTabs(false));
 		super.handleRun(present);
 	}
 
 	@Override
 	public void handleStop() {
 		if (wasLastRunInteractive) {
-		  boolean appletWasRunning = canvasFrame.isShowing();
+			boolean appletWasRunning = canvasFrame.isShowing();
 			applet.stop();
 			canvasFrame.dispose();
 			// This check is needed since save also calls handleStop.
 			if (appletWasRunning) {
-			  logRunFeedback(true);
+				logRunFeedback(true);
 			}
 		} else {
 			super.handleStop();
 		}
+		isInInteractiveRun = false;
 	}
-	
+
 	public String appendCodeFromAllTabs() {
-	  return appendCodeFromAllTabs(true);
+		return appendCodeFromAllTabs(true);
 	}
-	
+
 	public String appendCodeFromAllTabs(boolean interactive) {
 		StringBuffer bigCode = new StringBuffer();
 		int bigCount = 0;
 		for (SketchCode sc : getSketch().getCode()) {
-		  if (interactive)
-		    sc.setPreprocOffset(bigCount);
+			if (interactive)
+				sc.setPreprocOffset(bigCount);
 			if (sc == getSketch().getCurrentCode()) {
 				bigCode.append(getText());
-		        bigCode.append('\n');
-		        bigCount += getLineCount();
+				bigCode.append('\n');
+				bigCount += getLineCount();
 			} else {
 				bigCode.append(sc.getProgram());
-		        bigCode.append('\n');
-		        bigCount += sc.getLineCount();
+				bigCode.append('\n');
+				bigCount += sc.getLineCount();
 			}
 		}
-		
+
 		return bigCode.toString();
 	}
-	
+
 	public SketchCode lineToSketchCode(int line) {
 		for (SketchCode sc : getSketch().getCode()) {
 			int lineCount;
@@ -129,30 +143,32 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			} else {
 				lineCount = sc.getLineCount();
 			}
-			
-			if (line >= sc.getPreprocOffset() && line < sc.getPreprocOffset() + lineCount) {
+
+			if (line >= sc.getPreprocOffset()
+					&& line < sc.getPreprocOffset() + lineCount) {
 				return sc;
 			}
 		}
-		
+
 		return null;
 	}
 
-	
 	public void handleInteractiveRun() {
-	  HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
-	  
-	  statusEmpty(); //clear the status area
-	  
+		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
+
+		statusEmpty(); // clear the status area
+
 		wasLastRunInteractive = true;
 		// clear previous context
 		if (canvasFrame != null)
 			canvasFrame.dispose();
 		if (applet != null) {
-		  // We want to explicitly call the superclass stop() function here
-		  // because our overridden stop() handles some exception tracking info,
-		  // namely watching to see if the exception was resolved on the last line
-		  // of the program.
+			// We want to explicitly call the superclass stop() function here
+			// because our overridden stop() handles some exception tracking
+			// info,
+			// namely watching to see if the exception was resolved on the last
+			// line
+			// of the program.
 			applet.resolveException = false;
 			applet.stop();
 		}
@@ -163,76 +179,84 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		canvasFrame.setResizable(false);
 
 		applet = new RehearsePApplet();
-		
-		//applet.setupFrameResizeListener();
+
+		// applet.setupFrameResizeListener();
 		applet.frame = canvasFrame;
 		applet.sketchPath = getSketch().getFolder().getAbsolutePath();
 		canvasFrame.add(applet, BorderLayout.CENTER);
 		canvasFrame.setVisible(true);
 		canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		canvasFrame.addWindowListener(new WindowAdapter() {		
+		canvasFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				applet.stop();
+				isInInteractiveRun = false;
 				if (snapshots.size() > 0) {
-					RehearseImageViewer viewer = new RehearseImageViewer(snapshots);
+					RehearseImageViewer viewer = new RehearseImageViewer(
+							snapshots);
 					viewer.setVisible(true);
 				}
 				logRunFeedback(true);
 			}
 		});
+		
+		canvasFrame.addFocusListener(new FocusAdapter() {
+		  public void focusGained(FocusEvent e) {
+		    if (pig != null) {
+		      pig.parseCode(appendCodeFromAllTabs());
+		      
+		    }
+		  }
+    });
 
-		// NOTE: If this line fails with java.lang.NoSuchMethodError you probably have a the BeanShell bshXXX.jar 
+		// NOTE: If this line fails with java.lang.NoSuchMethodError you
+		// probably have a the BeanShell bshXXX.jar
 		// in the classpath, e.g., /Library/Java/Extensions on OSX
-		// to test, run "java bsh.Console" from terminal - if the beanshell console pops up, you'll have this problem
-		// @see http://www.beanshell.org/manual/quickstart.html#Download_and_Run_BeanShell
+		// to test, run "java bsh.Console" from terminal - if the beanshell
+		// console pops up, you'll have this problem
+		// @see
+		// http://www.beanshell.org/manual/quickstart.html#Download_and_Run_BeanShell
 		interpreter = new Interpreter(this, applet);
-		//interpreter.setStrictJava(true);
+		// interpreter.setStrictJava(true);
 
-		/* No longer sure this is needed, I think just setting the package solves all problems
-		// Add current classpath to the interpreter's classpath
-		String classpath = System.getProperty("java.class.path");
-		String[] paths = classpath.split(":");
-		for (String p : paths) {
-			URL processingClassPath = null;
-			try {
-				processingClassPath = new URL("file://" + p);
-			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
-			}
-
-			if (processingClassPath != null) {
-				try {
-					interpreter.getClassManager().addClassPath(processingClassPath);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
+		/*
+		 * No longer sure this is needed, I think just setting the package
+		 * solves all problems // Add current classpath to the interpreter's
+		 * classpath String classpath = System.getProperty("java.class.path");
+		 * String[] paths = classpath.split(":"); for (String p : paths) { URL
+		 * processingClassPath = null; try { processingClassPath = new
+		 * URL("file://" + p); } catch (MalformedURLException e1) {
+		 * e1.printStackTrace(); }
+		 * 
+		 * if (processingClassPath != null) { try {
+		 * interpreter.getClassManager().addClassPath(processingClassPath); }
+		 * catch (IOException e1) { e1.printStackTrace(); } } }
 		 */
-	 
+
 		// Compiles the interactive program to check for compile errors.
 		// If it fails, stop running.
 		boolean compiled = HelpMeOutCompile();
 		if (!compiled) {
-		  return;
+			return;
 		}
 
-    String source = appendCodeFromAllTabs();
-    RehearseLogger.getInstance().log(RehearseLogger.EventType.INTERACTIVE_RUN, getSketch(), source);
-    
-    // Add the sketch classpath to BeanShell interpreter
-    String[] classPaths = getSketch().getClassPath().split(";");
-    for (String classPath : classPaths) {
-      try {
-        File file = new File(classPath);
-        interpreter.getClassManager().addClassPath(file.toURI().toURL());
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-		
+		String source = appendCodeFromAllTabs();
+		RehearseLogger.getInstance().log(
+				RehearseLogger.EventType.INTERACTIVE_RUN, getSketch(), source);
+
+		// Add the sketch classpath to BeanShell interpreter
+		String[] classPaths = getSketch().getClassPath().split(";");
+		for (String classPath : classPaths) {
+			try {
+				File file = new File(classPath);
+				interpreter.getClassManager()
+						.addClassPath(file.toURI().toURL());
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		// now, add our script to the processing.core package
 		try {
 			interpreter.eval("package processing.core;");
@@ -243,7 +267,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		console.clear();
 		ensureDocumentExistsForEveryTab();
 		clearExecutionInfoForLines();
-		//lineHighlights.clear();
+		// lineHighlights.clear();
 		snapshots.clear();
 		getTextArea().repaint();
 		try {
@@ -256,85 +280,100 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 					throw new RuntimeException("We don't do java mode yet!");
 				} else {
 					// Code was written in static mode, let's try again.
-					System.out.println("Code written in static mode, wrapping and restarting.");
+					System.out
+							.println("Code written in static mode, wrapping and restarting.");
 					// this is kind of gross...
 					obj = interpreter.eval("setup() {" + source + "}");
 				}
 			}
 			// This actually starts the program.
 			applet.init();
+			isInInteractiveRun = true;
 
 			if (obj != null)
 				console.message(obj.toString(), false, false);
 		} catch (EvalError e) {
-		  RehearseLogger.getInstance().log(
-		      RehearseLogger.EventType.RUNTIME_ERROR, getSketch(), e.toString());
-		  HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, interpreter);
+			RehearseLogger.getInstance().log(
+					RehearseLogger.EventType.RUNTIME_ERROR, getSketch(),
+					e.toString());
+			HelpMeOutExceptionTracker.getInstance().processRuntimeException(e,
+					interpreter);
 			console.message(e.toString(), true, false);
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public boolean handleSave(boolean immediately) {
-	  RehearseLogger.getInstance().log(
-        RehearseLogger.EventType.SAVE, getSketch(), appendCodeFromAllTabs());
-	  return super.handleSave(immediately);
+		RehearseLogger.getInstance().log(RehearseLogger.EventType.SAVE,
+				getSketch(), appendCodeFromAllTabs());
+		return super.handleSave(immediately);
 	}
-	
+
 	@Override
 	public boolean handleSaveAs() {
-	  String oldPath = getSketch().getFolder().getAbsolutePath();
-	  boolean saved = super.handleSaveAs();
-	  if (saved) {
-	    String logMessage = "Oldpath: " + oldPath + "\r\n" + appendCodeFromAllTabs();
-	    RehearseLogger.getInstance().log(
-	        RehearseLogger.EventType.SAVE_AS, getSketch(), logMessage);
-	  }
-	  
-	  return saved;
+		String oldPath = getSketch().getFolder().getAbsolutePath();
+		boolean saved = super.handleSaveAs();
+		if (saved) {
+			String logMessage = "Oldpath: " + oldPath + "\r\n"
+					+ appendCodeFromAllTabs();
+			RehearseLogger.getInstance().log(RehearseLogger.EventType.SAVE_AS,
+					getSketch(), logMessage);
+		}
+
+		return saved;
 	}
-	
+
 	@Override
 	public void handlePaste() {
-    Clipboard clipboard = getToolkit().getSystemClipboard();
-    try {
-      String pasteText = ((String)clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor)).replace('\r','\n');
-      RehearseLogger.getInstance().log(
-          RehearseLogger.EventType.CODE_PASTE, getSketch(), pasteText);
-    } catch (Exception e) {
-      // Do nothing. Exception will be handled in the superclass.
-    }
+		Clipboard clipboard = getToolkit().getSystemClipboard();
+		try {
+			String pasteText = ((String) clipboard.getContents(this)
+					.getTransferData(DataFlavor.stringFlavor)).replace('\r',
+					'\n');
+			RehearseLogger.getInstance()
+					.log(RehearseLogger.EventType.CODE_PASTE, getSketch(),
+							pasteText);
+		} catch (Exception e) {
+			// Do nothing. Exception will be handled in the superclass.
+		}
 
-	  super.handlePaste();
+		super.handlePaste();
 	}
 
 	private boolean HelpMeOutCompile() {
-    try {
-     
-      String appletClassName = getSketch().compile();
-      if (appletClassName != null) {
-        HelpMeOut.getInstance().processNoError(appendCodeFromAllTabs(false));
-        // if no exception has occurred yet, send text to HelpMeOut Exception class
-        HelpMeOutExceptionTracker.getInstance().setSource(appendCodeFromAllTabs(false));
-        if(HelpMeOutExceptionTracker.getInstance().hasExceptionOccurred()) {
-          // TODO here or in handleInteractiveRun() above:
-          int lineToWatch = HelpMeOutExceptionTracker.getInstance().getLineToWatch();
-          interpreter.setLineToWatch(lineToWatch+1); //interpreter is 1-indexed
-          
-        } else {
-          // Just in case the interpreter is reused
-          interpreter.setLineToWatch(-1);
-        }
-        return true;
-      }
-    } catch (Exception e) {
-      statusError(e);
-    }
-    return false;
-  }
+		try {
 
-  public void error(Object o) {
+			String appletClassName = getSketch().compile();
+			if (appletClassName != null) {
+				HelpMeOut.getInstance().processNoError(
+						appendCodeFromAllTabs(false));
+				// if no exception has occurred yet, send text to HelpMeOut
+				// Exception class
+				HelpMeOutExceptionTracker.getInstance().setSource(
+						appendCodeFromAllTabs(false));
+				if (HelpMeOutExceptionTracker.getInstance()
+						.hasExceptionOccurred()) {
+					// TODO here or in handleInteractiveRun() above:
+					int lineToWatch = HelpMeOutExceptionTracker.getInstance()
+							.getLineToWatch();
+					interpreter.setLineToWatch(lineToWatch + 1); // interpreter
+																	// is
+																	// 1-indexed
+
+				} else {
+					// Just in case the interpreter is reused
+					interpreter.setLineToWatch(-1);
+				}
+				return true;
+			}
+		} catch (Exception e) {
+			statusError(e);
+		}
+		return false;
+	}
+
+	public void error(Object o) {
 		getOut().append(o.toString() + "\n");
 	}
 
@@ -351,24 +390,26 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 
 	public void print(Object o) {
-		//getOut().append(o.toString());
+		// getOut().append(o.toString());
 		System.out.print(o.toString());
 	}
 
 	public void println(Object o) {
-		//getOut().append(o.toString() + "\n");	
+		// getOut().append(o.toString() + "\n");
 		System.out.println(o.toString());
 	}
-	
+
 	private void ensureDocumentExistsForEveryTab() {
 		SketchCode currentCode = getSketch().getCurrentCode();
 		for (SketchCode sc : getSketch().getCode()) {
-			SyntaxDocument doc = (SyntaxDocument)sc.getDocument();
+			SyntaxDocument doc = (SyntaxDocument) sc.getDocument();
 			if (doc == null) {
 				// This code makes the document and associates it with the
-				// SketchCode object, performing appropriate initialization steps.
+				// SketchCode object, performing appropriate initialization
+				// steps.
 				// This isn't ideal but now we need each tab to have a valid
-				// document reference even if that tab hasn't been clicked on yet.
+				// document reference even if that tab hasn't been clicked on
+				// yet.
 				setCode(sc);
 			}
 		}
@@ -378,44 +419,44 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	private void clearExecutionInfoForLines() {
 		for (SketchCode sc : getSketch().getCode()) {
-			SyntaxDocument doc = (SyntaxDocument)sc.getDocument();
-				for (int line = 0; line < doc.getTokenMarker().getLineCount(); line++) {
-					RehearseLineModel m = 
-						(RehearseLineModel)doc.getTokenMarker().getLineModelAt(line);
-					if (m != null) {
-						m.executedInLastRun = false;
-						m.isMostRecentlyExecuted = false;
-					}
+			SyntaxDocument doc = (SyntaxDocument) sc.getDocument();
+			for (int line = 0; line < doc.getTokenMarker().getLineCount(); line++) {
+				RehearseLineModel m = (RehearseLineModel) doc.getTokenMarker()
+						.getLineModelAt(line);
+				if (m != null) {
+					m.executedInLastRun = false;
+					m.isMostRecentlyExecuted = false;
 				}
+			}
 		}
 	}
 
 	public void notifyLineExecution(int lineNumber) {
 		linesExecutedCount++;
-		
+
 		if (lastExecutedLineModel != null)
 			lastExecutedLineModel.isMostRecentlyExecuted = false;
 
 		// snapshotPoints is zero-indexed, interpreter is one-indexed.
 		int line = lineNumber - 1;
-		
+
 		SketchCode sc = lineToSketchCode(line);
-		SyntaxDocument doc = (SyntaxDocument)sc.getDocument();
-		
-		RehearseLineModel m = 
-			(RehearseLineModel)doc.getTokenMarker().getLineModelAt(line - sc.getPreprocOffset());
+		SyntaxDocument doc = (SyntaxDocument) sc.getDocument();
+
+		RehearseLineModel m = (RehearseLineModel) doc.getTokenMarker()
+				.getLineModelAt(line - sc.getPreprocOffset());
 		if (m == null) {
 			m = new RehearseLineModel();
-			doc.getTokenMarker().setLineModelAt(line - sc.getPreprocOffset(), m);
+			doc.getTokenMarker()
+					.setLineModelAt(line - sc.getPreprocOffset(), m);
 		}
 
-		
 		m.executedInLastRun = true;
 		m.isMostRecentlyExecuted = true;
 		m.countAtLastExec = linesExecutedCount;
-		
+
 		getTextArea().repaint();
-		
+
 		if (m.isPrintPoint) {
 			snapshots.add(interpreter.makeSnapshotModel());
 		}
@@ -424,8 +465,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 
 	public class TextAreaOutputStream extends OutputStream {
-		public void write( int b ) throws IOException {
-			console.message( String.valueOf( ( char )b ), false, false);
+		public void write(int b) throws IOException {
+			console.message(String.valueOf((char) b), false, false);
 		}
 	}
 
@@ -448,28 +489,26 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		public void paintHighlight(Graphics gfx, int line, int y) {
 			// Interpreter uses one-offset, processing uses zero-offset.
 			Color c = null;
-			RehearseLineModel m = 
-				(RehearseLineModel)getTextArea().getTokenMarker().getLineModelAt(line);
+			RehearseLineModel m = (RehearseLineModel) getTextArea()
+					.getTokenMarker().getLineModelAt(line);
 			if (m != null) {
 				/*
-				if (m.executedInLastRun)
-					c = Color.yellow;
-				if (m.isMostRecentlyExecuted)
-					c = Color.green;
-				*/
-				
+				 * if (m.executedInLastRun) c = Color.yellow; if
+				 * (m.isMostRecentlyExecuted) c = Color.green;
+				 */
+
 				int i = Math.min(linesExecutedCount - m.countAtLastExec, 150);
 				// c = new Color(i,255,i);
-				c = new Color(78,127,78,200-i);
+				c = new Color(78, 127, 78, 200 - i);
 			}
 
-			//Color c = lineHighlights.get(line + 1);
+			// Color c = lineHighlights.get(line + 1);
 			if (c != null) {
 				FontMetrics fm = textarea.getPainter().getFontMetrics();
 				int height = fm.getHeight();
 				y += fm.getLeading() + fm.getMaxDescent();
 				gfx.setColor(c);
-				gfx.fillRect(0,y,getWidth(),height);
+				gfx.fillRect(0, y, getWidth(), height);
 			}
 
 			if (next != null) {
@@ -478,40 +517,51 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		}
 	}
 
-  public void testFunction() {
-    String source = appendCodeFromAllTabs();
-    System.out.println(source);
- 
-    ParserInfoGetter pig = new ParserInfoGetter(); 
-    pig.parseCode(source);
-    
-    System.out.println(textarea.getCaretLine());
-    System.out.println(textarea.getCaretPosition());
-    pig.returnNodeAtCaretPosition(textarea.getCaretLine() + 1, textarea.getCaretPosition());
-  }
+	public void breakOnDrawEdit() {
+	  System.out.println("Breaking on draw");
+	  if(canvasFrame != null) {
+	    canvasFrame.remove(applet);
+	    JPanel panel = new JPanel();
+	    panel.add(new JLabel("Stopping"));
+	    canvasFrame.add(panel, BorderLayout.CENTER);
+	  }
+	}
 
-  public void uploadSketchToServer() {
-    // TODO Auto-generated method stub
-    RehearseSketchUploader.uploadSketchToServer(this);
-    
-  }
+	public void uploadSketchToServer() {
+		// TODO Auto-generated method stub
+		RehearseSketchUploader.uploadSketchToServer(this);
 
-	
-//	class RehearseDocumentListener implements DocumentListener {
-//	public void changedUpdate(DocumentEvent e) {
-//	lineHighlights.clear();
-//	getTextArea().repaint();
-//	}
+	}
 
-//	public void insertUpdate(DocumentEvent e) {
-//	lineHighlights.clear();
-//	getTextArea().repaint();
-//	}
+	class RehearseDocumentListener implements DocumentListener {
+		public void changedUpdate(DocumentEvent e) {
+		  // Do nothing.
+		}
+		
+		private void checkForDrawMethodEdits(DocumentEvent e) {
+		  if (!isInInteractiveRun) return;
+		  
+		  interpreter.run();
+		  if(pig == null){
+        pig = new ParserInfoGetter();
+        pig.parseCode(appendCodeFromAllTabs());
+      }
+      
+      if (pig.getDrawMethodNode() == null) {
+        pig.parseCode(appendCodeFromAllTabs());
+      } else if(pig.isEditInDrawMethod(getTextArea().getLineOfOffset(e.getOffset()))){
+        pig.parseCode(appendCodeFromAllTabs());
+        breakOnDrawEdit();
+      }
+		}
 
-//	public void removeUpdate(DocumentEvent e) {
-//	lineHighlights.clear();
-//	getTextArea().repaint();
-//	}
+		public void insertUpdate(DocumentEvent e) {
+		  checkForDrawMethodEdits(e);
+		}
 
-//	}
+		public void removeUpdate(DocumentEvent e) {
+		  checkForDrawMethodEdits(e);
+		}
+
+	}
 }

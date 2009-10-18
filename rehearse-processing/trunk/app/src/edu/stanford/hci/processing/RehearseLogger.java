@@ -13,7 +13,7 @@ import processing.app.Sketch;
 
 public class RehearseLogger {
   
-  public static final boolean LOG_RUN_FEEDBACK = true;
+  public static final boolean LOG_RUN_FEEDBACK = false;
   
   public enum EventType { 
     CODE_PASTE, 

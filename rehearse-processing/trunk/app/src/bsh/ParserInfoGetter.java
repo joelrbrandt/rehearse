@@ -7,6 +7,25 @@ public class ParserInfoGetter {
   ArrayList<SimpleNode> parsedNodes = new ArrayList<SimpleNode>();
   ArrayList<ThrowawaySegment> throwawaySegments = new ArrayList<ThrowawaySegment>();
 
+  public SimpleNode getDrawMethodNode() {
+	  for(int i=0; i< parsedNodes.size(); i++){
+		  SimpleNode node = parsedNodes.get(i);
+		  if(node instanceof BSHMethodDeclaration) {
+		    if (((BSHMethodDeclaration)node).name.equals("draw")) {
+		      return node;
+		    }
+		  }
+	  }
+	  
+	  return null;
+  }
+  
+  public boolean isEditInDrawMethod(int lineNumber){
+    SimpleNode sn = getDrawMethodNode();
+    if (sn == null) return false;
+    return sn.firstToken.beginLine <= lineNumber && sn.lastToken.endLine >= lineNumber; 
+  }
+  
   public SimpleNode returnNodeAtCaretPosition(int caretLine, int caretColumn) {
     ArrayList<SimpleNode> sameLineNodes = new ArrayList<SimpleNode>();
     for (SimpleNode node : parsedNodes) {
