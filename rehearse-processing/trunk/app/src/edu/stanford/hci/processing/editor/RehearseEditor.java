@@ -1,16 +1,11 @@
 package edu.stanford.hci.processing.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,12 +13,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -43,18 +34,17 @@ import edu.stanford.hci.helpmeout.HelpMeOut;
 import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
 import edu.stanford.hci.helpmeout.HelpMeOutLog;
 import edu.stanford.hci.processing.ModeException;
+import edu.stanford.hci.processing.RehearseCanvasFrame;
 import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.RehearsePApplet;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
 
-	private JFrame canvasFrame;
+	private RehearseCanvasFrame canvasFrame;
 	private RehearsePApplet applet;
 	private PrintStream outputStream;
 
 	private Interpreter interpreter;
-
-	private ArrayList<SnapshotModel> snapshots = new ArrayList<SnapshotModel>();
 
 	private boolean wasLastRunInteractive = false;
 	
@@ -64,6 +54,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 	private RehearseLineModel lastExecutedLineModel = null;
 	private ParserInfoGetter pig = null;
+	private DocumentListener documentListener = new RehearseDocumentListener();
 	
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this
 										// will overflow
@@ -73,8 +64,6 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
-		this.getTextArea().getDocument().addDocumentListener(new RehearseDocumentListener());
-		
 		if (USEHIGHLIGHT)
 			getTextArea().getPainter().addCustomHighlight(
 					new RehearseHighlight());
@@ -152,11 +141,26 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 
 		return null;
 	}
+	
+	public RehearseCanvasFrame getCanvasFrame() {
+	  return canvasFrame;
+	}
+	
+	public Interpreter getInterpreter() {
+	  return interpreter;
+	}
+	
+	public void setIsInInteractiveRun(boolean isInInteractiveRun) {
+	  this.isInInteractiveRun = isInInteractiveRun;
+	}
 
 	public void handleInteractiveRun() {
 		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
 
 		statusEmpty(); // clear the status area
+		
+		this.getTextArea().getDocument().removeDocumentListener(documentListener);
+		this.getTextArea().getDocument().addDocumentListener(documentListener);
 
 		wasLastRunInteractive = true;
 		// clear previous context
@@ -173,40 +177,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			applet.stop();
 		}
 
-		canvasFrame = new JFrame();
-		canvasFrame.setLayout(new BorderLayout());
-		canvasFrame.setSize(100, 100);
-		canvasFrame.setResizable(false);
-
 		applet = new RehearsePApplet();
-
-		// applet.setupFrameResizeListener();
-		applet.frame = canvasFrame;
 		applet.sketchPath = getSketch().getFolder().getAbsolutePath();
-		canvasFrame.add(applet, BorderLayout.CENTER);
-		canvasFrame.setVisible(true);
-		canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		canvasFrame.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				applet.stop();
-				isInInteractiveRun = false;
-				if (snapshots.size() > 0) {
-					RehearseImageViewer viewer = new RehearseImageViewer(
-							snapshots);
-					viewer.setVisible(true);
-				}
-				logRunFeedback(true);
-			}
-		});
-		
-		canvasFrame.addFocusListener(new FocusAdapter() {
-		  public void focusGained(FocusEvent e) {
-		    if (pig != null) {
-		      pig.parseCode(appendCodeFromAllTabs());
-		      
-		    }
-		  }
-    });
+		canvasFrame = new RehearseCanvasFrame(this, applet);
+		applet.frame = canvasFrame;
 
 		// NOTE: If this line fails with java.lang.NoSuchMethodError you
 		// probably have a the BeanShell bshXXX.jar
@@ -268,7 +242,6 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		ensureDocumentExistsForEveryTab();
 		clearExecutionInfoForLines();
 		// lineHighlights.clear();
-		snapshots.clear();
 		getTextArea().repaint();
 		try {
 			Object obj;
@@ -288,6 +261,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 			}
 			// This actually starts the program.
 			applet.init();
+			pig = null;
 			isInInteractiveRun = true;
 
 			if (obj != null)
@@ -458,7 +432,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		getTextArea().repaint();
 
 		if (m.isPrintPoint) {
-			snapshots.add(interpreter.makeSnapshotModel());
+		  canvasFrame.addSnapshot(interpreter.makeSnapshotModel());
 		}
 
 		lastExecutedLineModel = m;
@@ -518,19 +492,18 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 
 	public void breakOnDrawEdit() {
+	  interpreter.setBreakpoint(pig.getDrawMethodFirstLine());
 	  System.out.println("Breaking on draw");
-	  if(canvasFrame != null) {
-	    canvasFrame.remove(applet);
-	    JPanel panel = new JPanel();
-	    panel.add(new JLabel("Stopping"));
-	    canvasFrame.add(panel, BorderLayout.CENTER);
-	  }
+	}
+	
+	public void resumeWithDrawUpdate() {
+	  pig.parseCode(appendCodeFromAllTabs());
+	  interpreter.updateDrawMethod(pig.getDrawMethodNode());
+	  interpreter.resume();
 	}
 
 	public void uploadSketchToServer() {
-		// TODO Auto-generated method stub
 		RehearseSketchUploader.uploadSketchToServer(this);
-
 	}
 
 	class RehearseDocumentListener implements DocumentListener {
@@ -539,9 +512,9 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		}
 		
 		private void checkForDrawMethodEdits(DocumentEvent e) {
+		  System.out.println("Is in interactive run: " + isInInteractiveRun);
 		  if (!isInInteractiveRun) return;
 		  
-		  interpreter.run();
 		  if(pig == null){
         pig = new ParserInfoGetter();
         pig.parseCode(appendCodeFromAllTabs());
@@ -562,6 +535,5 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		public void removeUpdate(DocumentEvent e) {
 		  checkForDrawMethodEdits(e);
 		}
-
 	}
 }

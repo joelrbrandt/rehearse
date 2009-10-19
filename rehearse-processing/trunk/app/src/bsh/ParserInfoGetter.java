@@ -7,12 +7,17 @@ public class ParserInfoGetter {
   ArrayList<SimpleNode> parsedNodes = new ArrayList<SimpleNode>();
   ArrayList<ThrowawaySegment> throwawaySegments = new ArrayList<ThrowawaySegment>();
 
-  public SimpleNode getDrawMethodNode() {
+  public int getDrawMethodFirstLine() {
+    BSHMethodDeclaration md = getDrawMethodNode();
+    return ((SimpleNode)md.jjtGetChild(2)).firstToken.beginLine + 1;
+  }
+  
+  public BSHMethodDeclaration getDrawMethodNode() {
 	  for(int i=0; i< parsedNodes.size(); i++){
 		  SimpleNode node = parsedNodes.get(i);
 		  if(node instanceof BSHMethodDeclaration) {
 		    if (((BSHMethodDeclaration)node).name.equals("draw")) {
-		      return node;
+		      return (BSHMethodDeclaration)node;
 		    }
 		  }
 	  }

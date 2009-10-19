@@ -183,6 +183,7 @@ implements Runnable, ConsoleInterface,Serializable
 	 private HashMap<Integer, Integer> lineExecutionCount = new HashMap<Integer, Integer>();
 
 	private boolean suspended = false;
+	
 
 	/* --- End instance data --- */
 
@@ -1582,7 +1583,39 @@ implements Runnable, ConsoleInterface,Serializable
 
 	public void setSuspended(boolean suspended) {
 		this.suspended = suspended;
-		//editor.setResumable(suspended);
+		editor.getCanvasFrame().toggleRunSuspendedScreen(suspended);
+	}
+	
+	public void resume() {
+	   synchronized (getBreakpointLock()) {
+	     setSuspended(false);
+	     clearBreakpoints();
+	     getBreakpointLock().notify();
+	   }
+  }
+	
+	public BSHMethodDeclaration getDrawMethodNode() {
+	  Node root = get_jjtree().rootNode();
+    for(int i=0; i< root.jjtGetNumChildren(); i++){
+      Node node = root.jjtGetChild(i);
+      if(node instanceof BSHMethodDeclaration) {
+        if (((BSHMethodDeclaration)node).name.equals("draw")) {
+          return (BSHMethodDeclaration)node;
+        }
+      }
+    }
+    
+    return null;
+  }
+	
+	public void updateDrawMethod(BSHMethodDeclaration newDrawNode) {
+	    newDrawNode.insureNodesParsed();
+      try {
+        BshMethod drawMethod = globalNameSpace.getMethod("draw", new Class[0]);
+        drawMethod.methodBody = newDrawNode.blockNode;
+      } catch (UtilEvalError e) {
+        e.printStackTrace();
+      }
 	}
 
 	public int getLastExecutedLine() {
