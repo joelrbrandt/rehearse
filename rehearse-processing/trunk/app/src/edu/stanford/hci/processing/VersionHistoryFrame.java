@@ -168,8 +168,8 @@ public class VersionHistoryFrame extends JFrame {
         
         @Override
         public void mouseClicked(MouseEvent e) { 
-          setLastRunningVersionIndex(versionPanels.indexOf(e.getSource()));
           editor.swapRunningCode(VersionHistoryPanel.this.model.getCode());
+          setLastRunningVersionIndex(versionPanels.indexOf(e.getSource()));
         }
       });
     }

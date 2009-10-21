@@ -542,6 +542,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	    pig = new ParserInfoGetter();
 	  }
     pig.parseCode(code);
+    historyView.updateLastRunScreenshot(applet.get().getImage());
     interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	}
 
