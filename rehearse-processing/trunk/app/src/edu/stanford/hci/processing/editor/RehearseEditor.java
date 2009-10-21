@@ -3,9 +3,11 @@ package edu.stanford.hci.processing.editor;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +15,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.util.Date;
 
 import javax.swing.JMenu;
 import javax.swing.event.DocumentEvent;
@@ -37,6 +40,8 @@ import edu.stanford.hci.processing.ModeException;
 import edu.stanford.hci.processing.RehearseCanvasFrame;
 import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.RehearsePApplet;
+import edu.stanford.hci.processing.VersionHistoryFrame;
+import edu.stanford.hci.processing.VersionHistoryFrame.VersionHistory;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
 
@@ -58,8 +63,13 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this
 										// will overflow
+	
+	private VersionHistoryFrame historyView;
+	
+	private static Image defaultImage = new BufferedImage(100,100,BufferedImage.TYPE_INT_ARGB_PRE);
 
 	private static final boolean USEHIGHLIGHT = false;
+	private static final boolean OPEN_VERSION_HISTORY = true;
 	
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
@@ -67,6 +77,12 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		if (USEHIGHLIGHT)
 			getTextArea().getPainter().addCustomHighlight(
 					new RehearseHighlight());
+		
+		if (OPEN_VERSION_HISTORY) {
+		  historyView = new VersionHistoryFrame(this);
+		  historyView.pack();
+		  historyView.setVisible(true);
+		}
 	}
 
 	@Override
@@ -83,17 +99,22 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 				getSketch(), appendCodeFromAllTabs(false));
 		super.handleRun(present);
 	}
+	
+	public void handleInteractiveRunEnd() {
+	  isInInteractiveRun = false;
+	  // This check is needed since save also calls handleStop.
+	  if (canvasFrame.isShowing()) {
+	    logRunFeedback(true);
+	    historyView.updateLastRunScreenshot(applet.get().getImage());
+	  }
+	  applet.stop();
+	}
 
 	@Override
 	public void handleStop() {
 		if (wasLastRunInteractive) {
-			boolean appletWasRunning = canvasFrame.isShowing();
-			applet.stop();
+		  handleInteractiveRunEnd();
 			canvasFrame.dispose();
-			// This check is needed since save also calls handleStop.
-			if (appletWasRunning) {
-				logRunFeedback(true);
-			}
 		} else {
 			super.handleStop();
 		}
@@ -148,6 +169,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	public Interpreter getInterpreter() {
 	  return interpreter;
+	}
+	
+	public VersionHistoryFrame getHistoryView() {
+	  return historyView;
 	}
 	
 	public void setIsInInteractiveRun(boolean isInInteractiveRun) {
@@ -216,6 +241,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		String source = appendCodeFromAllTabs();
 		RehearseLogger.getInstance().log(
 				RehearseLogger.EventType.INTERACTIVE_RUN, getSketch(), source);
+		
+		// Add entry to history.
+		VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
+		historyView.addVersionHistory(vh);
 
 		// Add the sketch classpath to BeanShell interpreter
 		String[] classPaths = getSketch().getClassPath().split(";");
@@ -497,9 +526,23 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	}
 	
 	public void resumeWithDrawUpdate() {
-	  pig.parseCode(appendCodeFromAllTabs());
+	  String source = appendCodeFromAllTabs();
+	  pig.parseCode(source);
+	  
+	  // Add entry to history.
+    VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
+    historyView.addVersionHistory(vh);
+	  
 	  interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	  interpreter.resume();
+	}
+	
+	public void swapRunningCode(String code) {
+	  if (pig == null) {
+	    pig = new ParserInfoGetter();
+	  }
+    pig.parseCode(code);
+    interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	}
 
 	public void uploadSketchToServer() {

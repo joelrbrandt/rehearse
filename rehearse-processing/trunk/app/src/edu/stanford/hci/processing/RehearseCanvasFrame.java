@@ -46,14 +46,12 @@ public class RehearseCanvasFrame extends JFrame {
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
-        applet.stop();
-        editor.setIsInInteractiveRun(false);
         if (snapshots.size() > 0) {
           RehearseImageViewer viewer = new RehearseImageViewer(
               snapshots);
           viewer.setVisible(true);
         }
-        editor.logRunFeedback(true);
+        editor.handleInteractiveRunEnd();
       }
     });
     
@@ -71,6 +69,10 @@ public class RehearseCanvasFrame extends JFrame {
   }
   
   public void toggleRunSuspendedScreen(boolean runSuspended) {
+    if (runSuspended) {
+      editor.getHistoryView().updateLastRunScreenshot(applet.get().getImage());
+    }
+    
     this.getGlassPane().setVisible(runSuspended);
     this.applet.setVisible(!runSuspended);
   }
