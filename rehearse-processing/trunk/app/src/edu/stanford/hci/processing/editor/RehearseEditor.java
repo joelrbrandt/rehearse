@@ -65,18 +65,16 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 										// will overflow
 	
 	private VersionHistoryFrame historyView;
+
+  private  boolean useHighlight = false;
 	
 	private static Image defaultImage = new BufferedImage(100,100,BufferedImage.TYPE_INT_ARGB_PRE);
-
-	private static final boolean USEHIGHLIGHT = false;
+	
 	private static final boolean OPEN_VERSION_HISTORY = true;
 	
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
-		if (USEHIGHLIGHT)
-			getTextArea().getPainter().addCustomHighlight(
-					new RehearseHighlight());
 		
 		if (OPEN_VERSION_HISTORY) {
 		  historyView = new VersionHistoryFrame(this);
@@ -580,4 +578,14 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		  checkForDrawMethodEdits(e);
 		}
 	}
+
+  public void toggleHighlights() {
+    useHighlight = !useHighlight;
+    
+    if (useHighlight) {
+      getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
+    } else {
+      getTextArea().getPainter().removeCustomHighlights();
+    }
+  }
 }

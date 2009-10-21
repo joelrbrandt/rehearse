@@ -18,7 +18,8 @@ import processing.app.Theme;
 public class RehearseEditorToolbar extends EditorToolbar {
 
 	  static final String title[] = {
-		  "Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run", "Upload to Server"
+		  "Run", "Stop", "New", "Open", "Save", "Export", 
+		  "Interactive Run", "Upload to Server", "Toggle Highlights On/Off"
 	  };
 
 	  static final int BUTTON_COUNT  = title.length;
@@ -32,6 +33,8 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	  static final int INTERACTIVE_RUN     = 6;
 
 	  static final int UPLOAD_TO_SERVER = 7;
+	  
+	  static final int TOGGLE_HIGHLIGHTS = 8;
 	  
 	  static final int INACTIVE = 0;
 	  static final int ROLLOVER = 1;
@@ -88,6 +91,7 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	    which[buttonCount++] = SAVE;
 	    which[buttonCount++] = EXPORT;
 	    which[buttonCount++] = UPLOAD_TO_SERVER;
+	    which[buttonCount++] = TOGGLE_HIGHLIGHTS;
 	    
 	    currentRollover = -1;
 
@@ -330,6 +334,10 @@ public class RehearseEditorToolbar extends EditorToolbar {
 	      break;
 	    case UPLOAD_TO_SERVER:
 	      ((RehearseEditor)editor).uploadSketchToServer();
+	      break;
+	    
+	    case TOGGLE_HIGHLIGHTS:
+	      ((RehearseEditor)editor).toggleHighlights();
 	      break;
 	    }
 	    

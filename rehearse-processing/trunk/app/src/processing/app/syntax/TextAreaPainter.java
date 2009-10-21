@@ -300,6 +300,11 @@ implements TabExpander, Printable
     highlight.init(textArea,highlights);
     highlights = highlight;
   }
+  
+  public void removeCustomHighlights()
+  {
+    highlights = null;
+  }
 
   /**
    * Highlight interface.
