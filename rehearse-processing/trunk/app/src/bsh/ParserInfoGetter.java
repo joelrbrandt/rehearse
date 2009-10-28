@@ -9,7 +9,9 @@ public class ParserInfoGetter {
 
   public int getDrawMethodFirstLine() {
     BSHMethodDeclaration md = getDrawMethodNode();
-    return ((SimpleNode)md.jjtGetChild(2)).firstToken.beginLine + 1;
+    BSHBlock block = (BSHBlock)md.jjtGetChild(2);
+    SimpleNode firstLineNode = (SimpleNode)block.jjtGetChild(0);
+    return firstLineNode.firstToken.beginLine;
   }
   
   public BSHMethodDeclaration getDrawMethodNode() {

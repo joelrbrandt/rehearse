@@ -34,6 +34,8 @@ public class SnapshotModel {
 	
 	public BufferedImage getImage() {
 		if (image == null) {
+		  if (imageLocation == null) return null;
+		  
 			try {
 				image = ImageIO.read(imageLocation);
 			} catch (IOException e) {

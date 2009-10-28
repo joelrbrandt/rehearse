@@ -122,6 +122,8 @@ public class RehearseImageViewer extends JFrame implements ChangeListener, Actio
 		}
 
 		public void paint(Graphics g) {
+		  if (image == null) return;
+		  
 			BufferedImage i = (BufferedImage)image;
 			
 			int x = this.getWidth() / 2 - i.getHeight(null) / 2;

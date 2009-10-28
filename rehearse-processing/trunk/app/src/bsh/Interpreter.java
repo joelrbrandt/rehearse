@@ -1665,7 +1665,8 @@ implements Runnable, ConsoleInterface,Serializable
 
 	public SnapshotModel makeSnapshotModel() {
 		SnapshotModel sm = new SnapshotModel();
-		sm.setImage((BufferedImage) applet.get().getImage());
+		if (applet.g != null)
+		  sm.setImage((BufferedImage) applet.get().getImage());
 		
 		// our consumers usually want zero-indexed
 		sm.setLineNum(lastExecutedLine - 1);
