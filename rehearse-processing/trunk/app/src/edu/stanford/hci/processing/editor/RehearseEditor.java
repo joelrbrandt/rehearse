@@ -565,7 +565,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
       if (pig.getDrawMethodNode() == null) {
         pig.parseCode(appendCodeFromAllTabs());
       } else if(pig.isEditInDrawMethod(getTextArea().getLineOfOffset(e.getOffset()))){
-        pig.parseCode(appendCodeFromAllTabs());
+        //pig.parseCode(appendCodeFromAllTabs());
         breakOnDrawEdit();
       }
 		}
