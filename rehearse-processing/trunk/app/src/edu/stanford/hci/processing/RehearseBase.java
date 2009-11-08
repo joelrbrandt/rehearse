@@ -28,6 +28,16 @@ public class RehearseBase extends Base {
 	}
 	
 	@Override
+	public boolean handleClose(Editor editor) {
+	  boolean closing = super.handleClose(editor);
+	  if (closing) {
+	    ((RehearseEditor)editor).getHistoryController().closeAndDisposeHistoryView();
+	  }
+	  
+	  return closing;
+	}
+	
+	@Override
 	public void handleOpenReplace(String path) {
 	  RehearseLogger.getInstance().log(RehearseLogger.EventType.OPEN, null, path);
 	  super.handleOpenReplace(path);

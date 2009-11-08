@@ -40,8 +40,9 @@ import edu.stanford.hci.processing.ModeException;
 import edu.stanford.hci.processing.RehearseCanvasFrame;
 import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.RehearsePApplet;
+import edu.stanford.hci.processing.VersionHistory;
+import edu.stanford.hci.processing.VersionHistoryController;
 import edu.stanford.hci.processing.VersionHistoryFrame;
-import edu.stanford.hci.processing.VersionHistoryFrame.VersionHistory;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
 
@@ -64,7 +65,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public int linesExecutedCount = 0; // TODO: refactor all this crap also this
 										// will overflow
 	
-	private VersionHistoryFrame historyView;
+	private VersionHistoryController historyController;
 
   private  boolean useHighlight = false;
 	
@@ -77,9 +78,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		super(ibase, path, location);
 		
 		if (OPEN_VERSION_HISTORY) {
-		  historyView = new VersionHistoryFrame(this);
-		  historyView.pack();
-		  historyView.setVisible(true);
+		  historyController = new VersionHistoryController(this);
+		  historyController.openHistoryView();
 		}
 	}
 
@@ -103,7 +103,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  // This check is needed since save also calls handleStop.
 	  if (canvasFrame.isShowing()) {
 	    logRunFeedback(true);
-	    historyView.updateLastRunScreenshot(applet.get().getImage());
+	    historyController.updateLastRunScreenshot(applet.get().getImage());
 	  }
 	  applet.stop();
 	}
@@ -169,8 +169,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  return interpreter;
 	}
 	
-	public VersionHistoryFrame getHistoryView() {
-	  return historyView;
+	public VersionHistoryController getHistoryController() {
+	  return historyController;
 	}
 	
 	public void setIsInInteractiveRun(boolean isInInteractiveRun) {
@@ -242,7 +242,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 		
 		// Add entry to history.
 		VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
-		historyView.addVersionHistory(vh);
+		historyController.addVersionHistory(vh);
 
 		// Add the sketch classpath to BeanShell interpreter
 		String[] classPaths = getSketch().getClassPath().split(";");
@@ -529,7 +529,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  
 	  // Add entry to history.
     VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
-    historyView.addVersionHistory(vh);
+    historyController.addVersionHistory(vh);
 	  
 	  interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	  interpreter.resume();
@@ -540,7 +540,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	    pig = new ParserInfoGetter();
 	  }
     pig.parseCode(code);
-    historyView.updateLastRunScreenshot(applet.get().getImage());
+    historyController.updateLastRunScreenshot(applet.get().getImage());
     interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	}
 

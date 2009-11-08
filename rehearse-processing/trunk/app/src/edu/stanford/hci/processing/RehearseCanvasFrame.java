@@ -70,7 +70,7 @@ public class RehearseCanvasFrame extends JFrame {
   
   public void toggleRunSuspendedScreen(boolean runSuspended) {
     if (runSuspended) {
-      editor.getHistoryView().updateLastRunScreenshot(applet.get().getImage());
+      editor.getHistoryController().updateLastRunScreenshot(applet.get().getImage());
     }
     
     this.getGlassPane().setVisible(runSuspended);

@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -21,8 +20,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
-import edu.stanford.hci.processing.editor.RehearseEditor;
-
 public class VersionHistoryFrame extends JFrame {
   
   private static final int ROW_HEIGHT = 120;
@@ -31,19 +28,15 @@ public class VersionHistoryFrame extends JFrame {
   private static final Border hoverBorder = BorderFactory.createLineBorder(Color.green);
   private static final Border normalBorder = BorderFactory.createLineBorder(Color.black);
   
-  
-  private final RehearseEditor editor;
+  private final VersionHistoryController controller;
   
   private JPanel rootPanel;
   private ArrayList<VersionHistoryPanel> versionPanels;
-  //private VersionHistoryTableModel tableModel;
-  //private JTable table;
   
-  private int lastRunningVersionIndex = -1;
   
-  public VersionHistoryFrame(final RehearseEditor editor) {
+  public VersionHistoryFrame(final VersionHistoryController controller) {
     super("Version History");
-    this.editor = editor;
+    this.controller = controller;
     this.versionPanels = new ArrayList<VersionHistoryPanel>();
     
     rootPanel = new JPanel();
@@ -59,17 +52,15 @@ public class VersionHistoryFrame extends JFrame {
     rootPanel.add(panel);
     rootPanel.add(Box.createRigidArea(new Dimension(10, 5)));
     versionPanels.add(panel);
-    setLastRunningVersionIndex(versionPanels.size() - 1);
     validate();
   }
   
-  private void setLastRunningVersionIndex(int index) {
-    if (lastRunningVersionIndex != -1) {
-      versionPanels.get(lastRunningVersionIndex).setBackground(Color.white);
+  public void lastRunningVersionChanged(int oldIndex, int newIndex) {
+    if (oldIndex != -1) {
+      versionPanels.get(oldIndex).setBackground(Color.white);
     }
-    lastRunningVersionIndex = index;
-    if (lastRunningVersionIndex != -1) {
-      versionPanels.get(lastRunningVersionIndex).setBackground(selectedColor);
+    if (newIndex != -1) {
+      versionPanels.get(newIndex).setBackground(selectedColor);
     }
   }
   
@@ -79,50 +70,6 @@ public class VersionHistoryFrame extends JFrame {
     model.setScreenshot(screenshot);
     panel.setModel(model);
     repaint();
-  }
-  
-  public void updateLastRunScreenshot(Image screenshot) {
-    updateScreenshot(lastRunningVersionIndex, screenshot);
-  }
-  
-  public static class VersionHistory {
-    private ImageIcon screenshot;
-    private String code;
-    private Date time;
-    
-    public VersionHistory(Image screenshot, String code, Date time) {
-      super();
-      this.screenshot = new ImageIcon(scaleImageDown(screenshot));
-      this.code = code;
-      this.time = time;
-    }
-    
-    private Image scaleImageDown(Image image) {
-      int width = 
-        (int)(ROW_HEIGHT * (image.getWidth(null) / (double)image.getHeight(null)));
-      return image.getScaledInstance(width, ROW_HEIGHT, Image.SCALE_DEFAULT);
-    }
-    
-    public ImageIcon getScreenshot() {
-      return screenshot;
-    }
-    
-    public void setScreenshot(Image screenshot) {
-      this.screenshot = new ImageIcon(scaleImageDown(screenshot));
-    }
-    
-    public String getCode() {
-      return code;
-    }
-    public void setCode(String code) {
-      this.code = code;
-    }
-    public Date getTime() {
-      return time;
-    }
-    public void setTime(Date time) {
-      this.time = time;
-    }
   }
   
   public class VersionHistoryPanel extends JPanel {
@@ -168,15 +115,14 @@ public class VersionHistoryFrame extends JFrame {
         
         @Override
         public void mouseClicked(MouseEvent e) { 
-          editor.swapRunningCode(VersionHistoryPanel.this.model.getCode());
-          setLastRunningVersionIndex(versionPanels.indexOf(e.getSource()));
+          controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
         }
       });
     }
     
     public void setModel(VersionHistory model) {
       this.model = model;
-      screenshot.setIcon(model.getScreenshot());
+      screenshot.setIcon(makeScaledImageIcon(model.getScreenshot()));
       codeTextArea.setText(model.getCode());
       int caretPos = Math.min(codeTextArea.getText().indexOf("void draw")+40, 
           codeTextArea.getText().length() - 1);
@@ -185,9 +131,14 @@ public class VersionHistoryFrame extends JFrame {
       validate();
     }
     
+    private ImageIcon makeScaledImageIcon(Image image) {
+      int width = 
+        (int)(ROW_HEIGHT * (image.getWidth(null) / (double)image.getHeight(null)));
+      return new ImageIcon(image.getScaledInstance(width, ROW_HEIGHT, Image.SCALE_DEFAULT));
+    }
+    
     public VersionHistory getModel() {
       return model;
     }
-    
   }
 }
