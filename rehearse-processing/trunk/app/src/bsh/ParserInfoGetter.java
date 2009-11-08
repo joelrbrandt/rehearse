@@ -75,16 +75,21 @@ public class ParserInfoGetter {
    * Parses code. If there are parse errors, best effort is made to parse
    * the code without the error segments. 
    * @param s code to parse.
+   * 
+   * @return true iff the code in its entirety could be parsed
    */
-  public void parseCode(String s) {
+  public boolean parseCode(String s) {
+    boolean parseError = false;
     while (true) {
       ThrowawaySegment ts = parseString(s);
       if (ts == null) break;
       throwawaySegments.add(ts);
       s = removeParseErrorSegment(s, ts);
+      parseError = true;
     }
 
     System.out.println("Parse done. Parsed: \n" + s);
+    return !parseError;
   }
 
   private String removeParseErrorSegment(String s, ThrowawaySegment ts) {

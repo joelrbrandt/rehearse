@@ -523,9 +523,10 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  System.out.println("Breaking on draw");
 	}
 	
-	public void resumeWithDrawUpdate() {
+	public boolean resumeWithDrawUpdate() {
 	  String source = appendCodeFromAllTabs();
-	  pig.parseCode(source);
+	  boolean noError = pig.parseCode(source);
+	  if (!noError) return false;
 	  
 	  // Add entry to history.
     VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
@@ -533,6 +534,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  
 	  interpreter.updateDrawMethod(pig.getDrawMethodNode());
 	  interpreter.resume();
+	  
+	  return true;
 	}
 	
 	public void swapRunningCode(String code) {

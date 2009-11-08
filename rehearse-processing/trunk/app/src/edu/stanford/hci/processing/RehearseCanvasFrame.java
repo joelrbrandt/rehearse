@@ -18,10 +18,19 @@ import edu.stanford.hci.processing.editor.RehearseImageViewer;
 import edu.stanford.hci.processing.editor.SnapshotModel;
 
 public class RehearseCanvasFrame extends JFrame {
+
+  private static final String DEFAULT_TEXT =
+    "Click to continue with edited code!";
+  
+  private static final String ERROR_TEXT =
+    "Please correct compile-time errors.";
   
   private final RehearseEditor editor;
   private final RehearsePApplet applet;
   private ArrayList<SnapshotModel> snapshots = new ArrayList<SnapshotModel>();
+  
+  private String glassPaneText = DEFAULT_TEXT;
+  
   
   public RehearseCanvasFrame(final RehearseEditor editor, final RehearsePApplet applet) {
     super();
@@ -31,11 +40,13 @@ public class RehearseCanvasFrame extends JFrame {
     setSize(100, 100);
     setResizable(false);
     
-    JComponent glassPane = new JComponent() {
+    final JComponent glassPane = new JComponent() {
       public void paint(Graphics g) {
         g.setColor(new Color(0, 0, 0, 125));
         Rectangle bounds = g.getClipBounds();
         g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g.setColor(Color.white);
+        g.drawString(glassPaneText, bounds.x + 5, bounds.y + bounds.height / 2);
       }
     };
     glassPane.setOpaque(false);
@@ -58,7 +69,12 @@ public class RehearseCanvasFrame extends JFrame {
     addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
         if (!applet.isVisible()) {
-          editor.resumeWithDrawUpdate();
+          if (!editor.resumeWithDrawUpdate()) {
+            glassPaneText = ERROR_TEXT;
+            glassPane.repaint();
+          } else {
+            glassPaneText = DEFAULT_TEXT;
+          }
         }
       }
     });
