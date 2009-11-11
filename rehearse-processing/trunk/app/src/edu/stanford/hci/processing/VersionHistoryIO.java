@@ -20,12 +20,15 @@ public class VersionHistoryIO {
   private static final String VERSION_DELIMITER = "#_#_#";
   private static final String FIELD_DELIMITER = "@_@_@";
   
+  private static final String HISTORY_FOLDER_NAME = "history";
+  private static final String VIDEO_FILE_EXTENSION = ".mov";
+  
   private File historyFolder;
   private BufferedWriter txtWriter;
   private int nextIndex;
   
   public VersionHistoryIO(File sketchFolder) {
-    historyFolder = new File(sketchFolder, "history");
+    historyFolder = new File(sketchFolder, HISTORY_FOLDER_NAME);
     if (!historyFolder.exists()) {
       historyFolder.mkdir();
     }
@@ -40,6 +43,11 @@ public class VersionHistoryIO {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+  
+  public String getVideoPath(int versionNo) {
+    return historyFolder.getAbsolutePath() + 
+           "/" + versionNo + VIDEO_FILE_EXTENSION;
   }
   
   public ArrayList<VersionHistory> loadHistory() {
@@ -61,12 +69,12 @@ public class VersionHistoryIO {
       for (String version : versions) {
         if (version.length() > 0) {
           String[] fields = version.split(FIELD_DELIMITER);
-        
+          
           String imageFileName = fields[0] + "." + HISTORY_IMAGE_FORMAT;
           Image image = ImageIO.read(new File(historyFolder, imageFileName));
           Date date = new Date(Long.parseLong(fields[2]));
-        
-          VersionHistory vh = new VersionHistory(image, fields[1], date);
+          
+          VersionHistory vh = new VersionHistory(Integer.parseInt(fields[0]), image, fields[1], date);
           history.add(vh);
         }
       }

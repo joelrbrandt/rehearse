@@ -3,6 +3,7 @@ package edu.stanford.hci.processing;
 import java.awt.Image;
 import java.util.ArrayList;
 
+import processing.video.MovieMaker;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
 public class VersionHistoryController {
@@ -20,6 +21,9 @@ public class VersionHistoryController {
   }
   
   public void addVersionHistory(VersionHistory vh) {
+    
+    vh.setVideoFilename(historyIO.getVideoPath(vh.getVersion()));
+    
     historyModels.add(vh);
     if (historyView != null) {
       historyView.addVersionHistory(vh);
@@ -36,6 +40,14 @@ public class VersionHistoryController {
     }
     
     historyIO.updateImage(index, screenshot);
+  }
+  
+  public void updateVideo(int index) {
+    historyView.updateVideo(index);
+  }
+  
+  public void updateLastRunVideo(MovieMaker mm) {
+    updateVideo(lastRunningVersionIndex);
   }
   
   public void updateLastRunScreenshot(Image screenshot) {
@@ -64,6 +76,7 @@ public class VersionHistoryController {
       
       // Load saved history.
       for (VersionHistory vh : historyModels) {
+        vh.setVideoFilename(historyIO.getVideoPath(vh.getVersion()));
         historyView.addVersionHistory(vh);
       }
       setLastRunningVersionIndex(historyModels.size() - 1);
@@ -79,4 +92,7 @@ public class VersionHistoryController {
       historyView = null;
     }
   }
+  
+  // Returns number of version histories in this controller
+  public int size() { return this.historyModels.size(); }
 }

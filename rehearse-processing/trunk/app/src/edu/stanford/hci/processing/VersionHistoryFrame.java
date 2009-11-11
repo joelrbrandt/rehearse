@@ -20,6 +20,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
+import processing.app.Sketch;
+
 public class VersionHistoryFrame extends JFrame {
   
   private static final int ROW_HEIGHT = 120;
@@ -32,12 +34,12 @@ public class VersionHistoryFrame extends JFrame {
   
   private JPanel rootPanel;
   private ArrayList<VersionHistoryPanel> versionPanels;
-  
-  
+ 
   public VersionHistoryFrame(final VersionHistoryController controller) {
     super("Version History");
     this.controller = controller;
     this.versionPanels = new ArrayList<VersionHistoryPanel>();
+    //this.sketch = sketch;
     
     rootPanel = new JPanel();
     rootPanel.setLayout(new BoxLayout(rootPanel, BoxLayout.PAGE_AXIS));
@@ -72,12 +74,21 @@ public class VersionHistoryFrame extends JFrame {
     repaint();
   }
   
+  public void updateVideo(int index) {
+    VersionHistoryPanel panel = versionPanels.get(index);
+    VersionHistory model = panel.getModel();
+    //model.setScreenshot(screenshot);
+    panel.setModel(model);
+    repaint();
+  }
+  
   public class VersionHistoryPanel extends JPanel {
     private VersionHistory model;
     private JLabel screenshot;
     private JTextArea codeTextArea;
     private JLabel timeLabel;
     
+    private RecordingView recording;
     
     public VersionHistoryPanel(VersionHistory model) {
       super();
@@ -87,8 +98,13 @@ public class VersionHistoryFrame extends JFrame {
       setBackground(Color.white);
       setBorder(BorderFactory.createLineBorder(Color.black));
       
+      recording = new RecordingView(model.getVideoFilename());
+      //recording.sketchPath = sketch.getFolder().getAbsolutePath();
+      add(recording);
+      recording.init();
+      
       screenshot = new JLabel();
-      add(screenshot);
+      //add(screenshot);
       
       codeTextArea = new JTextArea();
       JScrollPane scrollPane = new JScrollPane(codeTextArea);
@@ -122,6 +138,9 @@ public class VersionHistoryFrame extends JFrame {
     
     public void setModel(VersionHistory model) {
       this.model = model;
+      
+      recording.setRecording(model.getVideoFilename());
+      
       screenshot.setIcon(makeScaledImageIcon(model.getScreenshot()));
       codeTextArea.setText(model.getCode());
       int caretPos = Math.min(codeTextArea.getText().indexOf("void draw")+40, 

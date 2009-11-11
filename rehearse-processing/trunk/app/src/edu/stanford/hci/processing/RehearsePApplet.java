@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 
 import processing.core.PApplet;
 import processing.core.PApplet.RegisteredMethods;
+import processing.video.MovieMaker;
 import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
@@ -19,6 +20,9 @@ import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
  */
 public class RehearsePApplet extends PApplet {
 
+  private int version = -1;
+  private MovieMaker mm;
+  
   public enum MethodType { draw, setup, mouseClicked, 
     mouseDragged, mouseMoved, mousePressed, mouseReleased,
     keyPressed, keyReleased, keyTyped
@@ -46,8 +50,24 @@ public class RehearsePApplet extends PApplet {
   }
 
   @Override
+  public void handleDraw() {
+    super.handleDraw();
+    
+    // Then add frame to video recording
+    if (frameCount != 0 && mm != null) {
+      this.mm.addFrame();
+    }
+  }
+  
+  @Override
   public void setup() {
     invoke(MethodType.setup);
+    
+    // Create video recorder
+    // TODO (Abel): Make history folder based on constant
+    System.out.println("Creating MovieMaker to record execution");
+    mm = new MovieMaker(this, this.width, this.height, "history/" + this.version + ".mov", 
+                        30, MovieMaker.VIDEO, MovieMaker.LOW);
   }
 
   @Override
@@ -95,6 +115,11 @@ public class RehearsePApplet extends PApplet {
     // do nothing instead of System.exit
   }
 
+  public MovieMaker getVideoRecording() { return mm; }
+  
+  public void setVersion(int version) { this.version = version; }
+  public int getVersion() { return version; }
+  
   public Image snapshot() {
     return g.getImage();
   }
@@ -134,6 +159,7 @@ public class RehearsePApplet extends PApplet {
     }
   }
 
+  
   /* (non-Javadoc)
    * @see processing.core.PApplet#stop()
    */
@@ -142,6 +168,15 @@ public class RehearsePApplet extends PApplet {
     //System.err.println("RehearsePApplet.stop()");
     // check if waitForNextLine is true
 
+    // Stop video recording
+    // stop is called multiple times for whatever reason.  Only dispose of mm once
+    // TODO: check if mm is actually recording?
+    if (mm != null) {
+      System.out.println("Finishing video recording");
+      mm.finish();
+      mm = null;
+    }
+    
     if (i.getWatchForNextLine() && resolveException) {
       System.out.println("\tRehearsePApplet.stop() inner");
       // if so, resolve since we executed the error-causing line and finished without a problem

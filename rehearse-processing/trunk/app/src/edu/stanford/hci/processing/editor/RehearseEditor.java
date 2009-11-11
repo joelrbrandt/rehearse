@@ -29,6 +29,7 @@ import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.SyntaxDocument;
 import processing.app.syntax.TextAreaPainter;
 import processing.app.syntax.TextAreaPainter.Highlight;
+import processing.video.MovieMaker;
 import bsh.ConsoleInterface;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -73,6 +74,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	private static final boolean OPEN_VERSION_HISTORY = true;
 	
+	public static final String VIDEO_RECORDING_EXTENTION = ".mov";
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
@@ -100,12 +102,16 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	public void handleInteractiveRunEnd() {
 	  isInInteractiveRun = false;
-	  // This check is needed since save also calls handleStop.
-	  if (canvasFrame.isShowing()) {
-	    logRunFeedback(true);
-	    historyController.updateLastRunScreenshot(applet.get().getImage());
-	  }
+	  
 	  applet.stop();
+	  
+	  // This check is needed since save also calls handleStop.
+    if (canvasFrame.isShowing()) {
+      logRunFeedback(true);
+      
+      historyController.updateLastRunVideo(applet.getVideoRecording());
+      historyController.updateLastRunScreenshot(applet.get().getImage());
+    }
 	}
 
 	@Override
@@ -241,8 +247,11 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 				RehearseLogger.EventType.INTERACTIVE_RUN, getSketch(), source);
 		
 		// Add entry to history.
-		VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
+		int versionNo = historyController.size();
+		VersionHistory vh = new VersionHistory(versionNo, defaultImage, source, 
+		                                       new Date());
 		historyController.addVersionHistory(vh);
+		applet.setVersion(versionNo);
 
 		// Add the sketch classpath to BeanShell interpreter
 		String[] classPaths = getSketch().getClassPath().split(";");
@@ -355,7 +364,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 						appendCodeFromAllTabs(false));
 				if (HelpMeOutExceptionTracker.getInstance()
 						.hasExceptionOccurred()) {
-					// TODO here or in handleInteractiveRun() above:
+					
+				  // TODO (Will): here or in handleInteractiveRun() above:
 					int lineToWatch = HelpMeOutExceptionTracker.getInstance()
 							.getLineToWatch();
 					interpreter.setLineToWatch(lineToWatch + 1); // interpreter
@@ -529,7 +539,9 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  if (!noError) return false;
 	  
 	  // Add entry to history.
-    VersionHistory vh = new VersionHistory(defaultImage, source, new Date());
+	  // (Abel) Includes version number and video filename
+    VersionHistory vh = new VersionHistory(historyController.size(), defaultImage, source, 
+                                           new Date());
     historyController.addVersionHistory(vh);
 	  
 	  interpreter.updateDrawMethod(pig.getDrawMethodNode());
