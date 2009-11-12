@@ -20,6 +20,7 @@ import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
  */
 public class RehearsePApplet extends PApplet {
 
+  private static Object mediaLock = new Object();
   private int version = -1;
   private MovieMaker mm;
   
@@ -55,7 +56,12 @@ public class RehearsePApplet extends PApplet {
     
     // Then add frame to video recording
     if (frameCount != 0 && mm != null) {
-      this.mm.addFrame();
+      synchronized(mm) {
+        // null check again in case was nulled while waiting
+        if (mm != null) {
+          this.mm.addFrame();
+        }
+      }
     }
   }
   
@@ -66,8 +72,11 @@ public class RehearsePApplet extends PApplet {
     // Create video recorder
     // TODO (Abel): Make history folder based on constant
     System.out.println("Creating MovieMaker to record execution");
-    mm = new MovieMaker(this, this.width, this.height, "history/" + this.version + ".mov", 
-                        30, MovieMaker.VIDEO, MovieMaker.LOW);
+    
+    synchronized(mediaLock) {
+      mm = new MovieMaker(this, this.width, this.height, "history/" + this.version + ".mov", 
+                          30, MovieMaker.VIDEO, MovieMaker.LOW);
+    }
   }
 
   @Override
@@ -173,8 +182,11 @@ public class RehearsePApplet extends PApplet {
     // TODO: check if mm is actually recording?
     if (mm != null) {
       System.out.println("Finishing video recording");
-      mm.finish();
-      mm = null;
+      
+      synchronized(mm) {
+        mm.finish();
+        mm = null;
+      }
     }
     
     if (i.getWatchForNextLine() && resolveException) {

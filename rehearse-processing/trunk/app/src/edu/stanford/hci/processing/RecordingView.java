@@ -36,6 +36,17 @@ public class RecordingView extends PApplet {
   
   @Override
   public void setup() {
+    // This is from a suggestion by Fry to stop stalling
+    /*
+    System.out.print("Opening QuickTime Session...");
+    try {
+      quicktime.QTSession.open();
+    } catch (quicktime.QTException qte) {
+      qte.printStackTrace();
+    }
+    System.out.println("DONE!");
+    */
+    
     size(100, 100, P2D);
     println("setup");
     
