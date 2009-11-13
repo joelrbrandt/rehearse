@@ -47,7 +47,7 @@ public class VersionHistoryIO {
   
   public String getVideoPath(int versionNo) {
     return historyFolder.getAbsolutePath() + 
-           "/" + versionNo + VIDEO_FILE_EXTENSION;
+           File.separator + versionNo + VIDEO_FILE_EXTENSION;
   }
   
   public ArrayList<VersionHistory> loadHistory() {

@@ -78,17 +78,25 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	
 	public RehearseEditor(Base ibase, String path, int[] location) {
 		super(ibase, path, location);
-		
-		if (OPEN_VERSION_HISTORY) {
-		  historyController = new VersionHistoryController(this);
-		  historyController.openHistoryView();
-		}
 	}
 
 	@Override
 	public EditorToolbar newEditorToolbar(Editor editor, JMenu menu) {
 		System.out.println("Making a Reherase Editor toolbar");
 		return new RehearseEditorToolbar(editor, menu);
+	}
+	
+	@Override
+	protected boolean handleOpenInternal(String path) {
+	  boolean opened = super.handleOpenInternal(path);
+	  if (OPEN_VERSION_HISTORY) {
+	    if (historyController != null) {
+	      historyController.closeAndDisposeHistoryView();
+	    }
+      historyController = new VersionHistoryController(this);
+      historyController.openHistoryView();
+    }
+	  return opened;
 	}
 
 	@Override
