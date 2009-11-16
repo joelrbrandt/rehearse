@@ -21,6 +21,9 @@ public class RecordingView extends PApplet {
   
   public void setRecording(String recordingFilename) {
     this.recordingFilename = recordingFilename;
+    
+    if (this.recordingFilename == null) return;
+    
     try {
       recording = new Movie(this, this.recordingFilename);
       recording.jump((float)(recording.duration() / 2.0));
@@ -47,9 +50,18 @@ public class RecordingView extends PApplet {
     System.out.println("DONE!");
     */
     
-    size(100, 100, P2D);
+    size(VersionHistoryFrame.ROW_HEIGHT, VersionHistoryFrame.ROW_HEIGHT, P2D);
+    textFont(createFont("Arial", 12));
+   
     println("setup");
     
+    if (recordingFilename == null) {
+      background(50);
+      textAlign(CENTER);
+      text("Currently running...", width/2, height/2);
+      return;
+    }
+  
     try {
       print("loading: " + this.recordingFilename + "...");
       recording = new Movie(this, this.recordingFilename);
@@ -88,7 +100,7 @@ public class RecordingView extends PApplet {
   public void mouseMoved() {
     
     if (recording != null) {
-      float pos = (float)mouseX / (float)width;
+      float pos = (float)mouseY / (float)height;
       float jumpTime = pos * recording.duration();
       //println(jumpTime);
       

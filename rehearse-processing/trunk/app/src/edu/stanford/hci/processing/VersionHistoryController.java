@@ -22,7 +22,7 @@ public class VersionHistoryController {
   
   public void addVersionHistory(VersionHistory vh) {
     
-    vh.setVideoFilename(historyIO.getVideoPath(vh.getVersion()));
+    //vh.setVideoFilename(historyIO.getVideoPath(vh.getVersion()));
     
     historyModels.add(vh);
     if (historyView != null) {
@@ -35,15 +35,17 @@ public class VersionHistoryController {
   
   public void updateScreenshot(int index, Image screenshot) {
     historyModels.get(index).setScreenshot(screenshot);
-    if (historyView != null) {
-      historyView.updateScreenshot(index, screenshot);
-    }
+//    if (historyView != null) {
+//      historyView.updateScreenshot(index, screenshot);
+//    }
     
     historyIO.updateImage(index, screenshot);
   }
   
   public void updateVideo(int index) {
-    historyView.updateVideo(index);
+    VersionHistory vh = historyModels.get(index);
+    vh.setVideoFilename(historyIO.getVideoPath(vh.getVersion()));
+    historyView.updateVideo(index, vh);
   }
   
   public void updateLastRunVideo(MovieMaker mm) {
