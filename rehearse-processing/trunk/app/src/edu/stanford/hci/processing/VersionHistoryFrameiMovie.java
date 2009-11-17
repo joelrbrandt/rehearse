@@ -88,6 +88,17 @@ public class VersionHistoryFrameiMovie extends JFrame {
     }
   }
   
+  public void updateCodeArea(String filename) {
+	for (VersionHistoryPanel vhp : versionPanels) {
+		String f = vhp.getFilename();
+		if (f != null && f.equals(filename)) {
+			codeArea.setText(vhp.getCode());
+			break;
+		}
+
+	}
+  }
+  
   public void updateScreenshot(int index, Image screenshot) {
 //    VersionHistoryPanel panel = versionPanels.get(index);
 //    model.setScreenshot(screenshot);
@@ -122,6 +133,7 @@ public class VersionHistoryFrameiMovie extends JFrame {
       }
       recording = new RecordingView(fileName);
       recording.bigMovie = bigMovie;
+      recording.frame = VersionHistoryFrameiMovie.this;
       bigMovie.addRecording(fileName);
       
       //recording.sketchPath = sketch.getFolder().getAbsolutePath();
@@ -134,10 +146,21 @@ public class VersionHistoryFrameiMovie extends JFrame {
         @Override
         public void mouseClicked(MouseEvent e) { 
           controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
+          System.out.println("clicked");
         }
+        
+        
       });
     }
     
+    public String getFilename() {
+    	return model.getVideoFilename();
+    }
+    
+    // this is not good practice, methinks.
+    public String getCode() {
+    	return model.getCode();
+    }
     public void setModel(VersionHistory model) {
       this.model = model;
       String fileName = null;

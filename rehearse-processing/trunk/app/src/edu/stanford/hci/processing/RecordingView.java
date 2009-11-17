@@ -7,7 +7,11 @@ import processing.video.Movie;
 
 public class RecordingView extends PApplet {
   
+// highly suspect coding practices, 
+// in the name of prototyping
   BigMovieView bigMovie;
+  VersionHistoryFrameiMovie frame;
+  
   
   private String recordingFilename;
   private Movie recording;
@@ -85,34 +89,45 @@ public class RecordingView extends PApplet {
   
   @Override
   public void draw() {
-    
+
     if (!setup_done && initialFrameCount < INITIAL_FRAME_COUNT_MAX) {
       initialFrameCount++;
     } else if (initialFrameCount >= INITIAL_FRAME_COUNT_MAX) {
       noLoop();
       setup_done = true;
     }
-    
+
     if (recording!=null) {
-      //println("recordingview: draw!");
-      image(recording, 0, 0, width, height);
+    	background(100);
+      double scale = 1;
+      if (recording.width > recording.height) {
+    	  scale = ((double)recording.width) / width;
+          image(recording, 0, 0, width, (int)(recording.height / scale));
+      } else if (recording.width < recording.height){
+    	  scale = ((double)recording.height) / height;
+          image(recording, 0, 0, (int)(recording.width / scale), height);
+      } else {
+    	  image(recording, 0, 0, width, height);
+      }
+
       flush();
     } 
   }
   
   @Override
   public void mouseMoved() {
-    
-    if (recording != null) {
+     if (recording != null) {
       float pos = (float)mouseX / (float)width;
       float jumpTime = pos * recording.duration();
       //println(jumpTime);
       
       recording.jump(jumpTime);
       bigMovie.setRecordingJump(recordingFilename, jumpTime);
+      frame.updateCodeArea(recordingFilename);
       
       recording.read();
       redraw();
     }
-  }
+  } 
+  
 }

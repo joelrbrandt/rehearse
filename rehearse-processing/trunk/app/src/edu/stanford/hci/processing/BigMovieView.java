@@ -67,7 +67,18 @@ public class BigMovieView extends PApplet {
   public void draw() {
     
     if (currIndex != -1) {
-      image(recordings.get(currIndex), 0, 0, width, height);
+      background(100);
+      Movie recording = recordings.get(currIndex);
+      double scale = 1;
+      if (recording.width > recording.height) {
+    	  scale = ((double)recording.width) / width;
+          image(recording, 0, 0, width, (int)(recording.height / scale));
+      } else if (recording.width < recording.height){
+    	  scale = ((double)recording.height) / height;
+          image(recording, 0, 0, (int)(recording.width / scale), height);
+      } else {
+    	  image(recording, 0, 0, width, height);
+      }
       flush();
     } else {
       background(0);
