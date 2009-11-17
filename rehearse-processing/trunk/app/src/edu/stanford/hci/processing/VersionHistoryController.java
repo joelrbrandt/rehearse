@@ -11,7 +11,7 @@ public class VersionHistoryController {
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
   private ArrayList<VersionHistory> historyModels;
-  private VersionHistoryFrame historyView;
+  private VersionHistoryFrameiMovie historyView;
   private int lastRunningVersionIndex = -1;
   
   public VersionHistoryController(RehearseEditor editor) {
@@ -72,7 +72,7 @@ public class VersionHistoryController {
   
   public void openHistoryView() {
     if (historyView == null) {
-      historyView = new VersionHistoryFrame(this);
+      historyView = new VersionHistoryFrameiMovie(this);
       historyView.pack();
       historyView.setVisible(true);
       

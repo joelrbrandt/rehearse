@@ -1,9 +1,13 @@
 package edu.stanford.hci.processing;
 
+import java.awt.event.MouseEvent;
+
 import processing.core.PApplet;
 import processing.video.Movie;
 
 public class RecordingView extends PApplet {
+  
+  BigMovieView bigMovie;
   
   private String recordingFilename;
   private Movie recording;
@@ -100,16 +104,15 @@ public class RecordingView extends PApplet {
   public void mouseMoved() {
     
     if (recording != null) {
-      float pos = (float)mouseY / (float)height;
+      float pos = (float)mouseX / (float)width;
       float jumpTime = pos * recording.duration();
       //println(jumpTime);
       
       recording.jump(jumpTime);
+      bigMovie.setRecordingJump(recordingFilename, jumpTime);
+      
       recording.read();
       redraw();
     }
   }
-  
-  
-
 }
