@@ -548,6 +548,7 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	  
 	  // Add entry to history.
 	  // (Abel) Includes version number and video filename
+	  applet.startNewMovie();
     VersionHistory vh = new VersionHistory(historyController.size(), defaultImage, source, 
                                            new Date());
     historyController.addVersionHistory(vh);

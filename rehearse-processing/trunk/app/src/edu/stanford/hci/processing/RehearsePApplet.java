@@ -168,15 +168,7 @@ public class RehearsePApplet extends PApplet {
     }
   }
 
-  
-  /* (non-Javadoc)
-   * @see processing.core.PApplet#stop()
-   */
-  @Override
-  public void stop() {
-    //System.err.println("RehearsePApplet.stop()");
-    // check if waitForNextLine is true
-
+  public void finishVideoRecording() {
     // Stop video recording
     // stop is called multiple times for whatever reason.  Only dispose of mm once
     // TODO: check if mm is actually recording?
@@ -188,6 +180,25 @@ public class RehearsePApplet extends PApplet {
         mm = null;
       }
     }
+  }
+  
+  public void startNewMovie() {
+    synchronized(mediaLock) {
+      this.version++;
+      mm = new MovieMaker(this, this.width, this.height, "history/" + this.version + ".mov", 
+                          30, MovieMaker.VIDEO, MovieMaker.LOW);
+    }
+  }
+  
+  /* (non-Javadoc)
+   * @see processing.core.PApplet#stop()
+   */
+  @Override
+  public void stop() {
+    //System.err.println("RehearsePApplet.stop()");
+    // check if waitForNextLine is true
+
+    finishVideoRecording();
     
     if (i.getWatchForNextLine() && resolveException) {
       System.out.println("\tRehearsePApplet.stop() inner");
