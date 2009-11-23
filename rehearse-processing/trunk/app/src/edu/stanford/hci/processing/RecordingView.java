@@ -1,14 +1,17 @@
 package edu.stanford.hci.processing;
 
-import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
 import processing.core.PApplet;
 import processing.video.Movie;
+import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
 
 public class RecordingView extends PApplet {
   
 // highly suspect coding practices, 
 // in the name of prototyping
+  private static final int SEC_PER_SEGMENT = 1;
+  
   BigMovieView bigMovie;
   VersionHistoryFrameiMovie frame;
   
@@ -19,6 +22,16 @@ public class RecordingView extends PApplet {
   private boolean setup_done = false;
   private int initialFrameCount = 0;
   static final private int INITIAL_FRAME_COUNT_MAX = 100;
+  
+  private VersionHistoryPanel vhp;
+  private float jumpTime;
+  private int numSegments;
+  private float jumpTimes[];
+  
+  public RecordingView(String recordingFilename, VersionHistoryPanel vhp) {
+	  this(recordingFilename);
+	  this.vhp = vhp;
+  }
   
   public RecordingView(String recordingFilename) {
     // TODO Auto-generated constructor stub
@@ -45,6 +58,7 @@ public class RecordingView extends PApplet {
     redraw();
   }
   
+ 
   @Override
   public void setup() {
     // This is from a suggestion by Fry to stop stalling
@@ -75,17 +89,27 @@ public class RecordingView extends PApplet {
       print("loading: " + this.recordingFilename + "...");
       recording = new Movie(this, this.recordingFilename);
       println("DONE!");
-      recording.jump((float)(recording.duration() / 2.0));
-      recording.read();
+
+      numSegments = (int)(recording.duration() / SEC_PER_SEGMENT);
+      if (recording.duration() % SEC_PER_SEGMENT != 0) {
+    	  numSegments++;
+      }   
+      jumpTimes = new float[numSegments];
+      for (int i = 0; i < numSegments; i++) {
+    	  jumpTimes[i] = i * SEC_PER_SEGMENT;
+      }
+    
+      size(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT, P2D);
+      if (vhp != null) {
+    	  vhp.setPreferredSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
+    	  vhp.setMaximumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
+    	  vhp.setMinimumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
+      }
+      
     } catch(NullPointerException e) {
       recording = null;
       System.out.println("Could not find recording for: " + this.recordingFilename);
     }
-    //background(0);
-    
-    //noLoop();
-    //setup_done = true;
-    //redraw();
   }
   
   @Override
@@ -99,35 +123,50 @@ public class RecordingView extends PApplet {
     }
 
     if (recording!=null) {
-    	background(100);
-      double scale = 1;
-      if (recording.width > recording.height) {
-    	  scale = ((double)recording.width) / width;
-          image(recording, width/2, height/2, width, (int)(recording.height / scale));
-      } else if (recording.width < recording.height){
-    	  scale = ((double)recording.height) / height;
-          image(recording, width/2, height/2, (int)(recording.width / scale), height);
-      } else {
-    	  image(recording, width/2, height/2, width, height);
-      }
-
-      flush();
+    	background(240);
+    	double scale = 1;
+    	
+    	int recWidth;
+    	int recHeight;
+    	
+    	if (recording.width > recording.height) {
+    		scale = ((double)recording.width) / VersionHistoryFrame.ROW_HEIGHT;
+    		recWidth = VersionHistoryFrame.ROW_HEIGHT;
+    		recHeight = (int)(recording.height / scale);
+    	} else if (recording.width < recording.height) {
+    		scale = ((double)recording.height) / VersionHistoryFrame.ROW_HEIGHT;
+    		recWidth = (int)(recording.width / scale);
+    		recHeight = VersionHistoryFrame.ROW_HEIGHT;
+    	} else {
+    		recWidth = VersionHistoryFrame.ROW_HEIGHT;
+    		recHeight = VersionHistoryFrame.ROW_HEIGHT;
+    	}
+    	
+    	for (int i = 0; i < numSegments; i++) {
+    		int x = (i * VersionHistoryFrame.ROW_HEIGHT) + (VersionHistoryFrame.ROW_HEIGHT/2);
+    		recording.jump(jumpTimes[i]);
+    		recording.read();
+    		image(recording, x, height/2, recWidth, recHeight);
+    	}
+    	
+    	flush();
     } 
   }
   
+    
   @Override
   public void mouseMoved() {
      if (recording != null) {
       float pos = (float)mouseX / (float)width;
-      float jumpTime = pos * recording.duration();
-      //println(jumpTime);
-      
-      recording.jump(jumpTime);
+      jumpTime = pos * recording.duration();
+      int whichSegment = (int)(jumpTime / SEC_PER_SEGMENT);
+      jumpTimes[whichSegment] = jumpTime;
+
       bigMovie.setRecordingJump(recordingFilename, jumpTime);
       frame.updateCodeArea(recordingFilename);
-      
-      recording.read();
+
       redraw();
+
     }
   } 
   

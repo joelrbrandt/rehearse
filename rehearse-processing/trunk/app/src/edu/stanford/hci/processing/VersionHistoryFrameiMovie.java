@@ -50,26 +50,24 @@ public class VersionHistoryFrameiMovie extends JFrame {
     JScrollPane codeScrollPane = new JScrollPane(codeArea);
     
     bigMovie = new BigMovieView();
-    
+
     JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
         codeScrollPane, bigMovie);
     
     JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
         hSplitPane, moviesPanel);
-    
-    add(vSplitPane);
-    
+      
     vSplitPane.setDividerLocation(300);
     hSplitPane.setDividerLocation(400);
-    
-    setPreferredSize(new Dimension(700, 700));
+    add (vSplitPane);
+   
+    setPreferredSize(new Dimension(700, 800));
     bigMovie.init();
   }
   
   public void addVersionHistory(VersionHistory vh) {
     VersionHistoryPanel panel = new VersionHistoryPanel(vh);
     
-    //moviesPanel.add(Box.createRigidArea(new Dimension(10, 5)), 0);
     moviesPanel.add(panel);
     versionPanels.add(panel);
     
@@ -120,18 +118,20 @@ public class VersionHistoryFrameiMovie extends JFrame {
     public VersionHistoryPanel(VersionHistory newModel) {
       super(new BorderLayout());
       //setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-      setMaximumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-      setMinimumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-      setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
+//      setMaximumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
+//      setMinimumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
+//      setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
       
       setBackground(Color.white);
 //      setBorder(BorderFactory.createLineBorder(Color.black));
+      
       
       String fileName = null;
       if (newModel != null) {
         fileName = newModel.getVideoFilename();
       }
-      recording = new RecordingView(fileName);
+      
+      recording = new RecordingView(fileName, this);
       recording.bigMovie = bigMovie;
       recording.frame = VersionHistoryFrameiMovie.this;
       bigMovie.addRecording(fileName);
@@ -141,7 +141,7 @@ public class VersionHistoryFrameiMovie extends JFrame {
       //recording.init();
       
       setModel(newModel);
-      
+
       addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) { 
@@ -153,6 +153,7 @@ public class VersionHistoryFrameiMovie extends JFrame {
       });
     }
     
+   
     public String getFilename() {
     	return model.getVideoFilename();
     }
