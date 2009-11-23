@@ -57,6 +57,7 @@ public class BigMovieView extends PApplet {
   @Override
   public void setup() {
     size(300,300);
+    imageMode(CENTER);
     textFont(createFont("Arial", 12));
     background(0);
     
@@ -72,12 +73,12 @@ public class BigMovieView extends PApplet {
       double scale = 1;
       if (recording.width > recording.height) {
     	  scale = ((double)recording.width) / width;
-          image(recording, 0, 0, width, (int)(recording.height / scale));
+          image(recording, width/2, height/2, width, (int)(recording.height / scale));
       } else if (recording.width < recording.height){
     	  scale = ((double)recording.height) / height;
-          image(recording, 0, 0, (int)(recording.width / scale), height);
+          image(recording, width/2, height/2, (int)(recording.width / scale), height);
       } else {
-    	  image(recording, 0, 0, width, height);
+    	  image(recording, width/2, height/2, width, height);
       }
       flush();
     } else {

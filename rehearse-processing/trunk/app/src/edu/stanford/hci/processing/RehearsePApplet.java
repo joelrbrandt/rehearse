@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import javax.swing.JFrame;
 
 import processing.core.PApplet;
-import processing.core.PApplet.RegisteredMethods;
 import processing.video.MovieMaker;
 import bsh.EvalError;
 import bsh.Interpreter;

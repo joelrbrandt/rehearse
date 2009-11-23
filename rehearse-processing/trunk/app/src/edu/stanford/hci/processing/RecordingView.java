@@ -59,6 +59,7 @@ public class RecordingView extends PApplet {
     */
     
     size(VersionHistoryFrame.ROW_HEIGHT, VersionHistoryFrame.ROW_HEIGHT, P2D);
+    imageMode(CENTER);
     textFont(createFont("Arial", 12));
    
     println("setup");
@@ -102,12 +103,12 @@ public class RecordingView extends PApplet {
       double scale = 1;
       if (recording.width > recording.height) {
     	  scale = ((double)recording.width) / width;
-          image(recording, 0, 0, width, (int)(recording.height / scale));
+          image(recording, width/2, height/2, width, (int)(recording.height / scale));
       } else if (recording.width < recording.height){
     	  scale = ((double)recording.height) / height;
-          image(recording, 0, 0, (int)(recording.width / scale), height);
+          image(recording, width/2, height/2, (int)(recording.width / scale), height);
       } else {
-    	  image(recording, 0, 0, width, height);
+    	  image(recording, width/2, height/2, width, height);
       }
 
       flush();
