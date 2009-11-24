@@ -41,11 +41,15 @@ public class VersionHistoryFrameiMovie extends JFrame {
     showMarkedOnly = false;
     
     moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
+    moviesPanel.setPreferredSize(new Dimension(700, 700));
     JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
+    movieScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    movieScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     movieScrollPane.setMinimumSize(new Dimension(0, 400));
     
     AdjustmentListener scrollListener = new ScrollAdjustmentListener();
-    movieScrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollListener);
+//    movieScrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollListener);
+    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
     
     codeArea = new JTextArea();
     JScrollPane codeScrollPane = new JScrollPane(codeArea);
@@ -91,6 +95,8 @@ public class VersionHistoryFrameiMovie extends JFrame {
     versionPanels.add(panel);
     
     codeArea.setText(vh.getCode());
+    
+    //moviesPanel.setPreferredSize(new Dimension(700, versionPanels.size() * ROW_HEIGHT));
     
     validate();
     panel.recording.init();
