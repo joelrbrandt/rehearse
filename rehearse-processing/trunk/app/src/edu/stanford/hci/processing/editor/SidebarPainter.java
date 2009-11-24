@@ -12,6 +12,7 @@ import javax.swing.JComponent;
 
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.TextAreaPainter;
+import processing.app.syntax.TokenMarker;
 
 /**
  * Handles painting the left sidebar where "print points" or other
@@ -52,10 +53,14 @@ public class SidebarPainter extends JComponent {
 	    for (int line = firstInvalid; line <= lastInvalid; line++) {
 	    	Color c = Color.gray;
 	    	if (line < textArea.getLineCount()) {
-	    		RehearseLineModel m = 
-	    			(RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
-	    		if (m != null && m.isPrintPoint)
-	    			c = Color.red;
+	    	  TokenMarker tm = textArea.getTokenMarker();
+	    	  if (tm != null) {
+  	    		RehearseLineModel m = 
+  	    			(RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
+  	    		if (m != null && m.isPrintPoint) {
+  	    			c = Color.red;
+  	    		}
+	    	  }
 	    	}
 	        gfx.setColor(c);
 		    int y = textArea.lineToY(line);
