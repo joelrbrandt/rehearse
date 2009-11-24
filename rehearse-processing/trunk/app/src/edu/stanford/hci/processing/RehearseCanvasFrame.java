@@ -62,14 +62,19 @@ public class RehearseCanvasFrame extends JFrame {
               snapshots);
           viewer.setVisible(true);
         }
-        editor.handleInteractiveRunEnd();
+        if (editor == null) {
+          RehearseCanvasFrame.this.dispose();
+          RehearseCanvasFrame.this.setVisible(false);
+        } else {
+          editor.handleInteractiveRunEnd();
+        }
       }
     });
     
     addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
         if (!applet.isVisible()) {
-          if (!editor.resumeWithDrawUpdate()) {
+          if (editor != null && !editor.resumeWithDrawUpdate()) {
             glassPaneText = ERROR_TEXT;
             glassPane.repaint();
           } else {

@@ -194,21 +194,23 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public void runHistoryCode(String source) {
 	  RehearsePApplet applet = new RehearsePApplet();
     applet.sketchPath = null;
-    canvasFrame = new RehearseCanvasFrame(this, applet);
+    RehearseCanvasFrame canvasFrame = new RehearseCanvasFrame(null, applet);
     applet.frame = canvasFrame;
     
     Interpreter interpreter = new Interpreter(this, applet);
  // Add the sketch classpath to BeanShell interpreter
-    String[] classPaths = getSketch().getClassPath().split(";");
-    for (String classPath : classPaths) {
-      try {
-        File file = new File(classPath);
-        interpreter.getClassManager()
-            .addClassPath(file.toURI().toURL());
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
+    if (getSketch().getClassPath() != null) {
+      String[] classPaths = getSketch().getClassPath().split(";");
+      for (String classPath : classPaths) {
+        try {
+          File file = new File(classPath);
+          interpreter.getClassManager()
+              .addClassPath(file.toURI().toURL());
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
       }
     }
 
