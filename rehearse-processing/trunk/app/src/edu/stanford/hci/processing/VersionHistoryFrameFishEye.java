@@ -31,27 +31,18 @@ import difflib.Patch;
 
 import processing.app.Sketch;
 
-public class VersionHistoryFrameFishEye extends JFrame implements VersionHistoryFrameInterface {
-  
-  public static final int ROW_HEIGHT = 120;
-  private static final Color selectedColor = new Color(150,255,150);
-  
-  private final VersionHistoryController controller;
-  
-  private JPanel moviesPanel; // holds recordingViews
+public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   private FishEyeView fisheyeView;
   //private JTextArea codeArea;
   private JEditTextArea codeArea;
-  private BigMovieView bigMovie;
   
   private ArrayList<VersionHistoryPanel> versionPanels;
  
   public VersionHistoryFrameFishEye(final VersionHistoryController controller) {
-    super("Fisheye History Viewer");
+    super(controller);
     
     //System.out.println("Creating FishEye Frame");
     
-    this.controller = controller;
     this.versionPanels = new ArrayList<VersionHistoryPanel>();
     
     moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));

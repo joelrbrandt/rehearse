@@ -19,42 +19,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryFrameInterface{
-  
-  public static final int ROW_HEIGHT = 120;
-  private static final Color selectedColor = new Color(150,255,150);
-  
-  private final VersionHistoryController controller;
-  
-  private JPanel moviesPanel;
-  private JTextArea codeArea;
-  private BigMovieView bigMovie;
+public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
   
   private ArrayList<VersionHistoryPanel> versionPanels;
   private boolean showMarkedOnly;
  
   public VersionHistoryFrameiMovie(final VersionHistoryController controller) {
-    super("Version History");
-    this.controller = controller;
+    super(controller);
     this.versionPanels = new ArrayList<VersionHistoryPanel>();
     showMarkedOnly = false;
-    
-    moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
-    moviesPanel.setPreferredSize(new Dimension(700, 700));
-    JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
-    movieScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    movieScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-    movieScrollPane.setMinimumSize(new Dimension(0, 400));
-    
-    AdjustmentListener scrollListener = new ScrollAdjustmentListener();
-//    movieScrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollListener);
-    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
-    
-    codeArea = new JTextArea();
-    JScrollPane codeScrollPane = new JScrollPane(codeArea);
-    
-    bigMovie = new BigMovieView();
-    
+      
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
     JButton showMarked = new JButton("Show Marked");
     showMarked.addMouseListener(new MouseAdapter() {
@@ -64,23 +38,12 @@ public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryF
         }
       });
     buttonPanel.add(showMarked);
-   
-    JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-        codeScrollPane, bigMovie);
-    
-    JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-        hSplitPane, movieScrollPane);
-      
+        
     JSplitPane v2SplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
     		vSplitPane, buttonPanel);
-    vSplitPane.setDividerLocation(300);
-    hSplitPane.setDividerLocation(400);
     v2SplitPane.setDividerLocation(700);
     
     add(v2SplitPane);
-   
-    setPreferredSize(new Dimension(700, 800));
-    bigMovie.init();
   }
   
   public VersionHistoryController getController() {
@@ -122,10 +85,6 @@ public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryF
   }
   
   public void updateScreenshot(int index, Image screenshot) {
-//    VersionHistoryPanel panel = versionPanels.get(index);
-//    model.setScreenshot(screenshot);
-//    panel.setModel(model);
-//    repaint();
   }
   
   public void updateVideo(int index, VersionHistory vh) {
@@ -180,13 +139,6 @@ public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryF
       
       setModel(newModel);
 
-//      addMouseListener(new MouseAdapter() {
-//        @Override
-//        public void mouseClicked(MouseEvent e) { 
-//          controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
-//          System.out.println("clicked");
-//        }
-//      });
     }
         
     public String getFilename() {
@@ -209,11 +161,5 @@ public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryF
     public VersionHistory getModel() {
       return model;
     }
-  }
-  
-  public class ScrollAdjustmentListener implements AdjustmentListener {
-	  public void adjustmentValueChanged(AdjustmentEvent evt) {
-		  moviesPanel.revalidate();
-	  }
   }
 }

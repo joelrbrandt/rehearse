@@ -10,13 +10,13 @@ public class VersionHistoryController {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_FISHEYE;
+  public static final int view_type = VIEW_IMOVIE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
   private ArrayList<VersionHistory> historyModels;
   
-  private VersionHistoryFrameInterface historyView;
+  private VersionHistoryFrame historyView;
   //private VersionHistoryFrameiMovie historyView;
   
   private int lastRunningVersionIndex = -1;
