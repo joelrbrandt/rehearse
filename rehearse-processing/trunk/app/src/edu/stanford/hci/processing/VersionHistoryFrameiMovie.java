@@ -1,28 +1,24 @@
 package edu.stanford.hci.processing;
 
+import java.awt.Adjustable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DateFormat;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.border.Border;
-
-import processing.app.Sketch;
 
 public class VersionHistoryFrameiMovie extends JFrame {
   
@@ -36,30 +32,49 @@ public class VersionHistoryFrameiMovie extends JFrame {
   private BigMovieView bigMovie;
   
   private ArrayList<VersionHistoryPanel> versionPanels;
+  private boolean showMarkedOnly;
  
   public VersionHistoryFrameiMovie(final VersionHistoryController controller) {
     super("Version History");
     this.controller = controller;
     this.versionPanels = new ArrayList<VersionHistoryPanel>();
+    showMarkedOnly = false;
     
     moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
     JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
     movieScrollPane.setMinimumSize(new Dimension(0, 400));
     
+    AdjustmentListener scrollListener = new ScrollAdjustmentListener();
+    movieScrollPane.getHorizontalScrollBar().addAdjustmentListener(scrollListener);
+    
     codeArea = new JTextArea();
     JScrollPane codeScrollPane = new JScrollPane(codeArea);
     
     bigMovie = new BigMovieView();
-
+    
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
+    JButton showMarked = new JButton("Show Marked");
+    showMarked.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) { 
+        	toggleShowMarkedOnly();
+        }
+      });
+    buttonPanel.add(showMarked);
+   
     JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
         codeScrollPane, bigMovie);
     
     JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-        hSplitPane, moviesPanel);
+        hSplitPane, movieScrollPane);
       
+    JSplitPane v2SplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
+    		vSplitPane, buttonPanel);
     vSplitPane.setDividerLocation(300);
     hSplitPane.setDividerLocation(400);
-    add (vSplitPane);
+    v2SplitPane.setDividerLocation(700);
+    
+    add(v2SplitPane);
    
     setPreferredSize(new Dimension(700, 800));
     bigMovie.init();
@@ -115,6 +130,24 @@ public class VersionHistoryFrameiMovie extends JFrame {
     validate();
   }
   
+
+  public void toggleShowMarkedOnly() {
+	  showMarkedOnly = !showMarkedOnly;
+	  if(showMarkedOnly) {
+		  for (VersionHistoryPanel vhp : versionPanels) {
+			  if (!vhp.recording.isMarked()) {
+				  moviesPanel.remove(vhp);
+			  }
+		  }
+	  } else {
+		  moviesPanel.removeAll();
+		  for (int i = 0; i < versionPanels.size(); i++) {
+			  moviesPanel.add(versionPanels.get(i));
+		  }
+	  }
+	  moviesPanel.revalidate();
+  }
+  
   public class VersionHistoryPanel extends JPanel {
     private VersionHistory model;
     private RecordingView recording;
@@ -122,12 +155,9 @@ public class VersionHistoryFrameiMovie extends JFrame {
     public VersionHistoryPanel(VersionHistory newModel) {
       super(new BorderLayout());
       //setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-//      setMaximumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-//      setMinimumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-//      setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-      
+      setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
       setBackground(Color.white);
-//      setBorder(BorderFactory.createLineBorder(Color.black));
+      setBorder(BorderFactory.createLineBorder(Color.black, 3));
       
       
       String fileName = null;
@@ -156,8 +186,7 @@ public class VersionHistoryFrameiMovie extends JFrame {
         
       });
     }
-    
-   
+        
     public String getFilename() {
     	return model.getVideoFilename();
     }
@@ -180,4 +209,9 @@ public class VersionHistoryFrameiMovie extends JFrame {
       return model;
     }
   }
+  public class ScrollAdjustmentListener implements AdjustmentListener {
+  	  public void adjustmentValueChanged(AdjustmentEvent evt) {
+  		  moviesPanel.revalidate();
+  	  }
+    }
 }
