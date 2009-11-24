@@ -49,6 +49,7 @@ public class RecordingView extends PApplet {
       recording = new Movie(this, this.recordingFilename);
       recording.jump((float)(recording.duration() / 2.0));
       recording.read();
+      setSegments();
       
     } catch(NullPointerException e) {
       recording = null;
@@ -90,7 +91,16 @@ public class RecordingView extends PApplet {
       recording = new Movie(this, this.recordingFilename);
       println("DONE!");
 
-      numSegments = (int)(recording.duration() / SEC_PER_SEGMENT);
+      setSegments();
+      
+    } catch(NullPointerException e) {
+      recording = null;
+      System.out.println("Could not find recording for: " + this.recordingFilename);
+    }
+  }
+  
+  private void setSegments() {
+	  numSegments = (int)(recording.duration() / SEC_PER_SEGMENT);
       if (recording.duration() % SEC_PER_SEGMENT != 0) {
     	  numSegments++;
       }   
@@ -105,11 +115,6 @@ public class RecordingView extends PApplet {
     	  vhp.setMaximumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
     	  vhp.setMinimumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
       }
-      
-    } catch(NullPointerException e) {
-      recording = null;
-      System.out.println("Could not find recording for: " + this.recordingFilename);
-    }
   }
   
   @Override
