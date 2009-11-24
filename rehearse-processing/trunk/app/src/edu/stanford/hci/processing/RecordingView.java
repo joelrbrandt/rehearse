@@ -246,7 +246,8 @@ public class RecordingView extends PApplet {
 				if (isMarked) {
 					vhp.setBorder(BorderFactory.createLineBorder(Color.yellow, 3));
 				} else {
-					vhp.setBorder(BorderFactory.createLineBorder(Color.black, 3));
+					vhp.setBorder(BorderFactory.createLineBorder(Color.black, 
+					    VersionHistoryPanel.DEFAULT_BORDER_WIDTH));
 				}
 			}
 		}

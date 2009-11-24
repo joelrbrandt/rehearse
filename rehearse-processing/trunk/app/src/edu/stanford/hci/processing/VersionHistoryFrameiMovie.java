@@ -116,12 +116,14 @@ public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
     private VersionHistory model;
     private RecordingView recording;
     
+    public static final int DEFAULT_BORDER_WIDTH = 1;
+    
     public VersionHistoryPanel(VersionHistory newModel) {
       super(new BorderLayout());
       //setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
       setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
       setBackground(Color.white);
-      setBorder(BorderFactory.createLineBorder(Color.black, 3));
+      setBorder(BorderFactory.createLineBorder(Color.black, DEFAULT_BORDER_WIDTH));
       
       String fileName = null;
       if (newModel != null) {
