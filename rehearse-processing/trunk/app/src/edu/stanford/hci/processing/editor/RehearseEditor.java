@@ -190,6 +190,57 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	public void setIsInInteractiveRun(boolean isInInteractiveRun) {
 	  this.isInInteractiveRun = isInInteractiveRun;
 	}
+	
+	public void runHistoryCode(String source) {
+	  RehearsePApplet applet = new RehearsePApplet();
+    applet.sketchPath = null;
+    canvasFrame = new RehearseCanvasFrame(this, applet);
+    applet.frame = canvasFrame;
+    
+    Interpreter interpreter = new Interpreter(this, applet);
+ // Add the sketch classpath to BeanShell interpreter
+    String[] classPaths = getSketch().getClassPath().split(";");
+    for (String classPath : classPaths) {
+      try {
+        File file = new File(classPath);
+        interpreter.getClassManager()
+            .addClassPath(file.toURI().toURL());
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    // now, add our script to the processing.core package
+    try {
+      interpreter.eval("package processing.core;");
+    } catch (EvalError e1) {
+      e1.printStackTrace();
+    }
+
+    try {
+      Object obj;
+      try {
+        obj = interpreter.eval(source, true);
+
+      } catch (ModeException e) {
+        if (e.isJavaMode()) {
+          throw new RuntimeException("We don't do java mode yet!");
+        } else {
+          // Code was written in static mode, let's try again.
+          System.out
+              .println("Code written in static mode, wrapping and restarting.");
+          // this is kind of gross...
+          obj = interpreter.eval("setup() {" + source + "}");
+        }
+      }
+      // This actually starts the program.
+      applet.init();
+    } catch (EvalError e) {
+      e.printStackTrace();
+    }
+	}
 
 	public void handleInteractiveRun() {
 		HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);

@@ -65,6 +65,10 @@ public class VersionHistoryFrameiMovie extends JFrame {
     bigMovie.init();
   }
   
+  public VersionHistoryController getController() {
+    return controller;
+  }
+  
   public void addVersionHistory(VersionHistory vh) {
     VersionHistoryPanel panel = new VersionHistoryPanel(vh);
     
@@ -170,6 +174,10 @@ public class VersionHistoryFrameiMovie extends JFrame {
       }
       recording.setRecording(fileName);
       validate();
+    }
+    
+    public VersionHistory getModel() {
+      return model;
     }
   }
 }

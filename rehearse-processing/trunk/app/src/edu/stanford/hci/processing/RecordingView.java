@@ -15,13 +15,17 @@ public class RecordingView extends PApplet {
   BigMovieView bigMovie;
   VersionHistoryFrameiMovie frame;
   
-  
   private String recordingFilename;
   private Movie recording;
   
   private boolean setup_done = false;
   private int initialFrameCount = 0;
   static final private int INITIAL_FRAME_COUNT_MAX = 100;
+  
+
+  private static final int PLAY_BUTTON_SIZE = 15;
+  private static final int PLAY_BUTTON_X_OFFSET = 25;
+  private static final int PLAY_BUTTON_Y_OFFSET = 25;
   
   private VersionHistoryPanel vhp;
   private float jumpTime;
@@ -154,11 +158,26 @@ public class RecordingView extends PApplet {
     		image(recording, x, height/2, recWidth, recHeight);
     	}
     	
+    	if (mouseOverPlayButton()) {
+        fill(0,255,0);
+      } else {
+        fill(230,230,230);
+      }
+      triangle(width - PLAY_BUTTON_X_OFFSET, height - PLAY_BUTTON_Y_OFFSET, 
+           width - PLAY_BUTTON_X_OFFSET, height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE,
+           width - PLAY_BUTTON_X_OFFSET + PLAY_BUTTON_SIZE, height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE / 2);
+      }
+    	
     	flush();
-    } 
   }
   
-    
+  private boolean mouseOverPlayButton() {
+	  return (mouseX > width - PLAY_BUTTON_X_OFFSET 
+			  && mouseX < width - PLAY_BUTTON_X_OFFSET + PLAY_BUTTON_SIZE
+			  && mouseY > height - PLAY_BUTTON_Y_OFFSET 
+			  && mouseY < height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE);
+  }
+  
   @Override
   public void mouseMoved() {
      if (recording != null) {
@@ -175,4 +194,10 @@ public class RecordingView extends PApplet {
     }
   } 
   
+  @Override
+  public void mouseClicked() {
+    if (mouseOverPlayButton()) {
+      frame.getController().runHistoryCode(vhp.getModel().getCode());
+    }
+  }
 }

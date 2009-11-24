@@ -97,4 +97,8 @@ public class VersionHistoryController {
   
   // Returns number of version histories in this controller
   public int size() { return this.historyModels.size(); }
+  
+  public void runHistoryCode(String code) {
+    editor.runHistoryCode(code);
+  }
 }
