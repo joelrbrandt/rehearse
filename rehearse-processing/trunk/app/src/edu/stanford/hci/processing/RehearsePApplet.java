@@ -19,6 +19,8 @@ import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
  */
 public class RehearsePApplet extends PApplet {
 
+  public static final String HISTORY_DIR = "history/";
+  
   private static Object mediaLock = new Object();
   private int version = -1;
   private MovieMaker mm;
@@ -69,11 +71,10 @@ public class RehearsePApplet extends PApplet {
     invoke(MethodType.setup);
     
     // Create video recorder
-    // TODO (Abel): Make history folder based on constant
     System.out.println("Creating MovieMaker to record execution");
     
     synchronized(mediaLock) {
-      mm = new MovieMaker(this, this.width, this.height, "history/" + this.version + ".mov", 
+      mm = new MovieMaker(this, this.width, this.height, HISTORY_DIR + this.version + ".mov", 
                           30, MovieMaker.VIDEO, MovieMaker.LOW);
     }
   }

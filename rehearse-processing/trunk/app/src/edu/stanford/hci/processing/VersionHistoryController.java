@@ -8,10 +8,17 @@ import edu.stanford.hci.processing.editor.RehearseEditor;
 
 public class VersionHistoryController {
 
+  public static final int VIEW_IMOVIE = 1;
+  public static final int VIEW_FISHEYE = 2;
+  public static final int view_type = VIEW_FISHEYE;
+  
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
   private ArrayList<VersionHistory> historyModels;
-  private VersionHistoryFrameiMovie historyView;
+  
+  private VersionHistoryFrameInterface historyView;
+  //private VersionHistoryFrameiMovie historyView;
+  
   private int lastRunningVersionIndex = -1;
   
   public VersionHistoryController(RehearseEditor editor) {
@@ -72,7 +79,17 @@ public class VersionHistoryController {
   
   public void openHistoryView() {
     if (historyView == null) {
-      historyView = new VersionHistoryFrameiMovie(this);
+      
+      if (this.view_type == VIEW_IMOVIE) {
+        historyView = new VersionHistoryFrameiMovie(this);
+      } else if (this.view_type == VIEW_FISHEYE) {
+        try {
+        historyView = new VersionHistoryFrameFishEye(this);
+        } catch (Exception e) {
+          System.out.println("oops: " + e);
+        }
+      }
+      
       historyView.pack();
       historyView.setVisible(true);
       

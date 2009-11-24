@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-public class VersionHistoryFrameiMovie extends JFrame {
+public class VersionHistoryFrameiMovie extends JFrame implements VersionHistoryFrameInterface{
   
   public static final int ROW_HEIGHT = 120;
   private static final Color selectedColor = new Color(150,255,150);
