@@ -1,26 +1,15 @@
 package edu.stanford.hci.processing;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-
-import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public abstract class VersionHistoryFrame extends JFrame {
-	public static final int ROW_HEIGHT = 120;
+	public static final int ROW_HEIGHT = 60;
 	protected static final Color selectedColor = new Color(150,255,150);
 	
 	protected final VersionHistoryController controller;
@@ -36,15 +25,21 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    super("Version History");
 	    this.controller = controller;
 	    
-	    moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
-	    moviesPanel.setPreferredSize(new Dimension(700, 700));
+	    moviesPanel = new ScrollableFlowPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
+	    moviesPanel.setPreferredSize(new Dimension(700, 500));
 	    JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
 	    movieScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	    movieScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-	    movieScrollPane.setMinimumSize(new Dimension(0, 400));
+//	    movieScrollPane.setMinimumSize(new Dimension(0, 400));
+//	    AdjustmentListener scrollListener = new ScrollAdjustmentListener();
+//	    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
 	    
-	    AdjustmentListener scrollListener = new ScrollAdjustmentListener();
-	    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
+	    movieScrollPane.getViewport().addChangeListener(new ChangeListener() {
+        @Override
+        public void stateChanged(ChangeEvent e) {
+          moviesPanel.revalidate();
+        }
+	    });
 	    
 	    codeArea = new JTextArea();
 	    JScrollPane codeScrollPane = new JScrollPane(codeArea);
@@ -60,7 +55,7 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    vSplitPane.setDividerLocation(300);
 	    hSplitPane.setDividerLocation(400);
    	   
-	    setPreferredSize(new Dimension(700, 800));
+	    setPreferredSize(new Dimension(700, 600));
 	    bigMovie.init();
 	  }
 	  
@@ -82,5 +77,55 @@ public abstract class VersionHistoryFrame extends JFrame {
 		  public void adjustmentValueChanged(AdjustmentEvent evt) {
 			  moviesPanel.revalidate();
 		  }
+	  }
+	  
+	  static public class ScrollableFlowPanel extends JPanel implements Scrollable {
+
+	    public ScrollableFlowPanel(LayoutManager layout) {
+	      super(layout);
+	    }
+
+	    public void setBounds( int x, int y, int width, int height ) {
+	      super.setBounds( x, y, getParent().getWidth(), height );
+	    }
+
+	    public Dimension getPreferredSize() {
+	      return new Dimension( getWidth(), getPreferredHeight() );
+	    }
+
+	    public Dimension getPreferredScrollableViewportSize() {
+	      return super.getPreferredSize();
+	    }
+
+	    public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction ) {
+	      int hundredth = ( orientation ==  SwingConstants.VERTICAL
+	          ? getParent().getHeight() : getParent().getWidth() ) / 100;
+	      return ( hundredth == 0 ? 1 : hundredth ); 
+	    }
+
+	    public int getScrollableBlockIncrement( Rectangle visibleRect, int orientation, int direction ) {
+	      return orientation == SwingConstants.VERTICAL ? getParent().getHeight() : getParent().getWidth();
+	    }
+
+	    public boolean getScrollableTracksViewportWidth() {
+	      return true;
+	    }
+
+	    public boolean getScrollableTracksViewportHeight() {
+	      return false;
+	    }
+
+	    private int getPreferredHeight() {
+	      int rv = 0;
+	      for ( int k = 0, count = getComponentCount(); k < count; k++ ) {
+	        Component comp = getComponent( k );
+	        Rectangle r = comp.getBounds();
+	        int height = r.y + r.height;
+	        if ( height > rv )
+	          rv = height;
+	      }
+	      rv += ( (FlowLayout) getLayout() ).getVgap();
+	      return rv;
+	    }
 	  }
 }
