@@ -1,6 +1,5 @@
 package edu.stanford.hci.processing;
 
-import java.awt.Adjustable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -165,7 +164,6 @@ public class VersionHistoryFrameiMovie extends JFrame {
       setBackground(Color.white);
       setBorder(BorderFactory.createLineBorder(Color.black, 3));
       
-      
       String fileName = null;
       if (newModel != null) {
         fileName = newModel.getVideoFilename();
@@ -182,22 +180,19 @@ public class VersionHistoryFrameiMovie extends JFrame {
       
       setModel(newModel);
 
-      addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseClicked(MouseEvent e) { 
-          controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
-          System.out.println("clicked");
-        }
-        
-        
-      });
+//      addMouseListener(new MouseAdapter() {
+//        @Override
+//        public void mouseClicked(MouseEvent e) { 
+//          controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
+//          System.out.println("clicked");
+//        }
+//      });
     }
         
     public String getFilename() {
     	return model.getVideoFilename();
     }
     
-    // this is not good practice, methinks.
     public String getCode() {
     	return model.getCode();
     }
@@ -215,9 +210,10 @@ public class VersionHistoryFrameiMovie extends JFrame {
       return model;
     }
   }
+  
   public class ScrollAdjustmentListener implements AdjustmentListener {
-  	  public void adjustmentValueChanged(AdjustmentEvent evt) {
-  		  moviesPanel.revalidate();
-  	  }
-    }
+	  public void adjustmentValueChanged(AdjustmentEvent evt) {
+		  moviesPanel.revalidate();
+	  }
+  }
 }

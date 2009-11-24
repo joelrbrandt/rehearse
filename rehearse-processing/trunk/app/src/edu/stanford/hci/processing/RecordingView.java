@@ -15,6 +15,10 @@ public class RecordingView extends PApplet {
 	private static final int PLAY_BUTTON_SIZE = 15;
 	private static final int PLAY_BUTTON_X_OFFSET = 25;
 	private static final int PLAY_BUTTON_Y_OFFSET = 25;
+	
+	private static final int STOP_BUTTON_SIZE = 15;
+	private static final int STOP_BUTTON_X_OFFSET = PLAY_BUTTON_X_OFFSET * 2;
+	private static final int STOP_BUTTON_Y_OFFSET = PLAY_BUTTON_Y_OFFSET;
 
 	// highly suspect coding practices, 
 	// in the name of prototyping
@@ -115,19 +119,27 @@ public class RecordingView extends PApplet {
 			jumpTimes[i] = i * SEC_PER_SEGMENT;
 		}
 
-		size(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT, P2D);
-		if (vhp != null) {
-			vhp.setPreferredSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
-			vhp.setMaximumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
-			vhp.setMinimumSize(new Dimension(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT));
-			vhp.revalidate();
-			
-		}
+		setAllSizes(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrame.ROW_HEIGHT);
 	}
 
+	private void setAllSizes(int newWidth, int newHeight) {
+		size(newWidth, newHeight, P2D);
+		setVHPSizes(newWidth, newHeight);
+	}
+	
+	private void setVHPSizes(int newWidth, int newHeight) {
+		if (vhp != null) {
+			vhp.setPreferredSize(new Dimension(newWidth, newHeight));
+			vhp.setMaximumSize(new Dimension(newWidth, newHeight));
+			vhp.setMinimumSize(new Dimension(newWidth, newHeight));
+			vhp.revalidate();
+		}
+	}
+	
 	@Override
 	public void draw() {
-
+		if (vhp.getPreferredSize().width == CLOSED_WIDTH) return;
+		
 		if (!setup_done && initialFrameCount < INITIAL_FRAME_COUNT_MAX) {
 			initialFrameCount++;
 		} else if (initialFrameCount >= INITIAL_FRAME_COUNT_MAX) {
@@ -171,6 +183,12 @@ public class RecordingView extends PApplet {
 					width - PLAY_BUTTON_X_OFFSET, height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE,
 					width - PLAY_BUTTON_X_OFFSET + PLAY_BUTTON_SIZE, height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE / 2);
 
+			if (mouseOverCloseButton()) {
+				fill(255, 0, 0);
+			} else {
+				fill(230, 230, 230);
+			}
+			rect(width - STOP_BUTTON_X_OFFSET, height - STOP_BUTTON_Y_OFFSET, STOP_BUTTON_SIZE, STOP_BUTTON_SIZE);
 		}
 
 		flush();
@@ -179,6 +197,14 @@ public class RecordingView extends PApplet {
 	public boolean isMarked() {
 		return isMarked;
 	}
+	
+	private boolean mouseOverCloseButton() {
+		return ((mouseX > (width - STOP_BUTTON_X_OFFSET)) 
+				&& (mouseX < (width - STOP_BUTTON_X_OFFSET + STOP_BUTTON_SIZE))
+				&& (mouseY > (height - STOP_BUTTON_Y_OFFSET))
+				&& (mouseY < (height - STOP_BUTTON_Y_OFFSET + STOP_BUTTON_SIZE)));
+	}
+	
 	private boolean mouseOverPlayButton() {
 		return (mouseX > width - PLAY_BUTTON_X_OFFSET 
 				&& mouseX < width - PLAY_BUTTON_X_OFFSET + PLAY_BUTTON_SIZE
@@ -188,6 +214,8 @@ public class RecordingView extends PApplet {
 
 	@Override
 	public void mouseMoved() {
+		if (vhp.getPreferredSize().width == CLOSED_WIDTH) return;
+		
 		if (recording != null) {
 			float pos = (float)mouseX / (float)width;
 			jumpTime = pos * recording.duration();
@@ -202,16 +230,24 @@ public class RecordingView extends PApplet {
 		}
 	} 
 
+	private static final int CLOSED_WIDTH = 10;
 	@Override
 	public void mouseClicked() {
-		if (mouseOverPlayButton()) {
-			frame.getController().runHistoryCode(vhp.getModel().getCode());
+		if (vhp.getPreferredSize().width == CLOSED_WIDTH) {
+			setVHPSizes(VersionHistoryFrame.ROW_HEIGHT * numSegments, VersionHistoryFrameiMovie.ROW_HEIGHT);
+			redraw();
 		} else {
-			isMarked = !isMarked;
-			if (isMarked) {
-				vhp.setBorder(BorderFactory.createLineBorder(Color.yellow, 3));
+			if (mouseOverPlayButton()) {
+				frame.getController().runHistoryCode(vhp.getModel().getCode());
+			} else if (mouseOverCloseButton()){
+				setVHPSizes(CLOSED_WIDTH, VersionHistoryFrameiMovie.ROW_HEIGHT);
 			} else {
-				vhp.setBorder(BorderFactory.createLineBorder(Color.black, 3));
+				isMarked = !isMarked;
+				if (isMarked) {
+					vhp.setBorder(BorderFactory.createLineBorder(Color.yellow, 3));
+				} else {
+					vhp.setBorder(BorderFactory.createLineBorder(Color.black, 3));
+				}
 			}
 		}
 	}
