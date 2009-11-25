@@ -32,74 +32,31 @@ import difflib.Patch;
 import processing.app.Sketch;
 
 public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
-  private FishEyeView fisheyeView;
-  //private JTextArea codeArea;
-  private JEditTextArea codeArea;
   
-  private ArrayList<VersionHistoryPanel> versionPanels;
+  private FishEyeView fisheyeView;
  
   public VersionHistoryFrameFishEye(final VersionHistoryController controller) {
     super(controller);
     
-    //System.out.println("Creating FishEye Frame");
-    
-    this.versionPanels = new ArrayList<VersionHistoryPanel>();
-    
-    moviesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
-    JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
-    movieScrollPane.setMinimumSize(new Dimension(0, 400));
-    
-    //System.out.println("Creating FishEyeView");
-    bigMovie = new BigMovieView();
-    
     fisheyeView = new FishEyeView();
     fisheyeView.bigMovie = bigMovie;
     fisheyeView.frame = VersionHistoryFrameFishEye.this;
-    
     moviesPanel.add(fisheyeView);
     
-    
-    add(moviesPanel);
-    
-    //codeArea = new JTextArea();
-    codeArea = new JEditTextArea(new RehearseTextAreaDefaults());
-    JScrollPane codeScrollPane = new JScrollPane(codeArea);
-    
-    //
-
-    JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-        codeScrollPane, bigMovie);
-    
-    JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-        hSplitPane, moviesPanel);
-      
-    vSplitPane.setDividerLocation(300);
-    hSplitPane.setDividerLocation(400);
     add (vSplitPane);
    
-    setPreferredSize(new Dimension(700, 800));
-    bigMovie.init();
     fisheyeView.init();
-
-  }
-  
-  public VersionHistoryController getController() {
-    return controller;
   }
   
   public void addVersionHistory(VersionHistory vh) {
-    //VersionHistoryPanel panel = new VersionHistoryPanel(vh);
-    
-    //moviesPanel.add(panel);
-    //versionPanels.add(panel);
     
     fisheyeView.addVersion(vh);
     codeArea.setText(vh.getCode());
     
     validate();
-    //panel.recording.init();
   }
   
+  // TODO (Abel): What is this for?
   public void lastRunningVersionChanged(int oldIndex, int newIndex) {
     /*
     if (oldIndex != -1) {
@@ -112,7 +69,6 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   }
   
   public void updateCodeArea(String filename) {
-    // TODO (Abel): need to get rid of panels here and use version histories...
     
     VersionHistory vh = this.fisheyeView.getVersion(filename);
     if (vh != null) {
@@ -173,78 +129,10 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   }
   
   public void updateVideo(int index, VersionHistory vh) {
-    VersionHistoryPanel panel = versionPanels.get(index);
-    panel.setModel(vh);
+    // VersionHistoryPanel panel = versionPanels.get(index);
+    // panel.setModel(vh);
     bigMovie.setRecordingAt(index, vh.getVideoFilename());
     validate();
   }
-  
-  public class VersionHistoryPanel extends JPanel {
-    private VersionHistory model;
-    private RecordingView recording;
-    
-    
-    
-    public VersionHistoryPanel(VersionHistory newModel) {
-      super(new BorderLayout());
-      //setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-//      setMaximumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-//      setMinimumSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-//      setPreferredSize(new Dimension(ROW_HEIGHT, ROW_HEIGHT));
-      
-      setBackground(Color.white);
-//      setBorder(BorderFactory.createLineBorder(Color.black));
-      
-      
-      String fileName = null;
-      if (newModel != null) {
-        fileName = newModel.getVideoFilename();
-      }
-      
-      //recording = new RecordingView(fileName, this);
-      
-      //recording.bigMovie = bigMovie;
-      //recording.frame = VersionHistoryFrameFishEye.this;
-      bigMovie.addRecording(fileName);
-      
-      //recording.sketchPath = sketch.getFolder().getAbsolutePath();
-      add(recording, BorderLayout.CENTER);
-      //recording.init();
-      
-      setModel(newModel);
 
-      addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseClicked(MouseEvent e) { 
-          controller.swapRunningCode(versionPanels.indexOf(e.getSource()));
-          System.out.println("clicked");
-        }
-        
-        
-      });
-    }
-    
-   
-    public String getFilename() {
-    	return model.getVideoFilename();
-    }
-    
-    // this is not good practice, methinks.
-    public String getCode() {
-    	return model.getCode();
-    }
-    public void setModel(VersionHistory model) {
-      this.model = model;
-      String fileName = null;
-      if (model != null) {
-        fileName = model.getVideoFilename();
-      }
-      recording.setRecording(fileName);
-      validate();
-    }
-    
-    public VersionHistory getModel() {
-      return model;
-    }
-  }
 }

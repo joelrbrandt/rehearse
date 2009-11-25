@@ -8,6 +8,11 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import processing.app.syntax.JEditTextArea;
+import processing.app.syntax.RehearseTextAreaDefaults;
+
+import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
+
 public abstract class VersionHistoryFrame extends JFrame {
 	public static final int ROW_HEIGHT = 60;
 	protected static final Color selectedColor = new Color(150,255,150);
@@ -15,7 +20,9 @@ public abstract class VersionHistoryFrame extends JFrame {
 	protected final VersionHistoryController controller;
 
 	protected JPanel moviesPanel;
-	JTextArea codeArea;
+	
+	JEditTextArea codeArea;
+	//JTextArea codeArea;
 	BigMovieView bigMovie;
 	
 	protected JSplitPane hSplitPane;
@@ -35,13 +42,16 @@ public abstract class VersionHistoryFrame extends JFrame {
 //	    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
 	    
 	    movieScrollPane.getViewport().addChangeListener(new ChangeListener() {
-        @Override
+
         public void stateChanged(ChangeEvent e) {
+          // TODO Auto-generated method stub
           moviesPanel.revalidate();
         }
+        
 	    });
 	    
-	    codeArea = new JTextArea();
+	    //codeArea = new JTextArea();
+	    codeArea = new JEditTextArea(new RehearseTextAreaDefaults());
 	    JScrollPane codeScrollPane = new JScrollPane(codeArea);
 	    
 	    bigMovie = new BigMovieView();
@@ -78,6 +88,36 @@ public abstract class VersionHistoryFrame extends JFrame {
 			  moviesPanel.revalidate();
 		  }
 	  }
+	  
+	  /*
+	   * Changes version number
+	   * - update code window to show that version
+	   * - diffs are used to shift scroll position of code box
+	   *   to stay focused on same region
+	   * - BigMovie view needs to change
+	   * - (later) take care of highlighting appropriate lines in diff
+	   */
+	  public void setVersionNumber(int toVersion, String fromVersionCode, 
+	                               int fromVersionLineNumber) {
+	    
+	  }
+	  
+	  // TODO (Abel): fill this out
+	  // This may not be necessary
+	  public void setVersionNumber(VersionHistory toVersion, 
+	                               VersionHistory fromVersion) {
+	    
+	  
+	  }
+	  
+	  // Need to know
+	  //   1. Line number in current version
+	  //      This number changes only when the carrot pos changes
+	  //      in the editor
+	  //   2. Version number we're viewing in the history frame
+	  //        Frame needs to know version number when it is updated
+	  //        
+	  
 	  
 	  static public class ScrollableFlowPanel extends JPanel implements Scrollable {
 

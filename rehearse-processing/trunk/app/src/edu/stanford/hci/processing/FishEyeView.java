@@ -18,6 +18,15 @@ public class FishEyeView extends PApplet {
   }
   
   public void addVersion(VersionHistory vh) {
+    // Check if particle is already there
+    for (int i=0; i<parts.size(); i++) {
+      particle p = parts.get(i);
+      if (p.n == vh.getVersion()) {
+        p.setVideoFilename(vh.getVideoFilename());
+        return;
+      }
+    }
+    
     particle p = new particle(parts.size(), vh.getVideoFilename());
     
     histories.add(vh);
@@ -69,29 +78,51 @@ public class FishEyeView extends PApplet {
       this.filename = filename;
       this.n = n;
       
-      recording = new Movie(FishEyeView.this, filename);
-      recording.jump((int)(recording.duration()/2.0));
-      recording.read();
+      try {
+        recording = new Movie(FishEyeView.this, filename);
+        recording.jump((int)(recording.duration()/2.0));
+        recording.read();
+      } catch (NullPointerException e) {
+        recording = null;
+      }
       
       c = color(random(0,255), random(0,255), random(0,255));
       
       bigMovie.addRecording(filename);
     }
    
+    public void setVideoFilename(String filename) {
+      if (filename != null) {
+        try {
+          recording = new Movie(FishEyeView.this, filename);
+          recording.jump((int)(recording.duration()/2.0));
+          recording.read();
+        } catch (NullPointerException e) {
+          recording = null;
+        }
+      }
+    }
+    
     public void draw() {
+      
+      background(0);
       fill(c);
       noStroke();
       
       if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
-        float vid_position = (float)(
-          (mouseX - (x-(sx*psize)/2.0)) / (sx*psize) * 
-          recording.duration()
-        );
-        recording.jump(vid_position);
-        recording.read();
+      
+        if (recording != null) {
+          float vid_position = (float)(
+            (mouseX - (x-(sx*psize)/2.0)) / (sx*psize) * 
+            recording.duration()
+          );
+          recording.jump(vid_position);
+          recording.read();
+          
+          
+          bigMovie.setRecordingJump(this.filename, vid_position);
+        }
         
-        bigMovie.setRecordingJump(this.filename, vid_position);
-        // TODO (Abel): Code area not updating correctly
         frame.updateCodeArea(this.filename);
       }
       
@@ -116,16 +147,26 @@ public class FishEyeView extends PApplet {
         recHeight = (int)psize;
       }
       
-      image(recording,
-            (float)(x-(sx*psize)/2.0), 
-            (float)(y-(sy*psize)/2.0), 
-            (float)(sx*recWidth), 
-            (float)(sy*recHeight));
+      if (recording != null) {
+        image(recording,
+              (float)(x-(sx*psize)/2.0), 
+              (float)(y-(sy*psize)/2.0), 
+              (float)(sx*recWidth), 
+              (float)(sy*recHeight));
+      }
       
-      //rect();
+      if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
+        noFill();
+        stroke(255);
+        rect((float)(x-(sx*psize)/2.0), 
+             (float)(y-(sy*psize)/2.0), 
+             (float)(sx*recWidth), 
+             (float)(sy*recHeight)
+        );
+      }
       
       if (this.sx > 1.05) {
-        fill(255);
+        //fill(255);
         //text("r: "+this.n, 
         //    (float)(x-(sx*psize)/2.0), 
         //    (float)(y+(sy*psize)/2.0), 60, 30);
@@ -196,7 +237,6 @@ public class FishEyeView extends PApplet {
         
         parts.get(i).psize = dim;
         
-        
         float xdist = (float)Math.sqrt(
           Math.pow(Math.abs(parts.get(i).x - mx),2) 
           + Math.pow(Math.abs(parts.get(i).y - my),2)
@@ -215,6 +255,8 @@ public class FishEyeView extends PApplet {
         
         parts.get(i).sx = scale_amt;
         parts.get(i).sy = scale_amt;
+        //parts.get(i).sx = 1.0f;
+        //parts.get(i).sy = 1.0f;
         parts.get(i).x = nextX;
         parts.get(i).y = height/2;
         

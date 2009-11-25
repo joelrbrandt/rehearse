@@ -10,7 +10,7 @@ public class VersionHistoryController {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_IMOVIE;
+  public static final int view_type = VIEW_FISHEYE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
