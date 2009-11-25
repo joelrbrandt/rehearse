@@ -3,14 +3,17 @@ package edu.stanford.hci.processing;
 import java.awt.Image;
 import java.util.ArrayList;
 
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+
 import processing.video.MovieMaker;
 import edu.stanford.hci.processing.editor.RehearseEditor;
 
-public class VersionHistoryController {
+public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_FISHEYE;
+  public static final int view_type = VIEW_IMOVIE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
@@ -25,6 +28,10 @@ public class VersionHistoryController {
     this.editor = editor;
     historyIO = new VersionHistoryIO(editor.getSketch().getFolder());
     historyModels = historyIO.loadHistory();
+  }
+  
+  public VersionHistory getVersion(int versionNum) {
+    return historyModels.get(versionNum);
   }
   
   public void addVersionHistory(VersionHistory vh) {
@@ -117,5 +124,12 @@ public class VersionHistoryController {
   
   public void runHistoryCode(String code) {
     editor.runHistoryCode(code);
+  }
+
+  @Override
+  public void caretUpdate(CaretEvent e) {
+    int lineNum = editor.getTextArea().getLineOfOffset(e.getDot());
+    //System.out.println("Caret changed to line " + lineNum);
+    historyView.scrollWithEditorCaret(editor.appendCodeFromAllTabs(), lineNum);
   }
 }

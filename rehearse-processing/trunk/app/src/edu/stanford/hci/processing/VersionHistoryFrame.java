@@ -18,6 +18,8 @@ public abstract class VersionHistoryFrame extends JFrame {
 	protected static final Color selectedColor = new Color(150,255,150);
 	
 	protected final VersionHistoryController controller;
+	
+	private int currVersion;
 
 	protected JPanel moviesPanel;
 	
@@ -31,6 +33,7 @@ public abstract class VersionHistoryFrame extends JFrame {
 	public VersionHistoryFrame(final VersionHistoryController controller) {
 	    super("Version History");
 	    this.controller = controller;
+	    this.currVersion = -1;
 	    
 	    moviesPanel = new ScrollableFlowPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
 	    moviesPanel.setPreferredSize(new Dimension(700, 500));
@@ -52,12 +55,12 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    
 	    //codeArea = new JTextArea();
 	    codeArea = new JEditTextArea(new RehearseTextAreaDefaults());
-	    JScrollPane codeScrollPane = new JScrollPane(codeArea);
+	    //JScrollPane codeScrollPane = new JScrollPane(codeArea);
 	    
 	    bigMovie = new BigMovieView();
    
 	    hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-	        codeScrollPane, bigMovie);
+	        codeArea, bigMovie);
 	    
 	    vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 	        hSplitPane, movieScrollPane);
@@ -97,26 +100,46 @@ public abstract class VersionHistoryFrame extends JFrame {
 	   * - BigMovie view needs to change
 	   * - (later) take care of highlighting appropriate lines in diff
 	   */
-	  public void setVersionNumber(int toVersion, String fromVersionCode, 
+	  private void setVersionAndScroll(int toVersion, String fromVersionCode, 
 	                               int fromVersionLineNumber) {
+	    VersionHistory toVersionModel = controller.getVersion(toVersion);
+	    String toVersionCode = toVersionModel.getCode();
+	    int toVersionLineNumber = getLineNumberToScrollTo(fromVersionCode, 
+	        toVersionCode, fromVersionLineNumber);
 	    
+	    this.currVersion = toVersion;
+	    codeArea.setText(toVersionCode);
+	    
+	    //  TODO (Abel): Perhaps a better scrolling scheme here.
+	    codeArea.scrollTo(toVersionLineNumber, 1);
+	    codeArea.setCaretPosition(codeArea.getLineStartOffset(toVersionLineNumber));
+	    
+	    bigMovie.setRecordingJump(toVersionModel.getVideoFilename(), 0);
+	  }
+    
+    // Need to know
+    //   1. Line number in current version
+    //      This number changes only when the carrot pos changes
+    //      in the editor
+    //   2. Version number we're viewing in the history frame
+    //        Frame needs to know version number when it is updated
+    //        
+	  
+	  public void setVersionNumber(int toVersion) {
+	    if (currVersion == toVersion) return;
+	    setVersionAndScroll(toVersion, codeArea.getText(), codeArea.getCaretLine());
 	  }
 	  
-	  // TODO (Abel): fill this out
-	  // This may not be necessary
-	  public void setVersionNumber(VersionHistory toVersion, 
-	                               VersionHistory fromVersion) {
-	    
-	  
+	  public void scrollWithEditorCaret(String editorCode, int caretLineNumber) {
+	    if (currVersion == -1) return;
+	    setVersionAndScroll(currVersion, editorCode, caretLineNumber);
 	  }
-	  
-	  // Need to know
-	  //   1. Line number in current version
-	  //      This number changes only when the carrot pos changes
-	  //      in the editor
-	  //   2. Version number we're viewing in the history frame
-	  //        Frame needs to know version number when it is updated
-	  //        
+    
+    private int getLineNumberToScrollTo(String fromVersionCode, String toVersionCode, 
+        int fromVersionLineNumber) {
+      // TODO (Abel): Integrate the line number routine.
+      return fromVersionLineNumber;
+    }
 	  
 	  
 	  static public class ScrollableFlowPanel extends JPanel implements Scrollable {

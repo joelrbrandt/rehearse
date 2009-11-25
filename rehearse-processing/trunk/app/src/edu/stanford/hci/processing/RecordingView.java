@@ -85,14 +85,14 @@ public class RecordingView extends PApplet {
 
 		size(VersionHistoryFrame.ROW_HEIGHT, VersionHistoryFrame.ROW_HEIGHT, P2D);
 		imageMode(CENTER);
-		textFont(createFont("Arial", 12));
+		textFont(createFont("Arial", 8));
 
 		println("setup");
 
 		if (recordingFilename == null) {
 			background(50);
 			textAlign(CENTER);
-			text("Currently running...", width/2, height/2);
+			text("Running...", width/2, height/2);
 			return;
 		}
 
@@ -222,8 +222,9 @@ public class RecordingView extends PApplet {
 			int whichSegment = (int)(jumpTime / SEC_PER_SEGMENT);
 			jumpTimes[whichSegment] = jumpTime;
 
+			frame.setVersionNumber(vhp.getModel().getVersion());
 			bigMovie.setRecordingJump(recordingFilename, jumpTime);
-			frame.updateCodeArea(recordingFilename);
+//			frame.updateCodeArea(recordingFilename);
 
 			redraw();
 

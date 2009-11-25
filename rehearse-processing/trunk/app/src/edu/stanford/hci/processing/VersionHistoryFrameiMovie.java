@@ -56,7 +56,8 @@ public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
     moviesPanel.add(panel);
     versionPanels.add(panel);
     
-    codeArea.setText(vh.getCode());
+    //codeArea.setText(vh.getCode());
+    setVersionNumber(vh.getVersion());
     
     //moviesPanel.setPreferredSize(new Dimension(700, versionPanels.size() * ROW_HEIGHT));
     

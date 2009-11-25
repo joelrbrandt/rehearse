@@ -95,6 +95,8 @@ public class RehearseEditor extends Editor implements ConsoleInterface {
 	    }
       historyController = new VersionHistoryController(this);
       historyController.openHistoryView();
+      
+      this.getTextArea().addCaretListener(historyController);
     }
 	  return opened;
 	}
