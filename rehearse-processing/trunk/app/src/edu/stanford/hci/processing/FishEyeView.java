@@ -21,7 +21,7 @@ public class FishEyeView extends PApplet {
     // Check if particle is already there
     for (int i=0; i<parts.size(); i++) {
       particle p = parts.get(i);
-      if (p.n == vh.getVersion()) {
+      if (p.version == vh.getVersion()) {
         println("Updating video");
         p.setVideoFilename(vh.getVideoFilename());
         return;
@@ -66,7 +66,7 @@ public class FishEyeView extends PApplet {
     float sy;
     
     int c;
-    int n;
+    int version;
     
     String filename;
     Movie recording;
@@ -78,7 +78,7 @@ public class FishEyeView extends PApplet {
       psize = DEFAULT_SIZE;
       
       this.filename = filename;
-      this.n = n;
+      this.version = n;
       
       try {
         recording = new Movie(FishEyeView.this, filename);
@@ -125,7 +125,9 @@ public class FishEyeView extends PApplet {
           bigMovie.setRecordingJump(this.filename, vid_position);
         }
         
-        frame.updateCodeArea(this.filename);
+        // TODO (Abel): change this to call the proper method
+        frame.setVersionNumber(this.version);
+        //frame.updateCodeArea(this.filename);
       }
       
       double scale = 1;
