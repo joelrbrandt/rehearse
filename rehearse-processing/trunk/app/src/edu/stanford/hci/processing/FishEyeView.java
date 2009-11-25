@@ -22,11 +22,13 @@ public class FishEyeView extends PApplet {
     for (int i=0; i<parts.size(); i++) {
       particle p = parts.get(i);
       if (p.n == vh.getVersion()) {
+        println("Updating video");
         p.setVideoFilename(vh.getVideoFilename());
         return;
       }
     }
     
+    println("Creating new particle");
     particle p = new particle(parts.size(), vh.getVideoFilename());
     
     histories.add(vh);
@@ -83,6 +85,7 @@ public class FishEyeView extends PApplet {
         recording.jump((int)(recording.duration()/2.0));
         recording.read();
       } catch (NullPointerException e) {
+        println("Video not found.  Hopefully it's the current version");
         recording = null;
       }
       
@@ -97,6 +100,7 @@ public class FishEyeView extends PApplet {
           recording = new Movie(FishEyeView.this, filename);
           recording.jump((int)(recording.duration()/2.0));
           recording.read();
+          this.filename = filename;
         } catch (NullPointerException e) {
           recording = null;
         }
@@ -105,7 +109,6 @@ public class FishEyeView extends PApplet {
     
     public void draw() {
       
-      background(0);
       fill(c);
       noStroke();
       
@@ -119,7 +122,6 @@ public class FishEyeView extends PApplet {
           recording.jump(vid_position);
           recording.read();
           
-          
           bigMovie.setRecordingJump(this.filename, vid_position);
         }
         
@@ -131,12 +133,12 @@ public class FishEyeView extends PApplet {
       int recWidth;
       int recHeight;
       
-      if (recording.width > recording.height) {
+      if (recording != null && recording.width > recording.height) {
         
         //scale = ((double)recording.width) / psize;
         recWidth = (int)psize;
         recHeight = (int)(psize * (recording.height / recording.width));
-      } else if (recording.width < recording.height) {
+      } else if (recording != null && recording.width < recording.height) {
         
         //scale = ((double)recording.height) / psize;
         recWidth = (int)(psize * (recording.width / recording.height));

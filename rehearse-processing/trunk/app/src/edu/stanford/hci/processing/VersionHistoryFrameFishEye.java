@@ -50,6 +50,7 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   
   public void addVersionHistory(VersionHistory vh) {
     
+    bigMovie.addRecording(vh.getVideoFilename());
     fisheyeView.addVersion(vh);
     codeArea.setText(vh.getCode());
     
@@ -131,6 +132,8 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   public void updateVideo(int index, VersionHistory vh) {
     // VersionHistoryPanel panel = versionPanels.get(index);
     // panel.setModel(vh);
+    
+    this.fisheyeView.addVersion(vh);
     bigMovie.setRecordingAt(index, vh.getVideoFilename());
     validate();
   }

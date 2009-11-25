@@ -55,11 +55,17 @@ public class SidebarPainter extends JComponent {
 	    	if (line < textArea.getLineCount()) {
 	    	  TokenMarker tm = textArea.getTokenMarker();
 	    	  if (tm != null) {
-  	    		RehearseLineModel m = 
-  	    			(RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
-  	    		if (m != null && m.isPrintPoint) {
-  	    			c = Color.red;
-  	    		}
+	    	    try {
+    	    		RehearseLineModel m = 
+    	    			(RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
+    	    		
+    	    		if (m != null && m.isPrintPoint) {
+    	    			c = Color.red;
+    	    		}
+	    	    } catch (ArrayIndexOutOfBoundsException e) {
+	    	      // TODO (Abel): Need to handle errors better here?
+	    	      System.out.println("oops: SidebarPainter wanted a negative line number");
+	    	    }
 	    	  }
 	    	}
 	        gfx.setColor(c);

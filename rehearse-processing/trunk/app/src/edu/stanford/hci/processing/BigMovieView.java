@@ -25,10 +25,15 @@ public class BigMovieView extends PApplet {
     recordingFileNames.add(recordingFilename);
     if (recordingFilename == null) {
       recordings.add(null);
-    } else {Movie recording = new Movie(this, recordingFilename);
-      recording.jump((float)(recording.duration() / 2.0));
-      recording.read();
-      recordings.add(recording);
+    } else {
+      try {
+        Movie recording = new Movie(this, recordingFilename);
+        recording.jump((float)(recording.duration() / 2.0));
+        recording.read();
+        recordings.add(recording);
+      } catch (NullPointerException e) {
+        recordings.add(null);
+      }
     }
   }
   
@@ -42,14 +47,19 @@ public class BigMovieView extends PApplet {
   }
   
   public void setRecordingJump(String fileName, float time) {
-    currIndex = recordingFileNames.indexOf(fileName);
     
-    if (currIndex == -1) return;
+    int tmpIndex = recordingFileNames.indexOf(fileName);
+    //currIndex = recordingFileNames.indexOf(fileName);
     
-    Movie recording = recordings.get(currIndex);
+    if (tmpIndex == -1) return;
     
-    recording.jump(time);
-    recording.read();
+    Movie recording = recordings.get(tmpIndex);
+    
+    if (recording != null) {
+      recording.jump(time);
+      recording.read();
+      currIndex = tmpIndex;
+    }
     
     redraw();
   }
