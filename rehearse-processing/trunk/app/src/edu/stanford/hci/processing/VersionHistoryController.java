@@ -13,7 +13,7 @@ public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_IMOVIE;
+  public static final int view_type = VIEW_FISHEYE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
@@ -126,7 +126,6 @@ public class VersionHistoryController implements CaretListener {
     editor.runHistoryCode(code);
   }
 
-  @Override
   public void caretUpdate(CaretEvent e) {
     int lineNum = editor.getTextArea().getLineOfOffset(e.getDot());
     //System.out.println("Caret changed to line " + lineNum);

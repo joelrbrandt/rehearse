@@ -36,7 +36,7 @@ public class FishEyeView extends PApplet {
   }
   
   public VersionHistory getVersion(int n) {
-    // TODO (Abel): stub
+
     for (int i=0; i<histories.size(); i++) {
       if (histories.get(i).getVersion() == n) {
         return histories.get(i);
@@ -46,7 +46,7 @@ public class FishEyeView extends PApplet {
   }
   
   public VersionHistory getVersion(String filename) {
-    // TODO (Abel): stub
+    
     for (int i=0; i<histories.size(); i++) {
       if (histories.get(i).getVideoFilename().equals(filename)) {
         return histories.get(i);
@@ -126,6 +126,7 @@ public class FishEyeView extends PApplet {
         }
         
         // TODO (Abel): change this to call the proper method
+        
         frame.setVersionNumber(this.version);
         //frame.updateCodeArea(this.filename);
       }
@@ -243,7 +244,7 @@ public class FishEyeView extends PApplet {
         
         float xdist = (float)Math.sqrt(
           Math.pow(Math.abs(parts.get(i).x - mx),2) 
-          + Math.pow(Math.abs(parts.get(i).y - my),2)
+          //+ Math.pow(Math.abs(parts.get(i).y - my),2)
         );
         
         float capped_dist = xdist > MAX_MOUSE_DIST ? MAX_MOUSE_DIST : xdist;

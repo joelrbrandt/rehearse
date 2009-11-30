@@ -3,10 +3,16 @@ package edu.stanford.hci.processing;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.util.Arrays;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
+
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
 
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.RehearseTextAreaDefaults;
@@ -102,8 +108,10 @@ public abstract class VersionHistoryFrame extends JFrame {
 	   */
 	  private void setVersionAndScroll(int toVersion, String fromVersionCode, 
 	                               int fromVersionLineNumber) {
+	    
 	    VersionHistory toVersionModel = controller.getVersion(toVersion);
 	    String toVersionCode = toVersionModel.getCode();
+	    
 	    int toVersionLineNumber = getLineNumberToScrollTo(fromVersionCode, 
 	        toVersionCode, fromVersionLineNumber);
 	    
@@ -111,8 +119,10 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    codeArea.setText(toVersionCode);
 	    
 	    //  TODO (Abel): Perhaps a better scrolling scheme here.
-	    codeArea.scrollTo(toVersionLineNumber, 1);
-	    codeArea.setCaretPosition(codeArea.getLineStartOffset(toVersionLineNumber));
+      codeArea.scrollTo(toVersionLineNumber, 1);
+      codeArea.setCaretPosition(codeArea.getLineStartOffset(toVersionLineNumber));
+     
+      System.out.println("Carrot line: " + codeArea.getCaretLine());
 	    
 	    bigMovie.setRecordingJump(toVersionModel.getVideoFilename(), 0);
 	  }
@@ -136,9 +146,38 @@ public abstract class VersionHistoryFrame extends JFrame {
 	  }
     
     private int getLineNumberToScrollTo(String fromVersionCode, String toVersionCode, 
-        int fromVersionLineNumber) {
+      int fromVersionLineNumber) {
+      
       // TODO (Abel): Integrate the line number routine.
-      return fromVersionLineNumber;
+      int result = fromVersionLineNumber;
+      
+      int lineNumber = fromVersionLineNumber;
+      int numInsertedBelow = 0;
+      
+      Patch patch = DiffUtils.diff(Arrays.asList(fromVersionCode.split("\n")),
+                     Arrays.asList(toVersionCode.split("\n")));
+      for (Delta delta: patch.getDeltas()) {
+              System.out.println(delta);
+              int pos = delta.getOriginal().getPosition();
+              if (pos <= lineNumber) {
+                if (delta.type == Delta.INSERTION) {
+                  numInsertedBelow += delta.getRevised().getSize();
+                } else if (delta.type == Delta.DELETION) {
+                  numInsertedBelow -= delta.getOriginal().getSize();
+                } else if (delta.type == Delta.CHANGE) {
+                  
+                }
+              }
+      }
+      System.out.println("Num Inserted Below: " + numInsertedBelow);
+      
+      result += numInsertedBelow;
+      //result -= (codeArea.getVisibleLines() / 2);
+      
+      result = Math.max(0, result);
+      result = Math.min(toVersionCode.split("\n").length, result);
+    
+      return result;
     }
 	  
 	  
