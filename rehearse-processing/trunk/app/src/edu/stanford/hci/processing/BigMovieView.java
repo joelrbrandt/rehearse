@@ -39,11 +39,18 @@ public class BigMovieView extends PApplet {
   
   public void setRecordingAt(int index, String recordingFileName) {
     recordingFileNames.set(index, recordingFileName);
-    Movie recording = new Movie(this, recordingFileName);
-    recording.jump((float)(recording.duration() / 2.0));
-    recording.read();
-    recordings.set(index, recording);
-    System.out.println("index: " + index + " fileName: " + recordingFileName);
+    try {
+      Movie recording = new Movie(this, recordingFileName);
+      if (recording != null) {
+        recording.jump((float)(recording.duration() / 2.0));
+        recording.read();
+        recordings.set(index, recording);
+        System.out.println("index: " + index + " fileName: " + recordingFileName);
+      }
+    } catch (NullPointerException e) {
+      System.out.println("Movie not found");
+    }
+    
   }
   
   public void setRecordingJump(String fileName, float time) {

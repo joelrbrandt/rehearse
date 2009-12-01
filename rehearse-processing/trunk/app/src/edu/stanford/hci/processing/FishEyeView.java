@@ -31,7 +31,7 @@ public class FishEyeView extends PApplet {
       }
     }
     
-    println("Creating new particle");
+    //println("Creating new particle");
     particle p = new particle(parts.size(), vh.getVideoFilename());
     
     histories.add(vh);
@@ -346,6 +346,18 @@ public class FishEyeView extends PApplet {
       particle p = parts.get(i);
       if (mouseX > (p.x-(p.sx*p.psize)/2.0) && 
           mouseX < (p.x-(p.sx*p.psize)/2.0) + (p.sx*p.psize)) {
+        
+        if (viewLocked) {
+          selected.setSelected(false);
+          selected = null;
+          viewLocked = false;
+        } else {
+          p.setSelected(true);
+          selected = p;
+          viewLocked = true;
+        }
+        layoutParticles();
+        /*
         if (p.isSelected) {
           p.setSelected(false);
           viewLocked = false;
@@ -362,6 +374,7 @@ public class FishEyeView extends PApplet {
           
           layoutParticles();
         }
+        */
       }
         
     }

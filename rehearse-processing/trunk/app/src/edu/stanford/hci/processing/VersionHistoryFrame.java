@@ -130,7 +130,7 @@ public abstract class VersionHistoryFrame extends JFrame {
       codeArea.scrollTo(toVersionLineNumber, 1);
       codeArea.setCaretPosition(codeArea.getLineStartOffset(toVersionLineNumber));
      
-      System.out.println("Carrot line: " + codeArea.getCaretLine());
+      //System.out.println("Carrot line: " + codeArea.getCaretLine());
 	    
 	    bigMovie.setRecordingJump(toVersionModel.getVideoFilename(), 0);
 	  }
@@ -190,7 +190,7 @@ public abstract class VersionHistoryFrame extends JFrame {
       this.codeArea.getPainter().addCustomHighlight(new VersionHistoryHighlight());
       
       for (Delta delta: patch.getDeltas()) {
-        System.out.println(delta);
+        //System.out.println(delta);
         int pos = delta.getOriginal().getPosition();
         if (pos <= lineNumber) {
           if (delta.type == Delta.INSERTION) {
@@ -202,7 +202,7 @@ public abstract class VersionHistoryFrame extends JFrame {
           }
         }
       }
-      System.out.println("Num Inserted Below: " + numInsertedBelow);
+      //System.out.println("Num Inserted Below: " + numInsertedBelow);
       
       result += numInsertedBelow;
       //result -= (codeArea.getVisibleLines() / 2);

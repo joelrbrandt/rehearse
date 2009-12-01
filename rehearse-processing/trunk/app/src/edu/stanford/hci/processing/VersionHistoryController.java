@@ -129,6 +129,8 @@ public class VersionHistoryController implements CaretListener {
   public void caretUpdate(CaretEvent e) {
     int lineNum = editor.getTextArea().getLineOfOffset(e.getDot());
     //System.out.println("Caret changed to line " + lineNum);
-    historyView.scrollWithEditorCaret(editor.appendCodeFromAllTabs(), lineNum);
+    if (historyView != null) {
+      historyView.scrollWithEditorCaret(editor.appendCodeFromAllTabs(), lineNum);
+    }
   }
 }
