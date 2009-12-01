@@ -3,6 +3,7 @@ package edu.stanford.hci.processing;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 import javax.swing.*;
@@ -16,8 +17,12 @@ import difflib.Patch;
 
 import processing.app.syntax.JEditTextArea;
 import processing.app.syntax.RehearseTextAreaDefaults;
+import processing.app.syntax.TextAreaPainter;
+import processing.app.syntax.TextAreaPainter.Highlight;
 
-import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
+//import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
+//import edu.stanford.hci.processing.editor.RehearseLineModel;
+
 
 public abstract class VersionHistoryFrame extends JFrame {
 	public static final int ROW_HEIGHT = 60;
@@ -35,6 +40,8 @@ public abstract class VersionHistoryFrame extends JFrame {
 	
 	protected JSplitPane hSplitPane;
 	protected JSplitPane vSplitPane;
+	
+	protected Color[] lineColors;
 	
 	public VersionHistoryFrame(final VersionHistoryController controller) {
 	    super("Version History");
@@ -156,18 +163,43 @@ public abstract class VersionHistoryFrame extends JFrame {
       
       Patch patch = DiffUtils.diff(Arrays.asList(fromVersionCode.split("\n")),
                      Arrays.asList(toVersionCode.split("\n")));
+      
+      lineColors = new Color[toVersionCode.split("\n").length];
+      Arrays.fill(lineColors, Color.WHITE);
       for (Delta delta: patch.getDeltas()) {
-              System.out.println(delta);
-              int pos = delta.getOriginal().getPosition();
-              if (pos <= lineNumber) {
-                if (delta.type == Delta.INSERTION) {
-                  numInsertedBelow += delta.getRevised().getSize();
-                } else if (delta.type == Delta.DELETION) {
-                  numInsertedBelow -= delta.getOriginal().getSize();
-                } else if (delta.type == Delta.CHANGE) {
-                  
-                }
-              }
+        if (delta.type == Delta.INSERTION) {
+          int begin = delta.getRevised().getPosition();
+          int size = delta.getRevised().getSize();
+          for (int i=begin; i<begin+size; i++) {
+            lineColors[i] = new Color(0xa0, 0xff, 0xa0);
+          }
+        } else if (delta.type == Delta.DELETION) {
+          int begin = delta.getRevised().getPosition(); 
+          lineColors[ Math.min(begin, lineColors.length-1)] = 
+             new Color(0xff, 0xa0, 0xa0);
+        } else if (delta.type == Delta.CHANGE) {
+          int begin = delta.getRevised().getPosition();
+          int size = delta.getRevised().getSize();
+          for (int i=begin; i<begin+size; i++) {
+            lineColors[i] = new Color(0xff, 0xff, 0xa0);
+          } 
+        }
+      }
+      this.codeArea.getPainter().removeCustomHighlights();
+      this.codeArea.getPainter().addCustomHighlight(new VersionHistoryHighlight());
+      
+      for (Delta delta: patch.getDeltas()) {
+        System.out.println(delta);
+        int pos = delta.getOriginal().getPosition();
+        if (pos <= lineNumber) {
+          if (delta.type == Delta.INSERTION) {
+            numInsertedBelow += delta.getRevised().getSize();
+          } else if (delta.type == Delta.DELETION) {
+            numInsertedBelow -= delta.getOriginal().getSize();
+          } else if (delta.type == Delta.CHANGE) {
+             
+          }
+        }
       }
       System.out.println("Num Inserted Below: " + numInsertedBelow);
       
@@ -180,6 +212,57 @@ public abstract class VersionHistoryFrame extends JFrame {
       return result;
     }
 	  
+    private class VersionHistoryHighlight implements TextAreaPainter.Highlight {
+      JEditTextArea textarea;
+      Highlight next;
+
+      public String getToolTipText(MouseEvent evt) {
+        if (next != null) {
+          return null;
+        }
+        return null;
+      }
+
+      public void init(JEditTextArea textArea, Highlight next) {
+        textarea = textArea;
+        this.next = next;
+      }
+
+      public void paintHighlight(Graphics gfx, int line, int y) {
+        // Interpreter uses one-offset, processing uses zero-offset.
+        Color c = null;
+        //RehearseLineModel m = (RehearseLineModel) getTextArea()
+        //    .getTokenMarker().getLineModelAt(line);
+        
+        if (lineColors != null && line < lineColors.length) {
+          c = lineColors[line];
+        }
+        
+//        if (m != null) {
+//          /*
+//           * if (m.executedInLastRun) c = Color.yellow; if
+//           * (m.isMostRecentlyExecuted) c = Color.green;
+//           */
+//
+//          int i = Math.min(linesExecutedCount - m.countAtLastExec, 150);
+//          // c = new Color(i,255,i);
+//          c = new Color(78, 127, 78, 200 - i);
+//        }
+
+        // Color c = lineHighlights.get(line + 1);
+        if (c != null) {
+          FontMetrics fm = textarea.getPainter().getFontMetrics();
+          int height = fm.getHeight();
+          y += fm.getLeading() + fm.getMaxDescent();
+          gfx.setColor(c);
+          gfx.fillRect(0, y, getWidth(), height);
+        }
+
+        if (next != null) {
+          next.paintHighlight(gfx, line, y);
+        }
+      }
+    }
 	  
 	  static public class ScrollableFlowPanel extends JPanel implements Scrollable {
 
