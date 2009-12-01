@@ -29,6 +29,9 @@ public abstract class VersionHistoryFrame extends JFrame {
 	protected static final Color selectedColor = new Color(150,255,150);
 	
 	protected final VersionHistoryController controller;
+	protected static final Color DELETION = new Color(0xff, 0xa0, 0xa0);
+	protected static final Color INSERTION = new Color(0xa0, 0xff, 0xa0);
+	protected static final Color CHANGE = new Color(0xff, 0xff, 0xa0);
 	
 	private int currVersion;
 
@@ -171,17 +174,17 @@ public abstract class VersionHistoryFrame extends JFrame {
           int begin = delta.getRevised().getPosition();
           int size = delta.getRevised().getSize();
           for (int i=begin; i<begin+size; i++) {
-            lineColors[i] = new Color(0xa0, 0xff, 0xa0);
+            lineColors[i] = VersionHistoryFrame.INSERTION;
           }
         } else if (delta.type == Delta.DELETION) {
           int begin = delta.getRevised().getPosition(); 
           lineColors[ Math.min(begin, lineColors.length-1)] = 
-             new Color(0xff, 0xa0, 0xa0);
+             VersionHistoryFrame.DELETION;
         } else if (delta.type == Delta.CHANGE) {
           int begin = delta.getRevised().getPosition();
           int size = delta.getRevised().getSize();
           for (int i=begin; i<begin+size; i++) {
-            lineColors[i] = new Color(0xff, 0xff, 0xa0);
+            lineColors[i] = VersionHistoryFrame.CHANGE;
           } 
         }
       }
@@ -255,7 +258,12 @@ public abstract class VersionHistoryFrame extends JFrame {
           int height = fm.getHeight();
           y += fm.getLeading() + fm.getMaxDescent();
           gfx.setColor(c);
-          gfx.fillRect(0, y, getWidth(), height);
+          if (c.equals(VersionHistoryFrame.DELETION)) {
+            gfx.fillRect(0, y-2, getWidth(), 4);
+          } else {
+            gfx.fillRect(0, y, getWidth(), height);
+          }
+          
         }
 
         if (next != null) {
