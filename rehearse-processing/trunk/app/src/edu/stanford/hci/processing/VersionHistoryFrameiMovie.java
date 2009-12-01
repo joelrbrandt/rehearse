@@ -182,7 +182,7 @@ public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
         fileName = model.getVideoFilename();
       }
       recording.setRecording(fileName);
-      validate();
+      //validate();
     }
     
     public VersionHistory getModel() {

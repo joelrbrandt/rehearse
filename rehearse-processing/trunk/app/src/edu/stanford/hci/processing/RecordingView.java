@@ -12,13 +12,13 @@ import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel
 public class RecordingView extends PApplet {
 
 	private static final int SEC_PER_SEGMENT = 1;
-	private static final int PLAY_BUTTON_SIZE = 15;
-	private static final int PLAY_BUTTON_X_OFFSET = 25;
-	private static final int PLAY_BUTTON_Y_OFFSET = 25;
+	private static final int PLAY_BUTTON_SIZE = 10;
+	private static final int PLAY_BUTTON_X_OFFSET = 15;
+	private static final int PLAY_BUTTON_Y_OFFSET = 15;
 	
-	private static final int STOP_BUTTON_SIZE = 15;
-	private static final int STOP_BUTTON_X_OFFSET = PLAY_BUTTON_X_OFFSET * 2;
-	private static final int STOP_BUTTON_Y_OFFSET = PLAY_BUTTON_Y_OFFSET;
+	private static final int STOP_BUTTON_SIZE = 10;
+	private static final int STOP_BUTTON_X_OFFSET = 15;
+	private static final int STOP_BUTTON_Y_OFFSET = 55;
 
 	// highly suspect coding practices, 
 	// in the name of prototyping
@@ -85,6 +85,7 @@ public class RecordingView extends PApplet {
 
 		size(VersionHistoryFrame.ROW_HEIGHT, VersionHistoryFrame.ROW_HEIGHT, P2D);
 		imageMode(CENTER);
+		strokeCap(ROUND);
 		textFont(createFont("Arial", 8));
 
 		println("setup");
@@ -184,11 +185,20 @@ public class RecordingView extends PApplet {
 					width - PLAY_BUTTON_X_OFFSET + PLAY_BUTTON_SIZE, height - PLAY_BUTTON_Y_OFFSET + PLAY_BUTTON_SIZE / 2);
 
 			if (mouseOverCloseButton()) {
-				fill(255, 0, 0);
+				stroke(255, 0, 0);
 			} else {
-				fill(230, 230, 230);
+				stroke(230, 230, 230);
 			}
-			rect(width - STOP_BUTTON_X_OFFSET, height - STOP_BUTTON_Y_OFFSET, STOP_BUTTON_SIZE, STOP_BUTTON_SIZE);
+			strokeWeight(2);
+			line(width - STOP_BUTTON_X_OFFSET, height - STOP_BUTTON_Y_OFFSET,
+			    width - STOP_BUTTON_X_OFFSET + STOP_BUTTON_SIZE,
+			    height - STOP_BUTTON_Y_OFFSET + STOP_BUTTON_SIZE);
+			line(width - STOP_BUTTON_X_OFFSET, height - STOP_BUTTON_Y_OFFSET + STOP_BUTTON_SIZE,
+          width - STOP_BUTTON_X_OFFSET + STOP_BUTTON_SIZE,
+          height - STOP_BUTTON_Y_OFFSET);
+			noStroke();
+//			rect(width - STOP_BUTTON_X_OFFSET, height - STOP_BUTTON_Y_OFFSET, STOP_BUTTON_SIZE, STOP_BUTTON_SIZE);
+			
 		}
 
 		flush();
