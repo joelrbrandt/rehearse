@@ -264,49 +264,69 @@ public class FishEyeView extends PApplet {
       nextX = (float)50.0;
       float totalX = (float)0.0;
       
-      float dim = (width - 100) / parts.size();
+      // Dimension of non-magnified version
+      float dim = Math.min( (width - 100) / parts.size(), 100);
+      
+      // Max magnification scale amount
       float pscale = (float)(1.0 / ( dim / 200.0 ) / 2.0);
       
-      for (int i=0; i<parts.size(); i++) {
-        
-        parts.get(i).psize = dim;
-        
-        float xdist = (float)Math.sqrt(
-          Math.pow(Math.abs(parts.get(i).x - mx),2) 
-          //+ Math.pow(Math.abs(parts.get(i).y - my),2)
-        );
-        
-        float capped_dist = xdist > MAX_MOUSE_DIST ? MAX_MOUSE_DIST : xdist;
-        float norm_dist = (float)(1.0 - (capped_dist / MAX_MOUSE_DIST));
-        
-        float scale_amt = (float)(1.0 + 
-          (3.0*Math.pow(norm_dist,2) - 2.0*Math.pow(norm_dist,3)) * pscale);
-          //(float)1.0 + (float)Math.min(5.0, (1.0 / Math.log((1.0+10*xdist)))));
-        
-        //xdist = (xdist > 2.0 ? 2.0 : xdist);
-        
-        //if (i == 5) { println(scale_amt); }
-        
-        parts.get(i).sx = scale_amt;
-        parts.get(i).sy = scale_amt;
-        //parts.get(i).sx = 1.0f;
-        //parts.get(i).sy = 1.0f;
-        parts.get(i).x = nextX;
-        parts.get(i).y = height/2;
-        
-        totalX += parts.get(i).sx * parts.get(i).psize + 10;
-        
-      }
-      totalX -= 10; // to account for last bit added
+      if (dim > 99.0) {
+        float totalWidth = (parts.size() * dim) + ((parts.size()-1) * 10);
+        nextX = (float)((width/2.0) - (totalWidth/2.0) + (dim/2.0));
+        for (int i=0; i<parts.size(); i++) {
+          particle p = parts.get(i);
+          p.psize = dim;
+          p.sx = 1.0f;
+          p.sy = 1.0f;
+          p.x = nextX;
+          p.y = height/2;
+          nextX+=(p.sx * p.psize) + 10; 
+          
+        }
+      } else {
       
-      nextX = ((float)mx / (float)width) * (width - totalX);
+        for (int i=0; i<parts.size(); i++) {
+          
+          parts.get(i).psize = dim;
+          
+          float xdist = (float)Math.sqrt(
+            Math.pow(Math.abs(parts.get(i).x - mx),2) 
+            //+ Math.pow(Math.abs(parts.get(i).y - my),2)
+          );
+          
+          float capped_dist = xdist > MAX_MOUSE_DIST ? MAX_MOUSE_DIST : xdist;
+          float norm_dist = (float)(1.0 - (capped_dist / MAX_MOUSE_DIST));
+          
+          float scale_amt = (float)(1.0 + 
+            (3.0*Math.pow(norm_dist,2) - 2.0*Math.pow(norm_dist,3)) * pscale);
+            //(float)1.0 + (float)Math.min(5.0, (1.0 / Math.log((1.0+10*xdist)))));
+          
+          //xdist = (xdist > 2.0 ? 2.0 : xdist);
+          
+          //if (i == 5) { println(scale_amt); }
+          
+          parts.get(i).sx = scale_amt;
+          parts.get(i).sy = scale_amt;
+          //parts.get(i).sx = 1.0f;
+          //parts.get(i).sy = 1.0f;
+          parts.get(i).x = nextX;
+          parts.get(i).y = height/2;
+          
+          totalX += parts.get(i).sx * parts.get(i).psize + 10;
+          
+        }
+        totalX -= 10; // to account for last bit added
+        
+        nextX = ((float)mx / (float)width) * (width - totalX);
+        
+        //println("total: " + totalX + " nextX: " + nextX);
+        
+        for (int i=0; i<parts.size(); i++) {
+          parts.get(i).x = (float)(nextX + (parts.get(i).sx * parts.get(i).psize) / 2.0);
+          nextX = nextX + (parts.get(i).sx * parts.get(i).psize) + 10; 
+        }
       
-      //println("total: " + totalX + " nextX: " + nextX);
-      
-      for (int i=0; i<parts.size(); i++) {
-        parts.get(i).x = (float)(nextX + (parts.get(i).sx * parts.get(i).psize) / 2.0);
-        nextX = nextX + (parts.get(i).sx * parts.get(i).psize) + 10; 
-      }
+      } // End if
       
       redraw();
     }
