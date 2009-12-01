@@ -12,7 +12,10 @@ public class FishEyeView extends PApplet {
 
   VersionHistoryFrameFishEye frame;
   BigMovieView bigMovie;
-
+  particle selected = null; 
+  particle hovered = null;
+  boolean viewLocked = false;
+  
   public FishEyeView() {
     
   }
@@ -68,6 +71,9 @@ public class FishEyeView extends PApplet {
     int c;
     int version;
     
+    boolean isSelected;
+    boolean isHovered;
+    
     String filename;
     Movie recording;
     
@@ -79,6 +85,7 @@ public class FishEyeView extends PApplet {
       
       this.filename = filename;
       this.version = n;
+      this.isSelected = false;
       
       try {
         recording = new Movie(FishEyeView.this, filename);
@@ -94,6 +101,14 @@ public class FishEyeView extends PApplet {
       bigMovie.addRecording(filename);
     }
    
+    public void setSelected(boolean selected) {
+      this.isSelected = selected;
+    }
+    
+    public void setHover(boolean hovered) {
+      this.isHovered = hovered;
+    }
+    
     public void setVideoFilename(String filename) {
       if (filename != null) {
         try {
@@ -110,6 +125,8 @@ public class FishEyeView extends PApplet {
     public void draw() {
       
       fill(c);
+      
+      
       noStroke();
       
       if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
@@ -122,12 +139,15 @@ public class FishEyeView extends PApplet {
           recording.jump(vid_position);
           recording.read();
           
-          bigMovie.setRecordingJump(this.filename, vid_position);
+          if (!viewLocked) {
+            bigMovie.setRecordingJump(this.filename, vid_position);
+          }
         }
         
         // TODO (Abel): change this to call the proper method
-        
-        frame.setVersionNumber(this.version);
+        if (!viewLocked) {
+          frame.setVersionNumber(this.version);
+        }
         //frame.updateCodeArea(this.filename);
       }
       
@@ -160,7 +180,16 @@ public class FishEyeView extends PApplet {
               (float)(sy*recHeight));
       }
       
-      if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
+      //if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
+      if (isSelected) {
+        stroke(0, 255, 0);
+        noFill();
+        rect((float)(x-(sx*psize)/2.0), 
+             (float)(y-(sy*psize)/2.0), 
+             (float)(sx*recWidth), 
+             (float)(sy*recHeight)
+        );
+      } else if (isHovered) {
         noFill();
         stroke(255);
         rect((float)(x-(sx*psize)/2.0), 
@@ -285,9 +314,57 @@ public class FishEyeView extends PApplet {
   
   @Override
   public void mouseMoved() {
-     layoutParticles();
-     
-     
+    if (!viewLocked) {
+      layoutParticles();
+    }
+    
+    if (hovered != null) {
+      hovered.setHover(false);
+    }
+    
+    for (int i=0; i<parts.size(); i++) {
+      particle p = parts.get(i);
+      if (mouseX > (p.x-(p.sx*p.psize)/2.0) && 
+          mouseX < (p.x-(p.sx*p.psize)/2.0) + (p.sx*p.psize)) {
+        if (p.isSelected) {
+          
+        } else {
+          
+          p.setHover(true);
+          hovered = p;
+          
+        }
+      }
+        
+    }
+    redraw();
   }
 
+  @Override
+  public void mouseClicked() {
+    for (int i=0; i<parts.size(); i++) {
+      particle p = parts.get(i);
+      if (mouseX > (p.x-(p.sx*p.psize)/2.0) && 
+          mouseX < (p.x-(p.sx*p.psize)/2.0) + (p.sx*p.psize)) {
+        if (p.isSelected) {
+          p.setSelected(false);
+          viewLocked = false;
+          selected = null;
+        } else {
+          if (selected != null) {
+            selected.setSelected(false);
+          }
+          
+          p.setSelected(true);
+          
+          selected = p;
+          viewLocked = true;
+          
+          layoutParticles();
+        }
+      }
+        
+    }
+  }
+  
 }
