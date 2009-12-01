@@ -3,6 +3,8 @@ package edu.stanford.hci.processing;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
@@ -38,7 +40,6 @@ public abstract class VersionHistoryFrame extends JFrame {
 	protected JPanel moviesPanel;
 	
 	JEditTextArea codeArea;
-	//JTextArea codeArea;
 	BigMovieView bigMovie;
 	
 	protected JSplitPane hSplitPane;
@@ -51,41 +52,38 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    this.controller = controller;
 	    this.currVersion = -1;
 	    
-	    moviesPanel = new ScrollableFlowPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
-	    moviesPanel.setPreferredSize(new Dimension(700, 500));
-	    JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
-	    movieScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    movieScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-//	    movieScrollPane.setMinimumSize(new Dimension(0, 400));
-//	    AdjustmentListener scrollListener = new ScrollAdjustmentListener();
-//	    movieScrollPane.getVerticalScrollBar().addAdjustmentListener(scrollListener);
-	    
-	    movieScrollPane.getViewport().addChangeListener(new ChangeListener() {
-
-        public void stateChanged(ChangeEvent e) {
-          // TODO Auto-generated method stub
-          moviesPanel.revalidate();
-        }
-        
-	    });
-	    
-	    //codeArea = new JTextArea();
 	    codeArea = new JEditTextArea(new RehearseTextAreaDefaults());
-	    //JScrollPane codeScrollPane = new JScrollPane(codeArea);
+	    codeArea.setMinimumSize(new Dimension(50,50));
 	    
 	    bigMovie = new BigMovieView();
+	    bigMovie.frame = this;
+	    final JPanel bigMoviePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+	    bigMoviePanel.add(bigMovie);
+	    bigMoviePanel.addComponentListener(new ComponentAdapter() {
+	      @Override
+	      public void componentResized(ComponentEvent e) {
+	        Dimension d = bigMoviePanel.getSize();
+	        int dim = Math.min(d.width, d.height);
+	        bigMovie.setPreferredSize(new Dimension(dim,dim));
+	        bigMoviePanel.revalidate();
+	      }
+	    });
    
 	    hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-	        codeArea, bigMovie);
+	        codeArea, bigMoviePanel);
 	    
 	    vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-	        hSplitPane, movieScrollPane);
+	        hSplitPane, makeMoviePane());
 	      
 	    vSplitPane.setDividerLocation(300);
 	    hSplitPane.setDividerLocation(400);
    	   
 	    setPreferredSize(new Dimension(700, 600));
 	    bigMovie.init();
+	  }
+	
+	  protected JComponent makeMoviePane() {
+	    return new JPanel();
 	  }
 	  
 	  public VersionHistoryController getController() {

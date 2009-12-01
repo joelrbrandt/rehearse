@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,14 +39,25 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   public VersionHistoryFrameFishEye(final VersionHistoryController controller) {
     super(controller);
     
-    fisheyeView = new FishEyeView();
-    fisheyeView.bigMovie = bigMovie;
-    fisheyeView.frame = VersionHistoryFrameFishEye.this;
-    moviesPanel.add(fisheyeView);
+//    fisheyeView = new FishEyeView();
+//    fisheyeView.bigMovie = bigMovie;
+//    fisheyeView.frame = VersionHistoryFrameFishEye.this;
+//    moviesPanel.add(fisheyeView);
     
     add (vSplitPane);
    
     fisheyeView.init();
+  }
+  
+  @Override
+  protected JComponent makeMoviePane() {
+    fisheyeView = new FishEyeView();
+    fisheyeView.bigMovie = bigMovie;
+    fisheyeView.frame = VersionHistoryFrameFishEye.this;
+    moviesPanel = new JPanel(new BorderLayout());
+    moviesPanel.add(fisheyeView, BorderLayout.CENTER);
+    
+    return moviesPanel;
   }
   
   public void addVersionHistory(VersionHistory vh) {

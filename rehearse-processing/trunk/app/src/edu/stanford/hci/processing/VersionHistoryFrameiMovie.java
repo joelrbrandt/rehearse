@@ -13,11 +13,16 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import edu.stanford.hci.processing.VersionHistoryFrame.ScrollableFlowPanel;
 
 public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
   
@@ -44,6 +49,25 @@ public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
     v2SplitPane.setDividerLocation(520);
     
     add(v2SplitPane);
+  }
+  
+  @Override
+  protected JComponent makeMoviePane() {
+    moviesPanel = new ScrollableFlowPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
+    moviesPanel.setPreferredSize(new Dimension(700, 500));
+    JScrollPane movieScrollPane = new JScrollPane(moviesPanel);
+    movieScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    movieScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+    movieScrollPane.getViewport().addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        moviesPanel.revalidate();
+      }
+      
+    });
+    
+    return movieScrollPane;
   }
   
   public VersionHistoryController getController() {
