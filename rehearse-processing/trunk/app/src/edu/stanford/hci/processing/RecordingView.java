@@ -18,7 +18,7 @@ public class RecordingView extends PApplet {
 	
 	private static final int STOP_BUTTON_SIZE = 10;
 	private static final int STOP_BUTTON_X_OFFSET = 15;
-	private static final int STOP_BUTTON_Y_OFFSET = 55;
+	private static final int STOP_BUTTON_Y_OFFSET = 50;
 
 	// highly suspect coding practices, 
 	// in the name of prototyping
