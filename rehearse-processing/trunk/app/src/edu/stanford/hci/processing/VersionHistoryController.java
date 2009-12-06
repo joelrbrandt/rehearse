@@ -1,10 +1,7 @@
 package edu.stanford.hci.processing;
 
 import java.awt.Image;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -23,7 +20,7 @@ public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_IMOVIE;
+  public static final int view_type = VIEW_FISHEYE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
@@ -143,16 +140,24 @@ public class VersionHistoryController implements CaretListener {
 
   public void caretUpdate(CaretEvent e) {
     int lineNum = editor.getTextArea().getLineOfOffset(e.getDot());
+    int lastLineNum = editor.getTextArea().getLineOfOffset(e.getMark());
     //System.out.println("Caret changed to line " + lineNum);
     if (historyView != null) {
       historyView.scrollWithEditorCaret(editor.appendCodeFromAllTabs(), lineNum);
     }
     
     TokenMarker tm = ((SyntaxDocument) editor.getSketch().getCode()[0].getDocument()).getTokenMarker();
-    RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(lineNum);
-    if (m != null) {
-      historyView.setVersionFilter(m.relevantVersions);
+    
+    Set<Integer> relevantVersions = new HashSet<Integer>();
+    int start = Math.min(lineNum, lastLineNum);
+    int end = Math.max(lineNum, lastLineNum);
+    for (int i = start; i <= end; i++) {
+      RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(i);
+      if (m != null) {
+        relevantVersions.addAll(m.relevantVersions);
+      }
     }
+    historyView.setVersionFilter(relevantVersions);
   }
   
   public void updateLineModelsWithVersionInfo() {
@@ -175,9 +180,9 @@ public class VersionHistoryController implements CaretListener {
     
     for (int versionNum = historyModels.size() - 1; versionNum >= 0; versionNum--) {
       VersionHistory vh = historyModels.get(versionNum);
+      List<String> currLines = Arrays.asList(currentCode.split("\n"));
       
-      Patch patch = DiffUtils.diff(Arrays.asList(currentCode.split("\n")), 
-          Arrays.asList(vh.getCode().split("\n")));
+      Patch patch = DiffUtils.diff(currLines, Arrays.asList(vh.getCode().split("\n")));
       
       // Annotate lines with relevant versions.
       for (Delta delta: patch.getDeltas()) {
@@ -206,28 +211,44 @@ public class VersionHistoryController implements CaretListener {
         }
       }
       
-        // Update line correspondence map.
+      // Update line correspondence map.
+      int[] revisedLineNums = new int[currLines.size()];
+      for (int i = 0; i < revisedLineNums.length; i++) {
+        revisedLineNums[i] = i;
+      }
+      
       for (Delta delta: patch.getDeltas()) {
         if (delta.type == Delta.INSERTION) {
-          
-        } else if (delta.type == Delta.DELETION) {
-          int begin = delta.getOriginal().getPosition();
-          int size = delta.getOriginal().getSize();
-          for (int i=begin; i<begin+size; i++) {
-            lineCorrespondenceMap.remove(i);
+          int pos = delta.getOriginal().getPosition();
+          for (int i = pos; i < revisedLineNums.length; i++) {
+            if (revisedLineNums[i] != -1)
+              revisedLineNums[i]++;
           }
-        } else if (delta.type == Delta.CHANGE) {
-          int size = delta.getRevised().getSize();
-          for (int i = 0; i < size; i++) {
-            int key = delta.getOriginal().getPosition() + i;
-            Integer value = lineCorrespondenceMap.get(key);
-            if (value != null) {
-              lineCorrespondenceMap.remove(key);
-              lineCorrespondenceMap.put(delta.getRevised().getPosition() + i, value);
-            }
-          } 
+        } else if (delta.type == Delta.DELETION) {
+          int pos = delta.getOriginal().getPosition();
+          for (int i = pos; i < pos + delta.getOriginal().getSize(); i++) {
+            revisedLineNums[i] = -1;
+          }
+          
+          pos = delta.getOriginal().last();
+          for (int i = pos + 1; i < revisedLineNums.length; i++) {
+            if (revisedLineNums[i] != -1)
+              revisedLineNums[i]--;
+          }
         }
       }
+      
+      Map<Integer, Integer> newLineCorrespondenceMap = new HashMap<Integer, Integer>();
+      for (int i = 0; i < revisedLineNums.length; i++) {
+        if (revisedLineNums[i] != -1) {
+          Integer value = lineCorrespondenceMap.get(i);
+          if (value != null) {
+            newLineCorrespondenceMap.put(revisedLineNums[i], value);
+          }
+        }
+      }
+      
+      lineCorrespondenceMap = newLineCorrespondenceMap;
       
       currentCode = vh.getCode();
     }
