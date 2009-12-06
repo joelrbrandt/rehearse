@@ -2,6 +2,7 @@ package edu.stanford.hci.processing;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Set;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -172,12 +173,18 @@ public class FishEyeView extends PApplet {
         recHeight = (int)psize;
       }
       
+      if (filterVersions != null && filterVersions.contains(version)) {
+        fill(255, 255, 0, 50);
+        rect((float)(x - (sx*psize)/2.0), 0, sx*recWidth, height);
+      }
+      
       if (recording != null) {
         image(recording,
               (float)(x-(sx*psize)/2.0), 
               (float)(y-(sy*psize)/2.0), 
               (float)(sx*recWidth), 
               (float)(sy*recHeight));
+        
       }
       
       //if (mouseX > (x-(sx*psize)/2.0) && mouseX < (x-(sx*psize)/2.0) + (sx*psize)) {
@@ -213,11 +220,22 @@ public class FishEyeView extends PApplet {
   
   ArrayList<VersionHistory> histories = new ArrayList<VersionHistory>();
   ArrayList<particle> parts = new ArrayList<particle>();
+  Set<Integer> filterVersions;
   //particle[] parts = new particle[N_PARTICLES];
   
   Object lock = new Object();
   
   PFont pfont;
+  
+  public void setVersionFilter(Set<Integer> versions) {
+    filterVersions = versions;
+    redraw();
+  }
+  
+  public void clearVersionFilter() {
+    filterVersions = null;
+    redraw();
+  }
   
   @Override
   public void init() {

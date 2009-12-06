@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -94,6 +95,12 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   
     // 
   
+  }
+  
+  @Override
+  public void setVersionFilter(Set<Integer> versions) {
+    //fisheyeView.setVersionFilter(versions);
+    validate();
   }
   
   /*

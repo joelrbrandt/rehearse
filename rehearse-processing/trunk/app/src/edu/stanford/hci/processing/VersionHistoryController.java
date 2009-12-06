@@ -2,18 +2,28 @@ package edu.stanford.hci.processing;
 
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+
+import processing.app.syntax.SyntaxDocument;
+import processing.app.syntax.TokenMarker;
 import processing.video.MovieMaker;
 import edu.stanford.hci.processing.editor.RehearseEditor;
+import edu.stanford.hci.processing.editor.RehearseLineModel;
 
 public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_IMOVIE;
+  public static final int view_type = VIEW_FISHEYE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
@@ -45,6 +55,8 @@ public class VersionHistoryController implements CaretListener {
     setLastRunningVersionIndex(historyModels.size() - 1);
     
     historyIO.appendHistory(vh);
+    
+    updateLineModelsWithVersionInfo();
   }
   
   public void updateScreenshot(int index, Image screenshot) {
@@ -88,7 +100,7 @@ public class VersionHistoryController implements CaretListener {
     if (historyView == null) {
       
       if (this.view_type == VIEW_IMOVIE) {
-        historyView = new VersionHistoryFrameiMovie(this);
+        historyView = new VersionHistoryFrameiMovie2(this);
       } else if (this.view_type == VIEW_FISHEYE) {
         try {
         historyView = new VersionHistoryFrameFishEye(this);
@@ -106,6 +118,9 @@ public class VersionHistoryController implements CaretListener {
         historyView.addVersionHistory(vh);
       }
       setLastRunningVersionIndex(historyModels.size() - 1);
+      
+      updateLineModelsWithVersionInfo();
+      
     } else {
       historyView.setVisible(true);
     }
@@ -131,6 +146,90 @@ public class VersionHistoryController implements CaretListener {
     //System.out.println("Caret changed to line " + lineNum);
     if (historyView != null) {
       historyView.scrollWithEditorCaret(editor.appendCodeFromAllTabs(), lineNum);
+    }
+    
+    TokenMarker tm = ((SyntaxDocument) editor.getSketch().getCode()[0].getDocument()).getTokenMarker();
+    RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(lineNum);
+    if (m != null) {
+      historyView.setVersionFilter(m.relevantVersions);
+    }
+  }
+  
+  public void updateLineModelsWithVersionInfo() {
+    Map<Integer, Integer> lineCorrespondenceMap = new HashMap<Integer, Integer>();
+    for (int i = 0; i < editor.getLineCount(); i++) {
+      lineCorrespondenceMap.put(i, i);
+    }
+    
+    String currentCode = editor.getText();
+    // TODO: Make this work with multiple tabs.
+    TokenMarker tm = ((SyntaxDocument) editor.getSketch().getCode()[0].getDocument()).getTokenMarker();
+      
+    for (int i = 0; i < tm.getLineCount(); i++) {
+      RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(i);
+      if (m == null) {
+        m = new RehearseLineModel();
+        tm.setLineModelAt(i, m);
+      }
+    }
+    
+    for (int versionNum = historyModels.size() - 1; versionNum >= 0; versionNum--) {
+      VersionHistory vh = historyModels.get(versionNum);
+      
+      Patch patch = DiffUtils.diff(Arrays.asList(currentCode.split("\n")), 
+          Arrays.asList(vh.getCode().split("\n")));
+      
+      // Annotate lines with relevant versions.
+      for (Delta delta: patch.getDeltas()) {
+        if (delta.type == Delta.INSERTION) {
+          
+        } else if (delta.type == Delta.DELETION) {
+          int begin = delta.getOriginal().getPosition();
+          int size = delta.getOriginal().getSize();
+          for (int i=begin; i<begin+size; i++) {
+            Integer value = lineCorrespondenceMap.get(i);
+            if (value != null) {
+              RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(value);
+              m.relevantVersions.add(versionNum + 1);
+            }
+          }
+        } else if (delta.type == Delta.CHANGE) {
+          int begin = delta.getOriginal().getPosition();
+          int size = delta.getOriginal().getSize();
+          for (int i=begin; i<begin+size; i++) {
+            Integer value = lineCorrespondenceMap.get(i);
+            if (value != null) {
+              RehearseLineModel m = (RehearseLineModel) tm.getLineModelAt(value);
+              m.relevantVersions.add(versionNum + 1);
+            }
+          }
+        }
+      }
+      
+        // Update line correspondence map.
+      for (Delta delta: patch.getDeltas()) {
+        if (delta.type == Delta.INSERTION) {
+          
+        } else if (delta.type == Delta.DELETION) {
+          int begin = delta.getOriginal().getPosition();
+          int size = delta.getOriginal().getSize();
+          for (int i=begin; i<begin+size; i++) {
+            lineCorrespondenceMap.remove(i);
+          }
+        } else if (delta.type == Delta.CHANGE) {
+          int size = delta.getRevised().getSize();
+          for (int i = 0; i < size; i++) {
+            int key = delta.getOriginal().getPosition() + i;
+            Integer value = lineCorrespondenceMap.get(key);
+            if (value != null) {
+              lineCorrespondenceMap.remove(key);
+              lineCorrespondenceMap.put(delta.getRevised().getPosition() + i, value);
+            }
+          } 
+        }
+      }
+      
+      currentCode = vh.getCode();
     }
   }
 }

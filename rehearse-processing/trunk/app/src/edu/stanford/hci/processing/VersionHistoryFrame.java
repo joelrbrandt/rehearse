@@ -7,6 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -211,6 +212,10 @@ public abstract class VersionHistoryFrame extends JFrame {
       result = Math.min(toVersionCode.split("\n").length, result);
     
       return result;
+    }
+    
+    public void setVersionFilter(Set<Integer> versions) {
+      
     }
 	  
     private class VersionHistoryHighlight implements TextAreaPainter.Highlight {
