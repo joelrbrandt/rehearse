@@ -11,7 +11,7 @@ import processing.video.Movie;
 
 public class FishEyeView extends PApplet {
 
-  VersionHistoryFrameFishEye frame;
+  VersionHistoryFrame frame;
   BigMovieView bigMovie;
   particle selected = null; 
   particle hovered = null;

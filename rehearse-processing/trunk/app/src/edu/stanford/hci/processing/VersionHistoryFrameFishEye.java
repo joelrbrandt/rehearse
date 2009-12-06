@@ -99,7 +99,7 @@ public class VersionHistoryFrameFishEye extends VersionHistoryFrame{
   
   @Override
   public void setVersionFilter(Set<Integer> versions) {
-    //fisheyeView.setVersionFilter(versions);
+    fisheyeView.setVersionFilter(versions);
     validate();
   }
   

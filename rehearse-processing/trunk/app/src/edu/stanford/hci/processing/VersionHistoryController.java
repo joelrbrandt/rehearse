@@ -23,7 +23,7 @@ public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_FISHEYE;
+  public static final int view_type = VIEW_IMOVIE;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;

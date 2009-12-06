@@ -46,7 +46,7 @@ public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
         
     JSplitPane v2SplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
     		vSplitPane, buttonPanel);
-    v2SplitPane.setDividerLocation(520);
+    v2SplitPane.setDividerLocation(625);
     
     add(v2SplitPane);
   }

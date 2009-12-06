@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormat;
@@ -15,11 +17,14 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -30,19 +35,52 @@ import processing.app.syntax.*;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
+import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
 
 import processing.app.Sketch;
 
 public class VersionHistoryFrameiMovie2 extends VersionHistoryFrame{
   
   private MovieClipView movieClipView;
+  
+  private boolean showMarkedOnly;
+  private JButton showMarked;
  
   public VersionHistoryFrameiMovie2(final VersionHistoryController controller) {
     super(controller);
     
-    add (vSplitPane);
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 5));
+    
+    showMarked = new JButton("Show Marked");
+    showMarked.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        toggleShowMarkedOnly();
+      }
+    });
+    buttonPanel.add(showMarked);
+        
+    JSplitPane v2SplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
+        vSplitPane, buttonPanel);
+    v2SplitPane.setDividerLocation(625);
+    v2SplitPane.setResizeWeight(1.0);
+    v2SplitPane.setEnabled(false);
+    
+    add(v2SplitPane);
    
     movieClipView.init();
+  }
+  
+  public void toggleShowMarkedOnly() {
+    showMarkedOnly = !showMarkedOnly;
+    if(showMarkedOnly) {
+      movieClipView.filterMarkedVersions();
+      showMarked.setText("Show All");
+      
+    } else {
+      movieClipView.clearVersionFilter();
+      showMarked.setText("Show Marked");
+    }
   }
   
   @Override

@@ -79,7 +79,7 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    vSplitPane.setDividerLocation(300);
 	    hSplitPane.setDividerLocation(400);
    	   
-	    setPreferredSize(new Dimension(700, 600));
+	    setPreferredSize(new Dimension(700, 700));
 	    bigMovie.init();
 	  }
 	

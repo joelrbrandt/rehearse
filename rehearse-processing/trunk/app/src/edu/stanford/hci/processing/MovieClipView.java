@@ -12,7 +12,7 @@ public class MovieClipView extends PApplet {
 
   private static final int SEC_PER_SEGMENT = 1;
   
-  VersionHistoryFrameiMovie2 frame;
+  VersionHistoryFrame frame;
   BigMovieView bigMovie;
   particle selected = null; 
   particle hovered = null;
@@ -24,8 +24,8 @@ public class MovieClipView extends PApplet {
   
   public void addVersion(VersionHistory vh) {
     // Check if particle is already there
-    for (int i=0; i<parts.size(); i++) {
-      particle p = parts.get(i);
+    for (int i=0; i<allParts.size(); i++) {
+      particle p = allParts.get(i);
       if (p.version == vh.getVersion()) {
         println("Updating video");
         p.setVideoFilename(vh.getVideoFilename());
@@ -35,12 +35,12 @@ public class MovieClipView extends PApplet {
     }
     
     println("Creating new particle");
-    particle p = new particle(parts.size(), vh.getVideoFilename());
+    particle p = new particle(allParts.size(), vh.getVideoFilename());
     
     histories.add(vh);
-    parts.add(p);
+    allParts.add(p);
 
-    layoutParticles();
+    clearVersionFilter();
   }
   
   public VersionHistory getVersion(int n) {
@@ -72,6 +72,7 @@ public class MovieClipView extends PApplet {
     
     boolean minimized;
     int version;
+    boolean marked = false;
     
     float jumpTime;
     int numSegments;
@@ -147,6 +148,11 @@ public class MovieClipView extends PApplet {
         fill(255, 0, 0, 120);
         rect(x, y, 10, sy);
         return;
+      }
+      
+      if (marked) {
+        fill(255, 255, 0);
+        rect(x - 5, y - 5, sx + 10, sy + 10);
       }
       
       if (isMouseOver()) {
@@ -239,6 +245,9 @@ public class MovieClipView extends PApplet {
         frame.getController().runHistoryCode(histories.get(version).getCode());
       } else if (minimized) {
         setMinimized(false);
+      } else {
+        marked = !marked;
+        this.draw();
       }
       
       return true;
@@ -251,6 +260,7 @@ public class MovieClipView extends PApplet {
   ArrayList<VersionHistory> histories = new ArrayList<VersionHistory>();
   ArrayList<particle> parts = new ArrayList<particle>();
   Set<Integer> filterVersions;
+  ArrayList<particle> allParts = new ArrayList<particle>();
   //particle[] parts = new particle[N_PARTICLES];
   
   Object lock = new Object();
@@ -261,6 +271,26 @@ public class MovieClipView extends PApplet {
  
   boolean scrolling = false;
   
+  public void clearVersionFilter() {
+    parts.clear();
+    parts.addAll(allParts);
+
+    scrollPos = 0.0f;
+    layoutParticles();
+    redraw();
+  }
+  
+  public void filterMarkedVersions() {
+    parts.clear();
+    for (int i = 0; i < allParts.size(); i++) {
+      particle p = allParts.get(i);
+      if (p.marked) parts.add(p);
+    }
+    
+    scrollPos = 0.0f;
+    layoutParticles();
+    redraw();
+  }
   
   @Override
   public void init() {
