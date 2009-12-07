@@ -24,6 +24,7 @@ import javax.swing.event.ChangeListener;
 
 import edu.stanford.hci.processing.history.VersionHistoryFrame.ScrollableFlowPanel;
 
+@Deprecated
 public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
   
   private ArrayList<VersionHistoryPanel> versionPanels;

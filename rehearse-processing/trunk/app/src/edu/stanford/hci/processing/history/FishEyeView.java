@@ -8,24 +8,28 @@ import java.util.Set;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.video.Movie;
-//import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
 
-public class FishEyeView extends PApplet {
+public class FishEyeView extends VersionsView {
 
-  VersionHistoryFrame frame;
-  BigMovieView bigMovie;
   particle selected = null; 
   particle hovered = null;
   boolean viewLocked = false;
+
+  ArrayList<particle> allParts = new ArrayList<particle>();
   
   public FishEyeView() {
     
   }
   
+  private particle getParticle(int i) {
+    return allParts.get(i);
+  }
+  
+  
   public void addVersion(VersionHistory vh) {
     // Check if particle is already there
-    for (int i=0; i<parts.size(); i++) {
-      particle p = parts.get(i);
+    for (int i=0; i<allParts.size(); i++) {
+      particle p = allParts.get(i);
       if (p.version == vh.getVersion()) {
         println("Updating video");
         p.setVideoFilename(vh.getVideoFilename());
@@ -34,10 +38,10 @@ public class FishEyeView extends PApplet {
     }
     
     //println("Creating new particle");
-    particle p = new particle(parts.size(), vh.getVideoFilename());
+    particle p = new particle(allParts.size(), vh.getVideoFilename());
     
     histories.add(vh);
-    parts.add(p);
+    allParts.add(p);
   }
   
   public VersionHistory getVersion(int n) {
@@ -219,8 +223,6 @@ public class FishEyeView extends PApplet {
   final float MAX_MOUSE_DIST = 125;
   final int N_PARTICLES = 200;
   
-  ArrayList<VersionHistory> histories = new ArrayList<VersionHistory>();
-  ArrayList<particle> parts = new ArrayList<particle>();
   Set<Integer> filterVersions;
   //particle[] parts = new particle[N_PARTICLES];
   
@@ -250,7 +252,7 @@ public class FishEyeView extends PApplet {
    
     //println("hiya");
     
-    size(700, 200);
+    size(700, 318);
     
     noLoop();  
   }
@@ -263,8 +265,8 @@ public class FishEyeView extends PApplet {
     
     fill(255,0,0);
     //ellipse(mouseX, mouseY, MAX_MOUSE_DIST*2, MAX_MOUSE_DIST*2);
-    for (int i=0; i<parts.size(); i++) {
-       parts.get(i).draw();
+    for (int i=0; i<allParts.size(); i++) {
+       allParts.get(i).draw();
     }
     
     //System.out.println("fisheye draw");
@@ -274,7 +276,7 @@ public class FishEyeView extends PApplet {
   boolean layingOut = false;
   void layoutParticles() {
     
-    if (parts.size() != 0) {
+    if (allParts.size() != 0) {
       int mx = mouseX;
       int my = mouseY;
       
@@ -284,16 +286,16 @@ public class FishEyeView extends PApplet {
       float totalX = (float)0.0;
       
       // Dimension of non-magnified version
-      float dim = Math.min( (width - 100) / parts.size(), 100);
+      float dim = Math.min( (width - 100) / allParts.size(), 100);
       
       // Max magnification scale amount
       float pscale = (float)(1.0 / ( dim / 200.0 ) / 2.0);
       
       if (dim > 99.0) {
-        float totalWidth = (parts.size() * dim) + ((parts.size()-1) * 10);
+        float totalWidth = (allParts.size() * dim) + ((allParts.size()-1) * 10);
         nextX = (float)((width/2.0) - (totalWidth/2.0) + (dim/2.0));
-        for (int i=0; i<parts.size(); i++) {
-          particle p = parts.get(i);
+        for (int i=0; i<allParts.size(); i++) {
+          particle p = allParts.get(i);
           p.psize = dim;
           p.sx = 1.0f;
           p.sy = 1.0f;
@@ -304,12 +306,12 @@ public class FishEyeView extends PApplet {
         }
       } else {
       
-        for (int i=0; i<parts.size(); i++) {
+        for (int i=0; i<allParts.size(); i++) {
           
-          parts.get(i).psize = dim;
+          allParts.get(i).psize = dim;
           
           float xdist = (float)Math.sqrt(
-            Math.pow(Math.abs(parts.get(i).x - mx),2) 
+            Math.pow(Math.abs(allParts.get(i).x - mx),2) 
             //+ Math.pow(Math.abs(parts.get(i).y - my),2)
           );
           
@@ -324,14 +326,14 @@ public class FishEyeView extends PApplet {
           
           //if (i == 5) { println(scale_amt); }
           
-          parts.get(i).sx = scale_amt;
-          parts.get(i).sy = scale_amt;
+          allParts.get(i).sx = scale_amt;
+          allParts.get(i).sy = scale_amt;
           //parts.get(i).sx = 1.0f;
           //parts.get(i).sy = 1.0f;
-          parts.get(i).x = nextX;
-          parts.get(i).y = height/2;
+          allParts.get(i).x = nextX;
+          allParts.get(i).y = height/2;
           
-          totalX += parts.get(i).sx * parts.get(i).psize + 10;
+          totalX += allParts.get(i).sx * allParts.get(i).psize + 10;
           
         }
         totalX -= 10; // to account for last bit added
@@ -340,9 +342,9 @@ public class FishEyeView extends PApplet {
         
         //println("total: " + totalX + " nextX: " + nextX);
         
-        for (int i=0; i<parts.size(); i++) {
-          parts.get(i).x = (float)(nextX + (parts.get(i).sx * parts.get(i).psize) / 2.0);
-          nextX = nextX + (parts.get(i).sx * parts.get(i).psize) + 10; 
+        for (int i=0; i<allParts.size(); i++) {
+          allParts.get(i).x = (float)(nextX + (allParts.get(i).sx * allParts.get(i).psize) / 2.0);
+          nextX = nextX + (allParts.get(i).sx * allParts.get(i).psize) + 10; 
         }
       
       } // End if
@@ -361,8 +363,8 @@ public class FishEyeView extends PApplet {
       hovered.setHover(false);
     }
     
-    for (int i=0; i<parts.size(); i++) {
-      particle p = parts.get(i);
+    for (int i=0; i<allParts.size(); i++) {
+      particle p = allParts.get(i);
       if (mouseX > (p.x-(p.sx*p.psize)/2.0) && 
           mouseX < (p.x-(p.sx*p.psize)/2.0) + (p.sx*p.psize)) {
         if (p.isSelected) {
@@ -381,8 +383,8 @@ public class FishEyeView extends PApplet {
 
   @Override
   public void mouseClicked() {
-    for (int i=0; i<parts.size(); i++) {
-      particle p = parts.get(i);
+    for (int i=0; i<allParts.size(); i++) {
+      particle p = allParts.get(i);
       if (mouseX > (p.x-(p.sx*p.psize)/2.0) && 
           mouseX < (p.x-(p.sx*p.psize)/2.0) + (p.sx*p.psize)) {
         

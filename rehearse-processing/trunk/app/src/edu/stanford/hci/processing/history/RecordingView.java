@@ -10,6 +10,7 @@ import edu.stanford.hci.processing.history.VersionHistoryFrameiMovie.VersionHist
 import processing.core.PApplet;
 import processing.video.Movie;
 
+@Deprecated
 public class RecordingView extends PApplet {
 
 	private static final int SEC_PER_SEGMENT = 1;

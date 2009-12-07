@@ -20,7 +20,8 @@ public class VersionHistoryController implements CaretListener {
 
   public static final int VIEW_IMOVIE = 1;
   public static final int VIEW_FISHEYE = 2;
-  public static final int view_type = VIEW_IMOVIE;
+  public static final int VIEW_COMBINED = 3;
+  public static final int view_type = VIEW_COMBINED;
   
   private RehearseEditor editor;
   private VersionHistoryIO historyIO;
@@ -96,8 +97,10 @@ public class VersionHistoryController implements CaretListener {
   public void openHistoryView() {
     if (historyView == null) {
       
-      if (this.view_type == VIEW_IMOVIE) {
-        historyView = new VersionHistoryFrameiMovie2(this);
+      if (this.view_type == VIEW_COMBINED) {
+        historyView = new VersionHistoryFrameCombined(this);
+      } else if (this.view_type == VIEW_IMOVIE) {
+        historyView = new VersionHistoryFrameiMovie(this);
       } else if (this.view_type == VIEW_FISHEYE) {
         try {
         historyView = new VersionHistoryFrameFishEye(this);

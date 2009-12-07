@@ -1,6 +1,7 @@
 package edu.stanford.hci.processing.history;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 
@@ -9,15 +10,15 @@ import processing.core.PFont;
 import processing.core.PImage;
 import processing.video.Movie;
 
-public class MovieClipView extends PApplet {
+public class MovieClipView extends VersionsView {
 
   private static final int SEC_PER_SEGMENT = 1;
   
-  VersionHistoryFrame frame;
-  BigMovieView bigMovie;
   particle selected = null; 
   particle hovered = null;
   boolean viewLocked = false;
+
+  ArrayList<particle> allParts = new ArrayList<particle>();
   
   public MovieClipView() {
     
@@ -26,7 +27,7 @@ public class MovieClipView extends PApplet {
   public void addVersion(VersionHistory vh) {
     // Check if particle is already there
     for (int i=0; i<allParts.size(); i++) {
-      particle p = allParts.get(i);
+      particle p = (particle)allParts.get(i);
       if (p.version == vh.getVersion()) {
         println("Updating video");
         p.setVideoFilename(vh.getVideoFilename());
@@ -258,10 +259,8 @@ public class MovieClipView extends PApplet {
   final float MAX_MOUSE_DIST = 125;
   final int N_PARTICLES = 200;
   
-  ArrayList<VersionHistory> histories = new ArrayList<VersionHistory>();
   ArrayList<particle> parts = new ArrayList<particle>();
   Set<Integer> filterVersions;
-  ArrayList<particle> allParts = new ArrayList<particle>();
   //particle[] parts = new particle[N_PARTICLES];
   
   Object lock = new Object();
@@ -300,7 +299,7 @@ public class MovieClipView extends PApplet {
   
   @Override
   public void setup() {
-    size(700, 200);
+    size(700, 318);
     noLoop();  
   }
   

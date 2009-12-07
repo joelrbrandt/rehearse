@@ -175,6 +175,7 @@ import javax.swing.border.Border;
 
 import processing.app.Sketch;
 
+@Deprecated
 public class OldVersionHistoryFrame extends JFrame {
   
   public static final int ROW_HEIGHT = 120;
