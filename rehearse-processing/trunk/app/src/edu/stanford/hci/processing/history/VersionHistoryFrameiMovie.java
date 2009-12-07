@@ -1,4 +1,4 @@
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,7 +22,7 @@ import javax.swing.JTextArea;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import edu.stanford.hci.processing.VersionHistoryFrame.ScrollableFlowPanel;
+import edu.stanford.hci.processing.history.VersionHistoryFrame.ScrollableFlowPanel;
 
 public class VersionHistoryFrameiMovie extends VersionHistoryFrame {
   

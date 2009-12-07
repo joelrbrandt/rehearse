@@ -1,4 +1,4 @@
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

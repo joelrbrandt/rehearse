@@ -1,8 +1,9 @@
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Set;
+
 
 import processing.core.PApplet;
 import processing.core.PFont;

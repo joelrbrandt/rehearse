@@ -148,7 +148,7 @@
 //  }
 //}
 
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -171,6 +171,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
+
 
 import processing.app.Sketch;
 

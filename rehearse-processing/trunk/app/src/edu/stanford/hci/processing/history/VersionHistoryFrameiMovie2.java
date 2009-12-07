@@ -1,4 +1,4 @@
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -35,7 +35,7 @@ import processing.app.syntax.*;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
-import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
+import edu.stanford.hci.processing.history.VersionHistoryFrameiMovie.VersionHistoryPanel;
 
 import processing.app.Sketch;
 

@@ -41,9 +41,9 @@ import edu.stanford.hci.processing.ModeException;
 import edu.stanford.hci.processing.RehearseCanvasFrame;
 import edu.stanford.hci.processing.RehearseLogger;
 import edu.stanford.hci.processing.RehearsePApplet;
-import edu.stanford.hci.processing.VersionHistory;
-import edu.stanford.hci.processing.VersionHistoryController;
-import edu.stanford.hci.processing.VersionHistoryFrame;
+import edu.stanford.hci.processing.history.VersionHistory;
+import edu.stanford.hci.processing.history.VersionHistoryController;
+import edu.stanford.hci.processing.history.VersionHistoryFrame;
 
 public class RehearseEditor extends Editor implements ConsoleInterface {
 

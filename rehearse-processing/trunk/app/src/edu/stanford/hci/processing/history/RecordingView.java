@@ -1,13 +1,14 @@
-package edu.stanford.hci.processing;
+package edu.stanford.hci.processing.history;
 
 import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 
+import edu.stanford.hci.processing.history.VersionHistoryFrameiMovie.VersionHistoryPanel;
+
 import processing.core.PApplet;
 import processing.video.Movie;
-import edu.stanford.hci.processing.VersionHistoryFrameiMovie.VersionHistoryPanel;
 
 public class RecordingView extends PApplet {
 
