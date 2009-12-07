@@ -172,7 +172,11 @@ public class VersionHistoryFrameCombined extends VersionHistoryFrame{
   
   @Override
   public void setVersionFilter(Set<Integer> versions) {
-    //
+    if (!inMovieClipView) {
+      FishEyeView fisheyeView = (FishEyeView)versionsView;
+      fisheyeView.setVersionFilter(versions);
+      validate();
+    }
   }
   
   public void updateScreenshot(int index, Image screenshot) {
