@@ -12,7 +12,7 @@ import processing.video.Movie;
 
 public class MovieClipView extends VersionsView {
 
-  private static final int SEC_PER_SEGMENT = 1;
+  private static final int SEC_PER_SEGMENT = 2;
   
   particle selected = null; 
   particle hovered = null;

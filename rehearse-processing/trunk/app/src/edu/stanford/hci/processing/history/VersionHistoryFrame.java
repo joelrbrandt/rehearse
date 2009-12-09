@@ -5,6 +5,9 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Set;
@@ -55,6 +58,15 @@ public abstract class VersionHistoryFrame extends JFrame {
 	    
 	    codeArea = new JEditTextArea(new RehearseTextAreaDefaults());
 	    codeArea.setMinimumSize(new Dimension(50,50));
+	    codeArea.addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if (e.isControlDown() && e.getKeyCode() == 17) {
+              codeArea.copy();
+              System.out.println("Copied");
+          }
+        }
+	    });
 	    
 	    bigMovie = new BigMovieView();
 	    bigMovie.frame = this;
