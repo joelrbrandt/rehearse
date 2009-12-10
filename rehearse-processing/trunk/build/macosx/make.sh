@@ -157,9 +157,13 @@ javac \
     src/bsh/org/objectweb/asm/*.java \
     src/bsh/reflect/*.java \
     src/bsh/util/*.java \
+    src/difflib/*.java \
+    src/difflib/myers/*.java \
+    ../video/src/processing/video/*.java \
     src/edu/stanford/hci/processing/*.java \
     src/edu/stanford/hci/helpmeout/*.java \
-    src/edu/stanford/hci/processing/editor/*.java 
+    src/edu/stanford/hci/processing/editor/*.java \
+    src/edu/stanford/hci/processing/history/*.java 
 
 cd ../build/macosx/work/classes
 rm -f "$RESOURCES/pde.jar"
