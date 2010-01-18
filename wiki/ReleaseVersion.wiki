@@ -1,4 +1,4 @@
-#summary "Release Version" of the
+#summary "Release Version" of Rehearse.
 
 = Introduction =
 
