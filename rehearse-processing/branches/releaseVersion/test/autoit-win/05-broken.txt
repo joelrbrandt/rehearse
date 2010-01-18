@@ -1,0 +1,11 @@
+
+class Thing {
+  public Thing() { super(); }
+  public void display(){}
+}
+Thing thing;
+void setup() {
+}
+void draw() {
+  thing.display();
+}

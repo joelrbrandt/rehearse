@@ -1,0 +1,7 @@
+
+int[] myArray = new int[100];
+void setup(){}
+void draw(){
+  int index = constrain(mouseX,0,myArray.length-1);
+  myArray[index] = 0;
+}

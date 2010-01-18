@@ -1,0 +1,4 @@
+void setup() {
+  Object x = new Integer(0);
+  System.out.println((Integer)x);
+}

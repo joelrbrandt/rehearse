@@ -1,0 +1,8 @@
+int i = 0;
+while(true) {
+    fill(i*10,255,i*10);
+    rect(i*10,i*10,i*10,i*10);
+    i += 2;
+    if (i > 20)
+        break;
+}

@@ -1,0 +1,5 @@
+// Fix: change a to 1
+String s = "a";
+
+int i = Integer.parseInt(s);
+println("done");
