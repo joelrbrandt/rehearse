@@ -1,4 +1,0 @@
-void setup() {
-  String a = "test";
-  char c = a.charAt(4);
-}

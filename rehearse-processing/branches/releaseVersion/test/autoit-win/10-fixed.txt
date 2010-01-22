@@ -1,4 +1,0 @@
-void setup() {
-  String s = "1";
-  int i = Integer.parseInt(s);
-}

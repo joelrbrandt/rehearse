@@ -1,9 +1,0 @@
-1. Class defined later in the code is not recognized by beanshell.
-JOEL WILL DO 2. Examples:WaveGradient.pde....bad float unaryOperation error?
-             |--> Related to #5?
-FIXED 3. Examples:RadialGradient.pde...Argument 1 of color constructor did not eval to a Primitive
-FIXED 4. None of the load.. (e.g. loadImage) functions work. Perhaps because of file path issue? All files in the "data" folder must be available.
-JOEL WILL DO 5. Examples:Basic>Control>EmbeddedIteration.pde...Variable assignment: j: Can't assign float to int
-             |--> Assignment of float to int isn't allowed by beanshell and could be. Problem starts at Primitive.java:1051
-FIXED 6. stop button doesn't work
-FIXED 7. Basic>Image>BackgroundImage: background function doesn't work?

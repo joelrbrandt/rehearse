@@ -1,5 +1,0 @@
-
-int [] myArray = new int[10];
-void setup() {
-  myArray[9]=0; //int[10] goes from 0..9
-}

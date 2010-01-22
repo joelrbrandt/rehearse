@@ -1,6 +1,0 @@
-void setup() {
- BufferedReader reader = createReader("does-not-exist.txt");
- try {
-   reader.readLine();
- catch (IOException e) {}
-}
