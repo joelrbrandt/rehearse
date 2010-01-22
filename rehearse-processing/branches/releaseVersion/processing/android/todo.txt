@@ -1,0 +1,93 @@
+0176 (private)
+X begin the merge of the new A3D, remove old OpenGL code
+_ Android tools on Windows are broken due to naming changes in r4 SDK
+_   http://dev.processing.org/bugs/show_bug.cgi?id=1432
+
+from romain
+_ tint() causes crash
+_   http://dev.processing.org/bugs/show_bug.cgi?id=1435
+_ colorMode() error 
+_   http://dev.processing.org/bugs/show_bug.cgi?id=1436
+_ createGraphics() broken
+_   http://dev.processing.org/bugs/show_bug.cgi?id=1437
+
+
+_ add method to set the icon (and package name?)
+_   http://dev.processing.org/bugs/show_bug.cgi?id=1429
+_   http://developer.android.com/guide/publishing/preparing.html
+_ need to make data folder copy more efficient than just copying everything
+_   right now, first copies to src inside Build.java (which then copies to bin)
+X add methods to request rendering
+_   need to deal with fps problems with this model
+_ check on multiple pointers (peter's msg)
+_ add clear and close to all stream methods?
+_ is there a way to get a width/height default to use for surfaceChanged?
+
+P1 this is embarrassing, need to fix ASAP
+P2 need to fix before beta release
+P3 would like to fix before final release
+P4 not an immediate need, but very nice to have
+P5 nice to have
+
+android bugs, sorted by priority
+http://dev.processing.org/bugs/buglist.cgi?bug_status=&field0-0-0=product&type0-0-0=substring&value0-0-0=android&field0-0-1=component&type0-0-1=substring&value0-0-1=android&field0-0-2=short_desc&type0-0-2=substring&value0-0-2=android&field0-0-3=status_whiteboard&type0-0-3=substring&value0-0-3=android&query_format=advanced&order=bugs.priority,bugs.bug_status%2Cbugs.bug_id&query_based_on=
+
+for each release, need to do an svn update on dev.processing.org
+
+P1 _ app not pausing or closing when switching to another activity
+P1 _   http://dev.processing.org/bugs/show_bug.cgi?id=1404
+P1 _ get stdout and stderr from the emulator/device
+P1 _   http://dev.processing.org/bugs/show_bug.cgi?id=1381
+P1 _   how to do this via jdb?
+P1 _   or is this jdi/jdwp?
+P1 _     connect to emulator with the proper io sockets
+P1 _       don't rely on getinput/getoutput from process (via logcat)
+P1 _     also connect to the external device when running code there
+P1 _ errors that happen inside events (e.g. keys) not highlighting lines
+P1 _   useful stack trace information not coming through.. why?
+P1 _   http://dev.processing.org/bugs/show_bug.cgi?id=1384
+
+P2 _ separate "PApplet" into separate View and Activity classes
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1398
+P2 _ too many temporary objects (particularly w/ color) created with A2D
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1399
+P2 _ size() command is currently ignored in Android
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1397
+P2 _ Implement P3D, OpenGL, A3D for Android
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1396
+P2 _ android mode is currently per-editor (and clunky)
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1379
+P2 _ save state re: whether sketches are android or java mode (or others?)
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1380
+P2 _ need to prevent hitting 'run' twice (threaded, so would work)
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1387
+P2 _ move the android tools into its own source package in SVN
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1388
+P2 _ 'stop' is now a no-op for the android tools
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1386
+P2 _ implement method for selecting donut or eclair AVD
+P2 _   http://dev.processing.org/bugs/show_bug.cgi?id=1390
+
+P3 _ remove unnecessary processing.xml.* code from android-core
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1400
+P3 _ remove processing.opengl.* classes and finish PGraphicsAndroid3D
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1401
+P3 _ remove legacy PGraphics3D class from processing.core.android
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1402
+P3 _ remove the need for a "Reset Android" menu option
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1392
+P3 _ don't require android tools to be installed already
+P3 _   or implement automatic download/install of android tools
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1383
+P3 _ remove various debug messages on the console
+P3 _   right now, there are too many places where errors occur
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1385
+P3 _ for now, only runs on the first device (findDevice()) found
+P3 _   --> implement selector to choose the default device for debugging
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1389
+P3 _ mouseClicked() is currently missing
+P3 _   implement tap methods to handle mouseClicked() 
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1406
+P3 _ implement certificates (self-signed) for distribution
+P3 _   http://developer.android.com/guide/publishing/app-signing.html
+P3 _   http://dev.processing.org/bugs/show_bug.cgi?id=1430
