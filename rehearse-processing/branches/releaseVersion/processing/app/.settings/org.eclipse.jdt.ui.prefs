@@ -1,4 +1,5 @@
-#Tue Jun 03 17:00:03 EDT 2008
+#Wed Jan 27 15:36:15 PST 2010
 eclipse.preferences.version=1
 formatter_profile=_two spaces no tabs
 formatter_settings_version=11
+org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates/>

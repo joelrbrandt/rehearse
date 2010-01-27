@@ -811,6 +811,10 @@ public class Editor extends JFrame implements RunnerListener {
     menu.add(item);
     menu.add(createToolMenuItem("processing.app.tools.android.Reset"));
 
+    // JRB -- Added 2010-01-27, leave out of final release
+    menu.add(createToolMenuItem("edu.stanford.hci.rehearse.RehearseTool"));
+    // JRB -- end of change
+    
     return menu;
   }
 
