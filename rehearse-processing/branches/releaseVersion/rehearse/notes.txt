@@ -1,0 +1,10 @@
+Processing SVN revision number: 6012 (chance it's 6011)
+
+BeanShell SVN revision number: _______
+
+== Changes to Processing code base ==
+
+[1] processing.app.Editor.java - Lines 814-816
+    added code to load the Rehearse tool more easily for development inside Eclipse
+    This does NOT need to go in the deployed version
+    
