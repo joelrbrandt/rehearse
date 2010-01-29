@@ -1,6 +1,6 @@
 Processing SVN revision number: 6012 (chance it's 6011)
 
-BeanShell SVN revision number: _______
+BeanShell SVN revision number: 42
 
 == Changes to Processing code base ==
 
