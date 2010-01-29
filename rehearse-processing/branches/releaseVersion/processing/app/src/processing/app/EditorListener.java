@@ -71,7 +71,11 @@ public class EditorListener {
     applyPreferences();
   }
 
+  //TODO add to changes list 
+  public void loadingComplete() {
 
+  }
+  
   public void applyPreferences() {
     tabsExpand = Preferences.getBoolean("editor.tabs.expand");
     //tabsIndent = Preferences.getBoolean("editor.tabs.indent");

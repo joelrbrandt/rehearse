@@ -41,14 +41,18 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 
+import edu.stanford.hci.rehearse.RehearseToolbar;
+
 
 /**
  * Main editor panel for the Processing Development Environment.
  */
 public class Editor extends JFrame implements RunnerListener {
 
-  Base base;
-
+  private Base base;
+  private String path;
+  private int[] location;
+  
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
   static protected final String EMPTY =
@@ -135,8 +139,9 @@ public class Editor extends JFrame implements RunnerListener {
 
   public Editor(Base ibase, String path, int[] location) {
     super("Processing");
-    this.base = ibase;
-
+    this.setBase(ibase);
+    this.setPath(path);
+    this.setBaseLocation(location);
     Base.setIcon(this);
 
     // Install default actions for Run, Present, etc.
@@ -145,7 +150,7 @@ public class Editor extends JFrame implements RunnerListener {
     // add listener to handle window close box hit event
     addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
-          base.handleClose(Editor.this);
+          getBase().handleClose(Editor.this);
         }
       });
     // don't close the window when clicked, the app will take care
@@ -157,7 +162,7 @@ public class Editor extends JFrame implements RunnerListener {
     addWindowListener(new WindowAdapter() {
         public void windowActivated(WindowEvent e) {
 //          System.err.println("activate");  // not coming through
-          base.handleActivated(Editor.this);
+          getBase().handleActivated(Editor.this);
           // re-add the sub-menus that are shared by all windows
           fileMenu.insert(sketchbookMenu, 2);
           fileMenu.insert(examplesMenu, 3);
@@ -191,9 +196,11 @@ public class Editor extends JFrame implements RunnerListener {
 
     if (toolbarMenu == null) {
       toolbarMenu = new JMenu();
-      base.rebuildToolbarMenu(toolbarMenu);
+      getBase().rebuildToolbarMenu(toolbarMenu);
     }
-    toolbar = new EditorToolbar(this, toolbarMenu);
+    
+    //TODO: changed this here
+    buildToolbar();
     upper.add(toolbar);
 
     header = new EditorHeader(this);
@@ -344,6 +351,16 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
 
+  public void buildToolbar(){
+    if (Preferences.getBoolean("rehearse.default")) {
+      toolbar = new RehearseToolbar(this,toolbarMenu);
+    }
+    else {
+      toolbar = new EditorToolbar(this, toolbarMenu);
+    }
+    toolbar.repaint();
+    //pack();
+  }
   
   protected void setPlacement(int[] location) {
     setBounds(location[0], location[1], location[2], location[3]);
@@ -454,7 +471,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = newJMenuItem("New", 'N');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          base.handleNew();
+          getBase().handleNew();
         }
       });
     fileMenu.add(item);
@@ -462,27 +479,27 @@ public class Editor extends JFrame implements RunnerListener {
     item = Editor.newJMenuItem("Open...", 'O');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          base.handleOpenPrompt();
+          getBase().handleOpenPrompt();
         }
       });
     fileMenu.add(item);
 
     if (sketchbookMenu == null) {
       sketchbookMenu = new JMenu("Sketchbook");
-      base.rebuildSketchbookMenu(sketchbookMenu);
+      getBase().rebuildSketchbookMenu(sketchbookMenu);
     }
     fileMenu.add(sketchbookMenu);
 
     if (examplesMenu == null) {
       examplesMenu = new JMenu("Examples");
-      base.rebuildExamplesMenu(examplesMenu);
+      getBase().rebuildExamplesMenu(examplesMenu);
     }
     fileMenu.add(examplesMenu);
 
     item = Editor.newJMenuItem("Close", 'W');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          base.handleClose(Editor.this);
+          getBase().handleClose(Editor.this);
         }
       });
     fileMenu.add(item);
@@ -548,7 +565,7 @@ public class Editor extends JFrame implements RunnerListener {
       item = newJMenuItem("Preferences", ',');
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            base.handlePrefs();
+            getBase().handlePrefs();
           }
         });
       fileMenu.add(item);
@@ -558,7 +575,7 @@ public class Editor extends JFrame implements RunnerListener {
       item = newJMenuItem("Quit", 'Q');
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            base.handleQuit();
+            getBase().handleQuit();
           }
         });
       fileMenu.add(item);
@@ -599,7 +616,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     if (importMenu == null) {
       importMenu = new JMenu("Import Library...");
-      base.rebuildImportMenu(importMenu);
+      getBase().rebuildImportMenu(importMenu);
     }
     sketchMenu.add(importMenu);
 
@@ -925,7 +942,7 @@ public class Editor extends JFrame implements RunnerListener {
       item = new JMenuItem("About Processing");
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            base.handleAbout();
+            getBase().handleAbout();
           }
         });
       menu.add(item);
@@ -1944,7 +1961,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     // Store information on who's open and running
     // (in case there's a crash or something that can't be recovered)
-    base.storeSketches();
+    getBase().storeSketches();
     Preferences.save();
 
     // opening was successful
@@ -2291,6 +2308,33 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+
+  public void setBase(Base base) {
+    this.base = base;
+  }
+
+  public Base getBase() {
+    return base;
+  }
+
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+
+  public void setBaseLocation(int[] location) {
+    this.location = location;
+  }
+
+  public int[] getBaseLocation() {
+    return location;
+  }
 
 
   /**

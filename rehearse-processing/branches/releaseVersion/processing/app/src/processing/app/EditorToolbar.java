@@ -36,55 +36,55 @@ import javax.swing.event.*;
 public class EditorToolbar extends JComponent implements MouseInputListener, KeyListener {
 
   /** Rollover titles for each button. */
-  static final String title[] = {
+  protected static String title[] = {
     "Run", "Stop", "New", "Open", "Save", "Export"
   };
   
   /** Titles for each button when the shift key is pressed. */ 
-  static final String titleShift[] = {
+  protected static String titleShift[] = {
     "Present", "Stop", "New Editor Window", "Open in Another Window", "Save", "Export to Application"
   };
 
-  static final int BUTTON_COUNT = title.length;
+  protected static int BUTTON_COUNT = title.length;
   /** Width of each toolbar button. */
-  static final int BUTTON_WIDTH = 27;
+  protected static final int BUTTON_WIDTH = 27;
   /** Height of each toolbar button. */
-  static final int BUTTON_HEIGHT = 32;
+  protected static final int BUTTON_HEIGHT = 32;
   /** The amount of space between groups of buttons on the toolbar. */
-  static final int BUTTON_GAP = 5;
+  protected static final int BUTTON_GAP = 5;
   /** Size of the button image being chopped up. */
-  static final int BUTTON_IMAGE_SIZE = 33;
+  protected static final int BUTTON_IMAGE_SIZE = 33;
 
 
-  static final int RUN      = 0;
-  static final int STOP     = 1;
+  protected static final int RUN      = 0;
+  protected static final int STOP     = 1;
 
-  static final int NEW      = 2;
-  static final int OPEN     = 3;
-  static final int SAVE     = 4;
-  static final int EXPORT   = 5;
+  protected static final int NEW      = 2;
+  protected static final int OPEN     = 3;
+  protected static final int SAVE     = 4;
+  protected static final int EXPORT   = 5;
 
   static final int INACTIVE = 0;
   static final int ROLLOVER = 1;
   static final int ACTIVE   = 2;
 
-  Editor editor;
+  protected Editor editor;
 
   Image offscreen;
   int width, height;
 
   Color bgcolor;
 
-  static Image[][] buttonImages;
+  protected static Image[][] buttonImages;
   int currentRollover;
 
   JPopupMenu popup;
-  JMenu menu;
+  protected JMenu menu;
 
-  int buttonCount;
+  protected int buttonCount;
   int[] state = new int[BUTTON_COUNT];
   Image[] stateImage;
-  int which[]; // mapping indices to implementation
+  protected int which[]; // mapping indices to implementation
 
   int x1[], x2[];
   int y1, y2;
@@ -94,8 +94,19 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   
   boolean shiftPressed;
 
+  public EditorToolbar() {
+    currentRollover = -1;
 
+    bgcolor = Theme.getColor("buttons.bgcolor");
+    statusFont = Theme.getFont("buttons.status.font");
+    statusColor = Theme.getColor("buttons.status.color");
+
+    addMouseListener(this);
+    addMouseMotionListener(this);
+  }
+  
   public EditorToolbar(Editor editor, JMenu menu) {
+    this();
     this.editor = editor;
     this.menu = menu;
 
@@ -110,14 +121,6 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     which[buttonCount++] = SAVE;
     which[buttonCount++] = EXPORT;
 
-    currentRollover = -1;
-
-    bgcolor = Theme.getColor("buttons.bgcolor");
-    statusFont = Theme.getFont("buttons.status.font");
-    statusColor = Theme.getColor("buttons.status.color");
-
-    addMouseListener(this);
-    addMouseMotionListener(this);
   }
   
 
@@ -309,9 +312,9 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
     case NEW:
       if (shiftPressed) {
-        editor.base.handleNew();
+        editor.getBase().handleNew();
       } else {
-        editor.base.handleNewReplace();
+        editor.getBase().handleNewReplace();
       }
       break;
 

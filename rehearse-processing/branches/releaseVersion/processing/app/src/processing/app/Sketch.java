@@ -480,7 +480,7 @@ public class Sketch {
 
         // get the changes into the sketchbook menu
         // (re-enabled in 0115 to fix bug #332)
-        editor.base.rebuildSketchbookMenus();
+        editor.getBase().rebuildSketchbookMenus();
 
       } else {  // else if something besides code[0]
         if (!current.renameTo(newFile, newExtension)) {
@@ -563,7 +563,7 @@ public class Sketch {
         // make a new sketch, and i think this will rebuild the sketch menu
         //editor.handleNewUnchecked();
         //editor.handleClose2();
-        editor.base.handleClose(editor);
+        editor.getBase().handleClose(editor);
 
       } else {
         // delete the file
@@ -841,7 +841,7 @@ public class Sketch {
 
     // Name changed, rebuild the sketch menus
     //editor.sketchbook.rebuildMenusAsync();
-    editor.base.rebuildSketchbookMenus();
+    editor.getBase().rebuildSketchbookMenus();
 
     // Make sure that it's not an untitled sketch
     setUntitled(false);

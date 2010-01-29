@@ -12,8 +12,8 @@ import javax.swing.JPanel;
 import processing.app.Editor;
 import processing.app.Preferences;
 
-public class RehearseTool implements processing.app.tools.Tool {
-
+public class RehearseTool implements processing.app.tools.Tool
+{
 	private Editor editor = null;
 	
 	public String getMenuTitle() {
@@ -22,9 +22,6 @@ public class RehearseTool implements processing.app.tools.Tool {
 
 	public void init(Editor editor) {
 		this.editor = editor;
-		if(Preferences.getBoolean("rehearse.default")) {
-			
-		}
 	}
 
 	public void run() {
@@ -71,7 +68,8 @@ public class RehearseTool implements processing.app.tools.Tool {
 		private class checkBoxPrefsAction implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				Preferences.setBoolean("rehearse.default", cb.isSelected());
-				System.out.println(Preferences.getBoolean("rehearse.default"));
+				editor.buildToolbar();
+				//editor = new Editor (editor.getBase(), editor.getPath(), editor.getBaseLocation());
 			}
 		}
 		
