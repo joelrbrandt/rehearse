@@ -7,4 +7,12 @@ BeanShell SVN revision number: 42
 [1] processing.app.Editor.java - Lines 814-816
     added code to load the Rehearse tool more easily for development inside Eclipse
     This does NOT need to go in the deployed version
+
+[2] processing.app.Editor.java - Lines ??
+    added code to allow (re)loading of new toolbars
+    TODO: Fill me in, Vignan
     
+== Things that must be kept in sync ==
+
+RehearsePApplet overridden methods need to be kept in sync with PApplet methods that
+are supposed to get overrridden.
