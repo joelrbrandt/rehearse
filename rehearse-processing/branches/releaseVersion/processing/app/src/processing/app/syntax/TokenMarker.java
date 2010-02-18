@@ -338,4 +338,12 @@ public abstract class TokenMarker
                  */
                 public Object obj;
         }
+        
+        public Object getLineModelAt(int line) {
+          return lineInfo[line].obj;
+        }
+
+        public void setLineModelAt(int line, Object obj) {
+          lineInfo[line].obj = obj;
+        }
 }

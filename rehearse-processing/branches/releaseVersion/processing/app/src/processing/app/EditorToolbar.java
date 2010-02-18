@@ -76,9 +76,9 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   Color bgcolor;
 
   protected static Image[][] buttonImages;
-  int currentRollover;
+  protected int currentRollover;
 
-  JPopupMenu popup;
+  protected JPopupMenu popup;
   protected JMenu menu;
 
   protected int buttonCount;
@@ -92,7 +92,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   Font statusFont;
   Color statusColor;
   
-  boolean shiftPressed;
+  protected boolean shiftPressed;
 
   public EditorToolbar() {
     currentRollover = -1;
@@ -243,7 +243,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   }
 
 
-  private int findSelection(int x, int y) {
+  protected int findSelection(int x, int y) {
     // if app loads slowly and cursor is near the buttons
     // when it comes up, the app may not have time to load
     if ((x1 == null) || (x2 == null)) return -1;
