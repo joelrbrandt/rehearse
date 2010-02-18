@@ -41,9 +41,6 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 
-import edu.stanford.hci.rehearse.RehearseToolbar;
-
-
 /**
  * Main editor panel for the Processing Development Environment.
  */
@@ -82,17 +79,17 @@ public class Editor extends JFrame implements RunnerListener {
   JMenu fileMenu;
   JMenu sketchMenu;
 
-  EditorToolbar toolbar;
+  private EditorToolbar toolbar;
   // these menus are shared so that they needn't be rebuilt for all windows
   // each time a sketch is created, renamed, or moved.
-  static JMenu toolbarMenu;
+  protected static JMenu toolbarMenu;
   static JMenu sketchbookMenu;
   static JMenu examplesMenu;
   static JMenu importMenu;
 
   EditorHeader header;
   EditorStatus status;
-  EditorConsole console;
+  protected EditorConsole console;
 
   JSplitPane splitPane;
   JPanel consolePanel;
@@ -200,7 +197,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
     
     //TODO: changed this here
-    buildToolbar();
+    toolbar = buildToolbar();
     upper.add(toolbar);
 
     header = new EditorHeader(this);
@@ -351,15 +348,8 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
 
-  public void buildToolbar(){
-    if (Preferences.getBoolean("rehearse.default")) {
-      toolbar = new RehearseToolbar(this,toolbarMenu);
-    }
-    else {
-      toolbar = new EditorToolbar(this, toolbarMenu);
-    }
-    toolbar.repaint();
-    //pack();
+  public EditorToolbar buildToolbar(){
+      return new EditorToolbar(this, toolbarMenu);
   }
   
   protected void setPlacement(int[] location) {
