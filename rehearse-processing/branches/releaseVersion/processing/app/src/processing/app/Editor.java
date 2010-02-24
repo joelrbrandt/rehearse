@@ -136,6 +136,9 @@ public class Editor extends JFrame implements RunnerListener {
   EditorToolbar customToolbar = null;
   Tool customToolbarTool = null;
   
+  JEditTextArea customTextArea = null;
+  Tool customTextAreaTool = null;
+  
   public Editor(Base ibase, String path, int[] location) {
     super("Processing");
     this.setBase(ibase);
@@ -198,14 +201,13 @@ public class Editor extends JFrame implements RunnerListener {
       getBase().rebuildToolbarMenu(toolbarMenu);
     }
     
-    //TODO: changed this here
     toolbar = buildToolbar();
     upper.add(toolbar);
 
     header = new EditorHeader(this);
     upper.add(header);
 
-    textarea = new JEditTextArea(new PdeTextAreaDefaults());
+    textarea = buildTextArea();
     textarea.setRightClickPopup(new TextAreaPopup());
     textarea.setHorizontalOffset(6);
 
@@ -284,8 +286,8 @@ public class Editor extends JFrame implements RunnerListener {
     // All set, now show the window
     //setVisible(true);
   }
-  
-  
+
+
   /**
    * Handles files dragged & dropped from the desktop and into the editor
    * window. Dragging files into the editor window is the same as using
@@ -359,28 +361,49 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
 
+  private JEditTextArea buildTextArea() {
+    if (customTextArea == null)
+      return new JEditTextArea(new PdeTextAreaDefaults());
+   return customTextArea;
+  }
+  
   public JMenu getToolbarMenu(){
     return toolbarMenu;
   }
   
   public void setCustomToolbar (EditorToolbar tb, Tool t) {
     if (customToolbar != null) {
-      new BuildToolbarException(t.getMenuTitle(), customToolbarTool.getMenuTitle());
+      new BuildCustomException(t.getMenuTitle(), customToolbarTool.getMenuTitle(),
+                               toolbar.getClass().getName());
     } else {
       customToolbar = tb;
       customToolbarTool = t;
     }
   }
   
-  private class BuildToolbarException extends Exception {
+  public void setCustomTextArea (JEditTextArea ta, Tool t) {
+    if (customTextArea != null) {
+      new BuildCustomException(t.getMenuTitle(), customTextAreaTool.getMenuTitle(), 
+                               textarea.getClass().getName());
+    } else {
+      customTextArea = ta;
+      customTextAreaTool = t;
+    }
+  }
+  
+  private class BuildCustomException extends Exception {
     String setterTitle;
     String currentTitle;
-    public BuildToolbarException(String setterTitle, String currentTitle){
+    String classname;
+    
+    public BuildCustomException(String setterTitle, 
+                                String currentTitle, String classname){
       this.setterTitle = setterTitle;
       this.currentTitle = currentTitle;
+      this.classname = classname;
     }
     public String toString(){
-      return "Cannot build custom toolbar for "+ setterTitle
+      return "Cannot build custom "+classname+" for "+ setterTitle
         +" since it has been overriden by " + currentTitle;       
     }
   }
