@@ -4,22 +4,32 @@ BeanShell SVN revision number: 42
 
 == Changes to Processing code base ==
 
-[1] processing.app.Editor.java - Lines 814-816
+[1] processing.app.Editor.java - Lines 136-137
+	Added private instance variables customToolbar and customToolbarClass.
+	Both are initialized to null.
+
+[2] processing.app.Editor.java - Line 202 & 352-360
+	Added buildToolbar() function
+	This lets us build a custom toolbar if it exists, or just an EditorToolbar otherwise.
+
+[3] processing.app.Editor.java - Lines 814-816
     added code to load the Rehearse tool more easily for development inside Eclipse
     This does NOT need to go in the deployed version
 
-[2] processing.app.Editor.java - Lines ??
-    added code to allow (re)loading of new toolbars
-    TODO: Fill me in, Vignan
+[4] processing.app.Editor.java - Line 1446
+	Changed visibility of setCode(), to be used in RehearseHandler
+	
+[5] processing.app.Editor.java - Line 2477	
+	Added getConsole() method to be used in RehearseHandler
 
-[3] processing.app.Editor.java - Lines 88 & 95
-	Changed visibility of toolbarMenu, currentRollover, popup and console in Editor.java to protected
+[6] processing.app.EditorToolbar.java - Line 79
+	Changed visibility of currentRollover to protected, used by RehearseToolbar
 
-[4] processing.app.syntax.TokenMarker.java - Lines 341-348
+[7] processing.app.EditorToolbar.java - Lines 108-110
+	added setMenu method. Used in Editor.java while building a custom toolbar.
+	
+[8] processing.app.syntax.TokenMarker.java - Lines 341-348
 	added methods getLineModelAt and setLineModelAt
-
-[5] processing.app.Base.java - Line 688 and 733-740
-	added getEditor method that returns a RehearseEditor if preferred.
 	
 == Things that must be kept in sync ==
 

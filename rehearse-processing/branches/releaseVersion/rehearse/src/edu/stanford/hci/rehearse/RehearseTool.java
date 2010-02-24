@@ -19,6 +19,9 @@ public class RehearseTool implements processing.app.tools.Tool
 
 	public void init(Editor editor) {
 		this.editor = editor;
+		if (Preferences.getBoolean("rehearse.default")) {
+			editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
+		}
 	}
 
 	public void run() {
@@ -29,6 +32,12 @@ public class RehearseTool implements processing.app.tools.Tool
 		if (selected == JOptionPane.YES_OPTION && 
 				cb.isSelected() != Preferences.getBoolean("rehearse.default")) {
 			Preferences.setBoolean("rehearse.default", cb.isSelected());
+			if (Preferences.getBoolean("rehearse.default")) {
+				editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
+			} else {
+				editor.setCustomToolbar(null, null);
+			}
+			editor.buildToolbar();
 		}
 	}
 	

@@ -29,8 +29,6 @@ import java.util.*;
 
 import javax.swing.*;
 
-import edu.stanford.hci.rehearse.RehearseEditor;
-
 import processing.app.debug.Compiler;
 import processing.core.*;
 
@@ -684,8 +682,7 @@ public class Base {
 //    }
 
 //    System.err.println("  creating new editor");
-    //TODO: changed here
-    Editor editor = getEditor(path, location);
+    Editor editor = new Editor(this, path, location);
 //    Editor editor = null;
 //    try {
 //      editor = new Editor(this, path, location);
@@ -728,16 +725,6 @@ public class Base {
 
     return editor;
   }
-
-
-  private Editor getEditor(String path, int[] location) {
-    if (Preferences.getBoolean("rehearse.default")) {
-       return new RehearseEditor(this, path, location);
-    } else {
-       return new Editor(this, path, location);
-    }
-  }
-
 
   /**
    * Close a sketch as specified by its editor window.
