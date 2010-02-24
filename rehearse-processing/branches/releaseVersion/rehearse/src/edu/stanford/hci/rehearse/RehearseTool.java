@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 import processing.app.Editor;
 import processing.app.Preferences;
+import processing.app.syntax.PdeTextAreaDefaults;
 
 public class RehearseTool implements processing.app.tools.Tool
 {
@@ -21,6 +22,7 @@ public class RehearseTool implements processing.app.tools.Tool
 		this.editor = editor;
 		if (Preferences.getBoolean("rehearse.default")) {
 			editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
+			editor.setCustomTextArea(new RehearseEditTextArea(new PdeTextAreaDefaults()), this);
 		}
 	}
 
@@ -36,6 +38,7 @@ public class RehearseTool implements processing.app.tools.Tool
 				editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
 			} else {
 				editor.setCustomToolbar(null, null);
+				editor.setCustomTextArea(null, null);
 			}
 			editor.buildToolbar();
 		}
