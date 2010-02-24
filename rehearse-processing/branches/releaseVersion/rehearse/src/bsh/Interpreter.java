@@ -48,19 +48,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-import edu.stanford.hci.rehearse.ModeException;
-import edu.stanford.hci.rehearse.RehearseEditor;
-import edu.stanford.hci.rehearse.RehearsePApplet;
-import edu.stanford.hci.rehearse.SnapshotModel;
-
 import processing.core.PApplet;
 import processing.core.PApplet.RendererChangeException;
-//
-//import edu.stanford.hci.helpmeout.HelpMeOutExceptionTracker;
-//import edu.stanford.hci.processing.RehearsePApplet;
-//import edu.stanford.hci.processing.ModeException;
-//import edu.stanford.hci.processing.editor.RehearseEditor;
-//import edu.stanford.hci.processing.editor.SnapshotModel;
+
+import edu.stanford.hci.rehearse.RehearsePApplet;
+import edu.stanford.hci.rehearse.ModeException;
+import edu.stanford.hci.rehearse.RehearseHandler;
+import edu.stanford.hci.rehearse.SnapshotModel;
 
 /**
         The BeanShell script interpreter.
@@ -175,7 +169,7 @@ implements Runnable, ConsoleInterface,Serializable
         private boolean showResults;
 
         private RehearsePApplet applet;
-        private RehearseEditor editor;
+        private RehearseHandler editor;
 
         private HashMap<Integer, Date> lineNumbers = new HashMap<Integer, Date>();
         private HashSet<Integer> breakpointLineNumbers = new HashSet<Integer>();
@@ -273,7 +267,7 @@ implements Runnable, ConsoleInterface,Serializable
         }
 
         /** This is the entry point for the Processing interpreter. */
-        public Interpreter(RehearseEditor console, RehearsePApplet applet) {
+        public Interpreter(RehearseHandler console, RehearsePApplet applet) {
                 parser = new Parser( in );
                 long t1=System.currentTimeMillis();
                 this.in = null;
@@ -1618,12 +1612,12 @@ implements Runnable, ConsoleInterface,Serializable
                   // exception as resolved.
                   lineToWatch = -1;
                   watchForNextLine = false;
-                  //HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
+                 //HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
                 }
 
-    if (line == lineToWatch) {
-      //watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, lineExecutionCount.get(lineToWatch));
-    }
+//    if (line == lineToWatch) {
+//      watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, lineExecutionCount.get(lineToWatch));
+//    }
     // </HelpMeOut>
 
                 lastExecutedLine = line;

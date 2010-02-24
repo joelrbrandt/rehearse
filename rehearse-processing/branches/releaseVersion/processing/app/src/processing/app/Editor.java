@@ -82,14 +82,14 @@ public class Editor extends JFrame implements RunnerListener {
   private EditorToolbar toolbar;
   // these menus are shared so that they needn't be rebuilt for all windows
   // each time a sketch is created, renamed, or moved.
-  protected static JMenu toolbarMenu;
+  static JMenu toolbarMenu;
   static JMenu sketchbookMenu;
   static JMenu examplesMenu;
   static JMenu importMenu;
 
   EditorHeader header;
   EditorStatus status;
-  protected EditorConsole console;
+  EditorConsole console;
 
   JSplitPane splitPane;
   JPanel consolePanel;
@@ -132,8 +132,10 @@ public class Editor extends JFrame implements RunnerListener {
   Runnable stopHandler;
   Runnable exportHandler;
   Runnable exportAppHandler;
-
-
+  
+  EditorToolbar customToolbar = null;
+  Tool customToolbarTool = null;
+  
   public Editor(Base ibase, String path, int[] location) {
     super("Processing");
     this.setBase(ibase);
@@ -349,7 +351,38 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
   public EditorToolbar buildToolbar(){
+    if (customToolbar == null) {
       return new EditorToolbar(this, toolbarMenu);
+    } else {
+      customToolbar.setMenu(toolbarMenu);
+      return customToolbar;
+    }
+  }
+
+  public JMenu getToolbarMenu(){
+    return toolbarMenu;
+  }
+  
+  public void setCustomToolbar (EditorToolbar tb, Tool t) {
+    if (customToolbar != null) {
+      new BuildToolbarException(t.getMenuTitle(), customToolbarTool.getMenuTitle());
+    } else {
+      customToolbar = tb;
+      customToolbarTool = t;
+    }
+  }
+  
+  private class BuildToolbarException extends Exception {
+    String setterTitle;
+    String currentTitle;
+    public BuildToolbarException(String setterTitle, String currentTitle){
+      this.setterTitle = setterTitle;
+      this.currentTitle = currentTitle;
+    }
+    public String toString(){
+      return "Cannot build custom toolbar for "+ setterTitle
+        +" since it has been overriden by " + currentTitle;       
+    }
   }
   
   protected void setPlacement(int[] location) {
@@ -1410,7 +1443,7 @@ public class Editor extends JFrame implements RunnerListener {
    * Switch between tabs, this swaps out the Document object
    * that's currently being manipulated.
    */
-  protected void setCode(SketchCode code) {
+  public void setCode(SketchCode code) {
     SyntaxDocument document = (SyntaxDocument) code.getDocument();
 
     if (document == null) {  // this document not yet inited
@@ -2439,5 +2472,9 @@ public class Editor extends JFrame implements RunnerListener {
       }
       super.show(component, x, y);
     }
+  }
+  
+  public EditorConsole getConsole() {
+    return console;
   }
 }

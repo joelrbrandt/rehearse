@@ -37,57 +37,57 @@ public class RehearsePApplet extends PApplet {
     ((JFrame)frame).getContentPane().setPreferredSize(new Dimension(width, height));
     ((JFrame)frame).pack();
   }
-//
-//  @Override
-//  public void draw() {
-//    invoke(MethodType.draw);
-//  }
-//
-//  @Override
-//  public void setup() {
-//    invoke(MethodType.setup);
-//  }
-//
-//  @Override
-//  public void mouseClicked() {
-//    invoke(MethodType.mouseClicked);
-//  }
-//
-//  @Override
-//  public void mouseDragged() {
-//    invoke(MethodType.mouseDragged);
-//  }
-//
-//  @Override
-//  public void mouseMoved() {
-//    invoke(MethodType.mouseMoved);
-//  }
-//
-//  @Override
-//  public void mousePressed() {
-//    invoke(MethodType.mousePressed);
-//  }
-//
-//  @Override
-//  public void mouseReleased() {
-//    invoke(MethodType.mouseReleased);
-//  }
-//
-//  @Override
-//  public void keyPressed() {
-//    invoke(MethodType.keyPressed);
-//  }
-//
-//  @Override
-//  public void keyReleased() {
-//    invoke(MethodType.keyReleased);
-//  }
-//
-//  @Override
-//  public void keyTyped() {
-//    invoke(MethodType.keyTyped);
-//  }
-//
+
+  @Override
+  public void draw() {
+    invoke(MethodType.draw);
+  }
+
+  @Override
+  public void setup() {
+    invoke(MethodType.setup);
+  }
+
+  @Override
+  public void mouseClicked() {
+    invoke(MethodType.mouseClicked);
+  }
+
+  @Override
+  public void mouseDragged() {
+    invoke(MethodType.mouseDragged);
+  }
+
+  @Override
+  public void mouseMoved() {
+    invoke(MethodType.mouseMoved);
+  }
+
+  @Override
+  public void mousePressed() {
+    invoke(MethodType.mousePressed);
+  }
+
+  @Override
+  public void mouseReleased() {
+    invoke(MethodType.mouseReleased);
+  }
+
+  @Override
+  public void keyPressed() {
+    invoke(MethodType.keyPressed);
+  }
+
+  @Override
+  public void keyReleased() {
+    invoke(MethodType.keyReleased);
+  }
+
+  @Override
+  public void keyTyped() {
+    invoke(MethodType.keyTyped);
+  }
+
 //  public Image snapshot() {
 //    return g.getImage();
 //  }
@@ -121,7 +121,6 @@ public class RehearsePApplet extends PApplet {
       throw new RuntimeException(e);
     } catch (EvalError e) {
       //HelpMeOutExceptionTracker.getInstance().processRuntimeException(e, i); //notify editor in here.
-
       throw new RuntimeException(e);
     }
   }

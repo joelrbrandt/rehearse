@@ -11,7 +11,8 @@ import processing.app.Editor;
 import processing.app.EditorToolbar;
 
 public class RehearseToolbar extends EditorToolbar{
-	private RehearseEditor editor;
+	private Editor editor;
+	private RehearseHandler rh;
 	  /** Rollover titles for each button. */
 	static final String newTitle[] = {
 		"Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run"
@@ -27,9 +28,10 @@ public class RehearseToolbar extends EditorToolbar{
 	
 	
 	public RehearseToolbar(Editor editor, JMenu menu) {
+		rh = new RehearseHandler(editor);
 		title = newTitle;
 		titleShift = newTitleShift;
-		this.editor = (RehearseEditor) editor;
+		this.editor = editor;
 	    this.menu = menu;
 	    BUTTON_COUNT++;
 	    
@@ -51,20 +53,21 @@ public class RehearseToolbar extends EditorToolbar{
 	    final int y = e.getY();
 
 	    int sel = findSelection(x, y);
-	    ///if (sel == -1) return false;
+	    
 	    if (sel == -1) return;
 	    currentRollover = -1;
 
 	    switch (sel) {
 	    case INTERACTIVE_RUN:
-	    	editor.handleInteractiveRun();
+	    	rh.handleInteractiveRun();
+	    	break;
 	    	
 	    case RUN:
-	      editor.handleRun(e.isShiftDown());
+	      rh.handleRun(e.isShiftDown());
 	      break;
 
 	    case STOP:
-	      editor.handleStop();
+	      rh.handleStop();
 	      break;
 
 	    case OPEN:
@@ -88,11 +91,11 @@ public class RehearseToolbar extends EditorToolbar{
 	      if (e.isShiftDown()) {
 	        editor.handleExportApplication();
 	      } else {
-	        editor.handleExport();
-	      }
+	    	  editor.handleExport();
+	      	}
 	      break;
 	    }
-	  }
+	}
 	
 	protected void loadButtons() {
 	    Image allButtons = Base.getThemeImage("rehearsebuttons.gif", this);
