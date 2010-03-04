@@ -37,10 +37,10 @@ public class RehearseTool implements processing.app.tools.Tool
 			if (Preferences.getBoolean("rehearse.default")) {
 				editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
 			} else {
-				editor.setCustomToolbar(null, null);
-				editor.setCustomTextArea(null, null);
+				editor.setCustomToolbar(null, this);
+				editor.setCustomTextArea(null, this);
 			}
-			editor.buildToolbar();
+			editor.rebuildToolbar();
 		}
 	}
 	

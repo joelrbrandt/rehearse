@@ -1,6 +1,7 @@
 package edu.stanford.hci.rehearse;
 
 import java.awt.Dimension;
+import java.awt.Image;
 import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
@@ -88,9 +89,9 @@ public class RehearsePApplet extends PApplet {
     invoke(MethodType.keyTyped);
   }
 
-//  public Image snapshot() {
-//    return g.getImage();
-//  }
+  public Image snapshot() {
+    return g.getImage();
+  }
 
   // Some methods are not supposed to be called directly.
   // This method is mainly used by the Interpreter to skip

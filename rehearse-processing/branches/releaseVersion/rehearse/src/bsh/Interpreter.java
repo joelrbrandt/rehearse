@@ -1612,12 +1612,12 @@ implements Runnable, ConsoleInterface,Serializable
                   // exception as resolved.
                   lineToWatch = -1;
                   watchForNextLine = false;
-                 //HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
+                 // HelpMeOutExceptionTracker.getInstance().resolveRuntimeException();
                 }
 
-//    if (line == lineToWatch) {
-//      watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, lineExecutionCount.get(lineToWatch));
-//    }
+    if (line == lineToWatch) {
+     // watchForNextLine = HelpMeOutExceptionTracker.getInstance().notifyLineReached(lineToWatch, lineExecutionCount.get(lineToWatch));
+    }
     // </HelpMeOut>
 
                 lastExecutedLine = line;
