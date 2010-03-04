@@ -1,6 +1,5 @@
 package edu.stanford.hci.rehearse;
 
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -42,7 +41,7 @@ public class RehearseSidebarPainter extends JComponent {
 
             // We don't use yToLine() here because that method doesn't
             // return lines past the end of the document
-            int height = textAreaPainter.getFont().getSize();
+            int height = textAreaPainter.getFontHeight();
             int firstLine = textArea.getFirstLine();
             int firstInvalid = firstLine + clipRect.y / height;
             // Because the clipRect's height is usually an even multiple
@@ -69,7 +68,7 @@ public class RehearseSidebarPainter extends JComponent {
 
         class MouseEventHandler extends MouseAdapter {
                 public void mousePressed(MouseEvent e) {
-                        int height = textAreaPainter.getFont().getSize();
+                        int height = textAreaPainter.getFontHeight();
                         int line = textArea.getFirstLine() + e.getY() / height;
                         //System.out.println(line);
 

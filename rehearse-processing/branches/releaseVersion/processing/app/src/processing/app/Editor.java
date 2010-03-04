@@ -351,7 +351,16 @@ public class Editor extends JFrame implements RunnerListener {
       return true;
     }
   }
-
+  
+  public void rebuildToolbar() {
+    if (customToolbar == null) {
+      toolbar = new EditorToolbar(this, toolbarMenu);
+    } else {
+      customToolbar.setMenu(toolbarMenu);
+      toolbar = customToolbar;
+    }
+  }
+  
   public EditorToolbar buildToolbar(){
     if (customToolbar == null) {
       return new EditorToolbar(this, toolbarMenu);

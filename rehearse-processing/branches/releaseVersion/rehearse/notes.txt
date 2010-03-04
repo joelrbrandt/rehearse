@@ -30,6 +30,9 @@ BeanShell SVN revision number: 42
 	
 [8] processing.app.syntax.TokenMarker.java - Lines 341-348
 	added methods getLineModelAt and setLineModelAt
+
+[9] processing.app.syntax.TextAreaPainter.java - Lines 761-763
+	added getFontHeight method used by RehearseSidebarPainter
 	
 == Things that must be kept in sync ==
 

@@ -757,4 +757,8 @@ implements TabExpander, Printable
       }
     }
   }
+  
+  public int getFontHeight() {
+    return fm.getHeight();
+  }
 }
