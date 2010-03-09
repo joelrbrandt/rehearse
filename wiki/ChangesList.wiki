@@ -59,7 +59,7 @@ This looks to be the last release version. Our initial list of changes was compi
 RehearsePApplet overridden methods need to be kept in sync with PApplet methods that
 are supposed to get overrridden.
 
----
+----
 
 == Changelist for rev #5766 ==
 
