@@ -1,0 +1,104 @@
+#summary List of changes made to processing revision #5766 (version 1.0.9) and revision #6011
+
+= Introduction =
+
+This looks to be the last release version. Our initial list of changes was compiled for revision #6011, so this is a new list of changes for revision #5766
+
+
+= Details =
+
+Changelist for rev #6011
+
+[1] processing.app.Editor.java - Lines 136-139
+        Added private instance variables customToolbar and customToolbarTool.
+        Added private instance variables customTextArea and customTextAreaTool.        
+        All four are initialized to null.
+
+[2] processing.app.Editor.java - Line 204 & 364-372        
+       Added public buildToolbar() function. This returns a custom toolbar if it exists, or just returns an EditorToolbar otherwise.
+
+[3] processing.app.Editor.java - Lines 814-816
+       Added code to load the Rehearse tool more easily for development inside Eclipse
+       This does NOT need to go in the deployed version
+
+[4] processing.app.Editor.java - Line 1478
+        Changed visibility of setCode() to public, to be used in RehearseHandler
+
+[5] processing.app.Editor.java - Lines 379-381
+        added public getToolbarMenu method.
+
+[6] processing.app.Editor.java - Lines 2372-2374
+        added public getBase method.
+
+[7] processing.app.Editor.java - Lines 2509-2511
+        Added getConsole method to be used in RehearseHandler
+
+[8] processing.app.Editor.java - Lines 2403-2406
+        Created methods setCustomToolbar, setCustomTextArea and rebuildToolbar. Added a BuildCustomException.
+
+[9] processing.app.EditorToolbar.java - Lines 36-70
+       Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
+       Changed visibility of BUTTON_GAP, BUTTON_WIDTH and BUTTON_HEIGHT to protected
+       Changed visibility of inactive, active and rollover to protected
+       Changed visibility of RUN, STOP, NEW, OPEN, SAVE, EXPORT
+       Changed visibility of currentRollover, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
+       Changed visibility of x1[], x2[], y1[] and y2[] to protected
+       Changed visibility of findSelection() and setState() to protected
+
+[10] processing.app.EditorToolbar.java - Lines 108-110
+        added setMenu method. Used in Editor.java while building a custom toolbar.
+
+[11] processing.app.syntax.TokenMarker.java - Lines 341-348
+        added methods getLineModelAt and setLineModelAt
+
+[12] processing.app.syntax.TextAreaPainter.java - Lines 761-763
+        added getFontHeight method used by RehearseSidebarPainter
+
+== Things that must be kept in sync ==
+
+RehearsePApplet overridden methods need to be kept in sync with PApplet methods that
+are supposed to get overrridden.
+
+**************************
+Changelist for rev #5766
+
+[1] processing.app.Editor.java - Lines 136-139
+        Added private instance variables customToolbar and customToolbarTool.
+        Added private instance variables customTextArea and customTextAreaTool.        
+        All four are initialized to null.
+
+[2] processing.app.Editor.java - Line 204 & 354-362        
+       Added public buildToolbar() function. This lets us build a custom toolbar if it exists, or just an EditorToolbar otherwise.
+
+[3] processing.app.Editor.java - Line 1428
+        Changed visibility of setCode(), to be used in RehearseHandler
+
+[4] processing.app.Editor.java - Lines 2396-2398
+        added getToolbarMenu method.
+
+[5] processing.app.Editor.java - Lines 2398-2402
+        added getBase method.
+
+[6] processing.app.Editor.java - Lines 2403-2406
+        Added getConsole() method to be used in RehearseHandler
+
+[7] processing.app.EditorToolbar.java - Lines 36-70
+       Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
+       Changed visibility of BUTTON_GAP, BUTTON_WIDTH and BUTTON_HEIGHT to protected
+       Changed visibility of inactive, active and rollover to protected
+       Changed visibility of RUN, STOP, NEW, OPEN, SAVE, EXPORT
+       Changed visibility of currentRollover, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
+       Changed visibility of x1[], x2[], y1[] and y2[] to protected
+        Changed visibility of findSelection() and setState() to protected
+
+[8] processing.app.Editor.java - Lines 2407-2415
+        Created methods setCustomToolbar, setCustomTextArea and rebuildToolbar. Added a BuildCustomException.
+
+[9] processing.app.EditorToolbar.java - Lines 452-110
+        added setMenu method. Used in Editor.java while building a custom toolbar.
+
+[10] processing.app.syntax.TokenMarker.java - Lines 341-348
+        added methods getLineModelAt and setLineModelAt
+
+[11] processing.app.syntax.TextAreaPainter.java - Lines 761-763
+        added getFontHeight method used by RehearseSidebarPainter
