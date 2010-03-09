@@ -7,7 +7,7 @@ This looks to be the last release version. Our initial list of changes was compi
 
 = Details =
 
-Changelist for rev #6011
+== Changelist for rev #6011 ==
 
 [1] processing.app.Editor.java - Lines 136-139
         Added private instance variables customToolbar and customToolbarTool.
@@ -59,8 +59,9 @@ Changelist for rev #6011
 RehearsePApplet overridden methods need to be kept in sync with PApplet methods that
 are supposed to get overrridden.
 
-**************************
-Changelist for rev #5766
+---
+
+== Changelist for rev #5766 ==
 
 [1] processing.app.Editor.java - Lines 136-139
         Added private instance variables customToolbar and customToolbarTool.
