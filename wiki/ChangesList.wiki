@@ -41,7 +41,7 @@ This looks to be the last release version. Our initial list of changes was compi
        Changed visibility of BUTTON_GAP, BUTTON_WIDTH and BUTTON_HEIGHT to protected
        Changed visibility of inactive, active and rollover to protected
        Changed visibility of RUN, STOP, NEW, OPEN, SAVE, EXPORT
-       Changed visibility of currentRollover, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
+       Changed visibility of currentRollover, buttons, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
        Changed visibility of x1[], x2[], y1[] and y2[] to protected
        Changed visibility of findSelection() and setState() to protected
 
