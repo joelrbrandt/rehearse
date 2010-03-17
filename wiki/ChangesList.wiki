@@ -12,11 +12,18 @@ This looks to be the last release version. Our initial list of changes was compi
 ----
 Reorganized:
 
-1. Made changes to processing.app.Editor.java so that we can add a custom textArea and a toolbar.
+1. Made changes to processing.app.Editor.java so that we can add a custom textArea and a toolbar. This is because our RehearseToolbar extends EditorToolbar, and RehearseTextArea is extending 
 
 2. Changed the visibility of a few variables in processing.app.EditorToolbar.java to protected so we can access it from RehearseToolbar.
+       Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
+       Changed visibility of BUTTON_GAP, BUTTON_WIDTH and BUTTON_HEIGHT to protected
+       Changed visibility of inactive, active and rollover to protected
+       Changed visibility of RUN, STOP, NEW, OPEN, SAVE, EXPORT
+       Changed visibility of currentRollover, buttons, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
+       Changed visibility of x1[], x2[], y1[] and y2[] to protected
+       Changed visibility of findSelection() and setState() to protected
 
-3. Made a change in processing.app.syntax.TextAreaPainter.java to enable highlights.
+3. Made a change in processing.app.syntax.TextAreaPainter.java to enable print points.
 
 4. Made changes to processing.app.Editor.java for RehearseHandler (which was earlier called RehearseEditor)
 
