@@ -9,6 +9,19 @@ This looks to be the last release version. Our initial list of changes was compi
 
 == Changelist for rev #6011 ==
 
+----
+Reorganized:
+
+1. Made changes to processing.app.Editor.java so that we can add a custom textArea and a toolbar.
+
+2. Changed the visibility of a few variables in processing.app.EditorToolbar.java to protected so we can access it from RehearseToolbar.
+
+3. Made a change in processing.app.syntax.TextAreaPainter.java to enable highlights.
+
+4. Made changes to processing.app.Editor.java for RehearseHandler (which was earlier called RehearseEditor)
+
+----
+
 [1] processing.app.Editor.java - Lines 136-139
         Added private instance variables customToolbar and customToolbarTool.
         Added private instance variables customTextArea and customTextAreaTool.        
