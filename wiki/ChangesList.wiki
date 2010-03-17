@@ -14,8 +14,9 @@ This looks to be the last release version. Our initial list of changes was compi
         Added private instance variables customTextArea and customTextAreaTool.        
         All four are initialized to null.
 
-[2] processing.app.Editor.java - Line 204 & 364-372        
-       Added public buildToolbar() function. This returns a custom toolbar if it exists, or just returns an EditorToolbar otherwise.
+[2] processing.app.Editor.java - Line 204, 210 & 364-372        
+       Added public buildToolbar() function. This returns a custom toolbar if it exists, or just returns an EditorToolbar otherwise.  Added public buildTextArea() function that returns a custom text area if it exists, or just the default TextArea otherwise.
+
 
 [3] processing.app.Editor.java - Lines 814-816
        Added code to load the Rehearse tool more easily for development inside Eclipse
@@ -68,7 +69,7 @@ are supposed to get overrridden.
         Added private instance variables customTextArea and customTextAreaTool.        
         All four are initialized to null.
 
-[2] processing.app.Editor.java - Line 204 & 354-362        
+[2] processing.app.Editor.java - Lines 197, 204 & 354-362        
        Added public buildToolbar() function. This lets us build a custom toolbar if it exists, or just an EditorToolbar otherwise.
 
 [3] processing.app.Editor.java - Line 1428
