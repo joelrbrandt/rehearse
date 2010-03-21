@@ -147,10 +147,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
 
   public void paintComponent(Graphics screen) {
     // this data is shared by all EditorToolbar instances
-    if (buttonImages == null) {
-      loadButtons();
-    }
-
+    loadButtons();
     // this happens once per instance of EditorToolbar
     if (stateImage == null) {
       state = new int[buttonCount];
