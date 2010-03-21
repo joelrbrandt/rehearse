@@ -32,8 +32,7 @@ public class RehearseSidebarPainter extends JComponent {
                 this.addMouseListener(new MouseEventHandler());
         }
 
-        public void paint(Graphics gfx)
-          {
+        public void paint(Graphics gfx) {
             Rectangle clipRect = gfx.getClipBounds();
 
             gfx.setColor(Color.black);
@@ -52,10 +51,12 @@ public class RehearseSidebarPainter extends JComponent {
             for (int line = firstInvalid; line <= lastInvalid; line++) {
                 Color c = Color.gray;
                 if (line < textArea.getLineCount()) {
+                	try { 
                         RehearseLineModel m =
                                 (RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
                         if (m != null && m.isPrintPoint)
                                 c = Color.red;
+                	} catch (NullPointerException ex) {};
                 }
                 gfx.setColor(c);
                     int y = textArea.lineToY(line);
@@ -77,18 +78,17 @@ public class RehearseSidebarPainter extends JComponent {
 
                         String lineText = textArea.getLineText(line);
                         RehearseLineModel m =
-                        (RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
+                        	(RehearseLineModel)textArea.getTokenMarker().getLineModelAt(line);
                         if (m == null) {
-                                m = new RehearseLineModel();
-                                textArea.getTokenMarker().setLineModelAt(line, m);
+                        	m = new RehearseLineModel();
+                        	textArea.getTokenMarker().setLineModelAt(line, m);
                         }
-
                         if (m.isPrintPoint) {
-                                m.isPrintPoint = false;
+                        	m.isPrintPoint = false;
                         } else if (lineText != null && lineText.trim().length() != 0){
-                                m.isPrintPoint = true;
+                        	m.isPrintPoint = true;
                         }
                         RehearseSidebarPainter.this.repaint();
-                }
+                }            
         }
 }

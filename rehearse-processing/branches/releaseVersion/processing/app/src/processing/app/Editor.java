@@ -114,6 +114,8 @@ public class Editor extends JFrame implements RunnerListener {
   JMenuItem saveMenuItem;
   JMenuItem saveAsMenuItem;
 
+  Box upper;
+  
   boolean running;
   //boolean presenting;
 
@@ -194,7 +196,7 @@ public class Editor extends JFrame implements RunnerListener {
     contentPain.add(pain, BorderLayout.CENTER);
 
     Box box = Box.createVerticalBox();
-    Box upper = Box.createVerticalBox();
+    upper = Box.createVerticalBox();
 
     if (toolbarMenu == null) {
       toolbarMenu = new JMenu();
@@ -352,20 +354,26 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
   
-  public void rebuildToolbar() {
-    if (customToolbar == null) {
-      toolbar = new EditorToolbar(this, toolbarMenu);
-    } else {
-      customToolbar.setMenu(toolbarMenu);
-      toolbar = customToolbar;
-    }
+  public void rebuildToolbarTextArea() {
+    upper.remove(toolbar);
+    toolbar = buildToolbar();
+    toolbar.repaint();
+    upper.add(toolbar, 0);
+    upper.validate();
+    
+    upper.remove(textarea);
+    textarea = buildTextArea();
+    textarea.repaint();
+    upper.add(textarea, 2);
+    upper.validate();
+    
+    upper.repaint();
   }
   
   public EditorToolbar buildToolbar(){
     if (customToolbar == null) {
       return new EditorToolbar(this, toolbarMenu);
     } else {
-      customToolbar.setMenu(toolbarMenu);
       return customToolbar;
     }
   }
@@ -381,7 +389,7 @@ public class Editor extends JFrame implements RunnerListener {
   }
   
   public void setCustomToolbar (EditorToolbar tb, Tool t) {
-    if (customToolbar != null) {
+    if (tb!= null && customToolbar != null) {
       new BuildCustomException(t.getMenuTitle(), customToolbarTool.getMenuTitle(),
                                toolbar.getClass().getName());
     } else {
@@ -391,7 +399,7 @@ public class Editor extends JFrame implements RunnerListener {
   }
   
   public void setCustomTextArea (JEditTextArea ta, Tool t) {
-    if (customTextArea != null) {
+    if (ta!= null && customTextArea != null) {
       new BuildCustomException(t.getMenuTitle(), customTextAreaTool.getMenuTitle(), 
                                textarea.getClass().getName());
     } else {
