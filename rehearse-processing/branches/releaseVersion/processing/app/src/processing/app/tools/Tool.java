@@ -31,7 +31,7 @@ import processing.app.Editor;
  */
 public interface Tool extends Runnable {
 
-  public void init(Editor editor);
+  public void init(Editor editor) throws Exception;
   
   public void run();
 

@@ -284,7 +284,9 @@ public class RehearseHandler implements ConsoleInterface {
                 editor.getTextArea().repaint();
 
                 if (m.isPrintPoint) {
-                	snapshots.add(interpreter.makeSnapshotModel());
+                	try {
+                		snapshots.add(interpreter.makeSnapshotModel());
+                	} catch (NullPointerException ex){};
                 }
                 lastExecutedLineModel = m;
         }
