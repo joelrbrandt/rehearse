@@ -12,7 +12,14 @@ This looks to be the last release version. Our initial list of changes was compi
 ----
 Reorganized:
 
-1. Made changes to processing.app.Editor.java so that we can add a custom textArea and a toolbar. This is because our RehearseToolbar extends EditorToolbar, and RehearseTextArea is extending 
+1. Made changes to processing.app.Editor.java so that we can add a custom textArea and a toolbar. This is because our RehearseToolbar extends processing.app.EditorToolbar, and RehearseTextArea extends processing.app.syntax.JEditTextArea.
+         Added public buildToolbar() function. This returns a custom toolbar if it exists, or just returns an EditorToolbar otherwise.
+         Added public buildTextArea() function that returns a custom text area if it exists, or just the default TextArea otherwise.
+        Added private instance variables customToolbar and customToolbarTool.
+        Added private instance variables customTextArea and customTextAreaTool.        
+        All four are initialized to null.
+        Created methods setCustomToolbar and setCustomTextArea. Added a BuildCustomException.
+        Created rebuildToolbarTextArea, called when the user changes Rehearse preferences. 
 
 2. Changed the visibility of a few variables in processing.app.EditorToolbar.java to protected so we can access it from RehearseToolbar.
        Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
@@ -30,7 +37,7 @@ Reorganized:
 
 4. Made changes to processing.app.Editor.java for RehearseHandler (which was earlier called RehearseEditor)
         Line 1478 - changed visibility of setCode() to public, to be used in RehearseHandler
-        
+        Lines 2509-2511 - Added getConsole method
 
 ----
 
@@ -60,7 +67,7 @@ Reorganized:
         Added getConsole method to be used in RehearseHandler
 
 [8] processing.app.Editor.java - Lines 2403-2406
-        Created methods setCustomToolbar, setCustomTextArea and rebuildToolbar. Added a BuildCustomException.
+        Created methods setCustomToolbar, setCustomTextArea and rebuildToolbarTextArea. Added a BuildCustomException.
 
 [9] processing.app.EditorToolbar.java - Lines 36-70
        Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
@@ -118,11 +125,8 @@ are supposed to get overrridden.
 [8] processing.app.Editor.java - Lines 2407-2415
         Created methods setCustomToolbar, setCustomTextArea and rebuildToolbar. Added a BuildCustomException.
 
-[9] processing.app.EditorToolbar.java - Lines 452-110
-        added setMenu method. Used in Editor.java while building a custom toolbar.
-
-[10] processing.app.syntax.TokenMarker.java - Lines 341-348
+[9] processing.app.syntax.TokenMarker.java - Lines 341-348
         added methods getLineModelAt and setLineModelAt
 
-[11] processing.app.syntax.TextAreaPainter.java - Lines 761-763
+[10] processing.app.syntax.TextAreaPainter.java - Lines 761-763
         added getFontHeight method used by RehearseSidebarPainter
