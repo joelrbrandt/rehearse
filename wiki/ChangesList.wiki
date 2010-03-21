@@ -18,8 +18,7 @@ Reorganized:
         Added private instance variables customToolbar and customToolbarTool.
         Added private instance variables customTextArea and customTextAreaTool.        
         All four are initialized to null.
-        Created methods setCustomToolbar and setCustomTextArea. Added a BuildCustomException.
-        Created rebuildToolbarTextArea, called when the user changes Rehearse preferences. 
+        Created methods setCustomToolbar and setCustomTextArea. Added a BuildCustomException. 
 
 2. Changed the visibility of a few variables in processing.app.EditorToolbar.java to protected so we can access it from RehearseToolbar.
        Changed visibility of title and BUTTON_COUNT to protected, removed final modifier
@@ -39,16 +38,21 @@ Reorganized:
         Line 1478 - changed visibility of setCode() to public, to be used in RehearseHandler
         Lines 2509-2511 - Added getConsole method
 
+5. Made changes to processing.app.Editor.java so users can switch between custom and default toolbars/textarea. 
+        Created rebuildToolbarTextArea, called when the user changes Rehearse preferences.
+        Made "upper" a global variable so we can add/remove the toolbar from it.
+
 ----
 
 [1] processing.app.Editor.java - Lines 136-139
         Added private instance variables customToolbar and customToolbarTool.
         Added private instance variables customTextArea and customTextAreaTool.        
         All four are initialized to null.
+        Made "upper" a global variable so we can add/remove the toolbar from it.
 
 [2] processing.app.Editor.java - Line 204, 210 & 364-372        
        Added public buildToolbar() function. This returns a custom toolbar if it exists, or just returns an EditorToolbar otherwise.  Added public buildTextArea() function that returns a custom text area if it exists, or just the default TextArea otherwise.
-
+     
 
 [3] processing.app.Editor.java - Lines 814-816
        Added code to load the Rehearse tool more easily for development inside Eclipse
@@ -97,6 +101,7 @@ are supposed to get overrridden.
         Added private instance variables customToolbar and customToolbarTool.
         Added private instance variables customTextArea and customTextAreaTool.        
         All four are initialized to null.
+        Made "upper" a global variable so we can add/remove the toolbar from it.
 
 [2] processing.app.Editor.java - Lines 197, 204 & 354-362        
        Added public buildToolbar() function. This lets us build a custom toolbar if it exists, or just an EditorToolbar otherwise.
