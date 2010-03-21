@@ -6,6 +6,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import processing.app.Base;
 import processing.app.Editor;
 import processing.app.Preferences;
 import processing.app.syntax.PdeTextAreaDefaults;
@@ -14,19 +15,30 @@ public class RehearseTool implements processing.app.tools.Tool
 {
 	private Editor editor = null;
 	private JCheckBox cb;
+	private String PROCESSING_VERSION = "0176";
 	public String getMenuTitle() {
 		return "Rehearse...";
 	}
 
-	public void init(Editor editor) {
+	public void init (Editor editor) {
+		if (Base.VERSION_NAME != PROCESSING_VERSION) {
+			System.err.println("Could not load Rehearse tool. Please download processing version #"+PROCESSING_VERSION);
+			return;
+		}
 		this.editor = editor;
 		if (Preferences.getBoolean("rehearse.default")) {
 			editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
 			editor.setCustomTextArea(new RehearseEditTextArea(new PdeTextAreaDefaults()), this);
 		}
 	}
-
+	
 	public void run() {
+		if (Base.VERSION_NAME != PROCESSING_VERSION) {
+			JOptionPane.showMessageDialog(editor, 
+					"Could not load Rehearse tool. Please download processing version #"+PROCESSING_VERSION);
+			return;
+		}
+		
 		RehearsePreferences prefs = new RehearsePreferences(Frame.getFrames()[0]);
 	    //JOptionPane.showMessageDialog(null, prefs);
 		int selected = JOptionPane.showOptionDialog(editor, prefs, "Rehearse Preferences", 
