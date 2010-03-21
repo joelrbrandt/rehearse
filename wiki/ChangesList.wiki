@@ -22,10 +22,15 @@ Reorganized:
        Changed visibility of currentRollover, buttons, buttonImages, popup, menu, buttonCount, which, state, width, height, offScreen, and stateImage to protected, used by RehearseToolbar.
        Changed visibility of x1[], x2[], y1[] and y2[] to protected
        Changed visibility of findSelection() and setState() to protected
+       Lines 2372-2374 -  Added a public getBase method.
+       Lines 379-381 -  added public getToolbarMenu method. Used to construct RehearseToolbar in the RehearseTool class.
 
 3. Made a change in processing.app.syntax.TextAreaPainter.java to enable print points.
+       Lines 761-763 - added getFontHeight method used by RehearseSidebarPainter
 
 4. Made changes to processing.app.Editor.java for RehearseHandler (which was earlier called RehearseEditor)
+        Line 1478 - changed visibility of setCode() to public, to be used in RehearseHandler
+        
 
 ----
 
@@ -66,13 +71,10 @@ Reorganized:
        Changed visibility of x1[], x2[], y1[] and y2[] to protected
        Changed visibility of findSelection() and setState() to protected
 
-[10] processing.app.EditorToolbar.java - Lines 108-110
-        added setMenu method. Used in Editor.java while building a custom toolbar.
-
-[11] processing.app.syntax.TokenMarker.java - Lines 341-348
+[10] processing.app.syntax.TokenMarker.java - Lines 341-348
         added methods getLineModelAt and setLineModelAt
 
-[12] processing.app.syntax.TextAreaPainter.java - Lines 761-763
+[11] processing.app.syntax.TextAreaPainter.java - Lines 761-763
         added getFontHeight method used by RehearseSidebarPainter
 
 == Things that must be kept in sync ==
