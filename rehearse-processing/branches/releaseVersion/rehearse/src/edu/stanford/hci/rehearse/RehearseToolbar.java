@@ -3,11 +3,11 @@ package edu.stanford.hci.rehearse;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 
-import processing.app.Base;
 import processing.app.Editor;
 import processing.app.EditorToolbar;
 
@@ -99,8 +99,9 @@ public class RehearseToolbar extends EditorToolbar{
 	}
 	
 	protected void loadButtons() {
-		java.net.URL imageURL = RehearseToolbar.class.getClassLoader().getResource("resources/rehearseButtons.gif");
-	    Image allButtons = (new ImageIcon(imageURL)).getImage();
+		URL imageURL = this.getClass().getClassLoader().getResource("resources/rehearseButtons.gif");
+		ImageIcon temp = new ImageIcon(imageURL);
+	    Image allButtons = temp.getImage();
 	    buttonImages = new Image[BUTTON_COUNT][3];
 	    
 	    for (int i = 0; i < BUTTON_COUNT; i++) {
