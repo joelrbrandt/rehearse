@@ -43,16 +43,16 @@ public class RehearseTool implements processing.app.tools.Tool
 	    //JOptionPane.showMessageDialog(null, prefs);
 		int selected = JOptionPane.showOptionDialog(editor, prefs, "Rehearse Preferences", 
 				JOptionPane.OK_CANCEL_OPTION, 0, null, null, JOptionPane.YES_OPTION);
-		if (selected == JOptionPane.YES_OPTION && 
-				cb.isSelected() != Preferences.getBoolean("rehearse.default")) {
+		if (selected == JOptionPane.YES_OPTION) {
 			Preferences.setBoolean("rehearse.default", cb.isSelected());
-			if (Preferences.getBoolean("rehearse.default")) {
+			if (cb.isSelected()) {
 				editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
+				editor.setCustomTextArea(new RehearseEditTextArea(new PdeTextAreaDefaults()), this);
 			} else {
 				editor.setCustomToolbar(null, this);
 				editor.setCustomTextArea(null, this);
 			}
-			editor.rebuildToolbar();
+			editor.rebuildToolbarTextArea();
 		}
 	}
 	

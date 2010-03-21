@@ -109,10 +109,6 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
     return menu;
   }
   
-  public void setMenu(JMenu menu) {
-    this.menu = menu;
-  }
-  
   public EditorToolbar(Editor editor, JMenu menu) {
     this();
     this.editor = editor;
