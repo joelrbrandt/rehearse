@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 
 import processing.app.Base;
@@ -98,7 +99,8 @@ public class RehearseToolbar extends EditorToolbar{
 	}
 	
 	protected void loadButtons() {
-	    Image allButtons = Base.getThemeImage("rehearsebuttons.gif", this);
+		java.net.URL imageURL = RehearseToolbar.class.getClassLoader().getResource("resources/rehearseButtons.gif");
+	    Image allButtons = (new ImageIcon(imageURL)).getImage();
 	    buttonImages = new Image[BUTTON_COUNT][3];
 	    
 	    for (int i = 0; i < BUTTON_COUNT; i++) {
