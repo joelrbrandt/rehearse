@@ -1,5 +1,6 @@
 package edu.stanford.hci.rehearse;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
@@ -34,7 +35,7 @@ public class RehearseToolbar extends EditorToolbar{
 		this.editor = editor;
 	    this.menu = menu;
 	    BUTTON_COUNT++;
-	    
+	    bgcolor = new Color(0, 51, 102);
 	    buttonCount = 0;
 	    which = new int[BUTTON_COUNT];
 	    

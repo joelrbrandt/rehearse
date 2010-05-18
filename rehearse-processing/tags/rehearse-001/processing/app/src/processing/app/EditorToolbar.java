@@ -73,7 +73,7 @@ public class EditorToolbar extends JComponent implements MouseInputListener, Key
   Image offscreen;
   int width, height;
 
-  Color bgcolor;
+  public Color bgcolor;
 
   protected static Image[][] buttonImages;
   protected int currentRollover;

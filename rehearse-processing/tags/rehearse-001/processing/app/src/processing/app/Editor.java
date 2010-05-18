@@ -383,7 +383,7 @@ public class Editor extends JFrame implements RunnerListener {
   public void setCustomToolbar (EditorToolbar tb, Tool t) {
     if (customToolbar != null) {
       new BuildCustomException(t.getMenuTitle(), customToolbarTool.getMenuTitle(),
-                               toolbar.getClass().getName());
+                               customToolbarTool.getClass().getName());
     } else {
       customToolbar = tb;
       customToolbarTool = t;
@@ -393,7 +393,7 @@ public class Editor extends JFrame implements RunnerListener {
   public void setCustomTextArea (JEditTextArea ta, Tool t) {
     if (customTextArea != null) {
       new BuildCustomException(t.getMenuTitle(), customTextAreaTool.getMenuTitle(), 
-                               textarea.getClass().getName());
+                               customTextAreaTool.getClass().getName());
     } else {
       customTextArea = ta;
       customTextAreaTool = t;
