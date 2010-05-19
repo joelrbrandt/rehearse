@@ -113,12 +113,13 @@ public class RehearseHandler implements ConsoleInterface {
 
         public void handleInteractiveRun() {
          // HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
-        	 if (USEHIGHLIGHT)
+        	wasLastRunInteractive = true;
+        	 if (USEHIGHLIGHT) {
                  editor.getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
-
+        	 }
         	editor.statusEmpty(); //clear the status area
 
-                wasLastRunInteractive = true;
+                
                 // clear previous context
                 if (canvasFrame != null)
                         canvasFrame.dispose();
