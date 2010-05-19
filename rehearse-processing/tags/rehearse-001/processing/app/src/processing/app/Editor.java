@@ -24,6 +24,7 @@ package processing.app;
 
 import processing.app.debug.*;
 import processing.app.syntax.*;
+import processing.app.syntax.TextAreaPainter.Highlight;
 import processing.app.tools.*;
 import processing.core.*;
 
@@ -41,6 +42,8 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 
+
+
 /**
  * Main editor panel for the Processing Development Environment.
  */
@@ -49,7 +52,7 @@ public class Editor extends JFrame implements RunnerListener {
   private Base base;
   private String path;
   private int[] location;
-  
+  private RelatedLines relLines;
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
   static protected final String EMPTY =
@@ -258,6 +261,9 @@ public class Editor extends JFrame implements RunnerListener {
     // get shift down/up events so we can show the alt version of toolbar buttons
     textarea.addKeyListener(toolbar);
 
+    relLines = new RelatedLines(this);
+    textarea.addCaretListener(relLines);
+    
     pain.setTransferHandler(new FileDropHandler());
 
 //    System.out.println("t1");
@@ -371,9 +377,9 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
   private JEditTextArea buildTextArea() {
-    if (customTextArea == null)
+    if (customToolbar == null)
       return new JEditTextArea(new PdeTextAreaDefaults());
-   return customTextArea;
+   return new RehearseEditTextArea(new PdeTextAreaDefaults());
   }
   
   public JMenu getToolbarMenu(){
@@ -2403,7 +2409,6 @@ public class Editor extends JFrame implements RunnerListener {
     JMenuItem copyItem;
     JMenuItem discourseItem;
     JMenuItem referenceItem;
-
 
     public TextAreaPopup() {
       JMenuItem item;

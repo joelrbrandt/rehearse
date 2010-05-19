@@ -14,15 +14,16 @@ public class RehearseTool implements processing.app.tools.Tool
 {
 	private Editor editor = null;
 	private JCheckBox cb;
+	
 	public String getMenuTitle() {
 		return "Rehearse...";
 	}
 
 	public void init(Editor editor) {
 		this.editor = editor;
+		
 		if (Preferences.getBoolean("rehearse.default")) {
 			editor.setCustomToolbar(new RehearseToolbar(editor, editor.getToolbarMenu()), this);
-			editor.setCustomTextArea(new RehearseEditTextArea(new PdeTextAreaDefaults()), this);
 		}
 	}
 
@@ -40,7 +41,7 @@ public class RehearseTool implements processing.app.tools.Tool
 				editor.setCustomToolbar(null, this);
 				editor.setCustomTextArea(null, this);
 			}
-			editor.rebuildToolbar();
+			editor.buildToolbar();
 		}
 	}
 	
