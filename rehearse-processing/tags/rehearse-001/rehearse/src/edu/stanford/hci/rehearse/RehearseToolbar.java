@@ -14,19 +14,21 @@ import processing.app.EditorToolbar;
 public class RehearseToolbar extends EditorToolbar{
 	private Editor editor;
 	private RehearseHandler rh;
+	boolean useHighlight = true;
+	
 	  /** Rollover titles for each button. */
 	static final String newTitle[] = {
-		"Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run"
+		"Run", "Stop", "New", "Open", "Save", "Export", "Interactive Run", "Clear Highlights"	
 	  };
 	  
 	  /** Titles for each button when the shift key is pressed. */ 
 	static final String newTitleShift[] = {
 		"Present", "Stop", "New Editor Window", "Open in Another Window", "Save", 
-		"Export to Application", "Interactive Run"
+		"Export to Application", "Interactive Run", "Turn Highlights Off"
 	    };
 	
 	protected static final int INTERACTIVE_RUN = 6;
-	
+	protected static final int TOGGLE_HIGHLIGHTS = 7;
 	
 	public RehearseToolbar(Editor editor, JMenu menu) {
 		rh = new RehearseHandler(editor);
@@ -34,7 +36,7 @@ public class RehearseToolbar extends EditorToolbar{
 		titleShift = newTitleShift;
 		this.editor = editor;
 	    this.menu = menu;
-	    BUTTON_COUNT++;
+	    BUTTON_COUNT += 2;
 	    bgcolor = new Color(0, 51, 102);
 	    buttonCount = 0;
 	    which = new int[BUTTON_COUNT];
@@ -46,6 +48,7 @@ public class RehearseToolbar extends EditorToolbar{
 	    which[buttonCount++] = SAVE;
 	    which[buttonCount++] = EXPORT;
 	    which[buttonCount++] = INTERACTIVE_RUN;
+	    which[buttonCount++] = TOGGLE_HIGHLIGHTS;
 	}
 	
 	@Override
@@ -61,6 +64,10 @@ public class RehearseToolbar extends EditorToolbar{
 	    switch (sel) {
 	    case INTERACTIVE_RUN:
 	    	rh.handleInteractiveRun();
+	    	break;
+	    
+	    case TOGGLE_HIGHLIGHTS:
+	    	editor.getTextArea().getPainter().removeCustomHighlights();    	
 	    	break;
 	    	
 	    case RUN:

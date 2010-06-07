@@ -47,7 +47,5 @@ public class RehearseHighlight implements Highlight {
                         gfx.setColor(Color.white);
                 }
                 gfx.fillRect(0, y, textArea.getWidth(), height);
-        }
-        
-        
+        }      
 }
