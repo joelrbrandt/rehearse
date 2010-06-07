@@ -11,7 +11,7 @@ import processing.app.syntax.PdeKeywords;
 
 public class RelatedLines implements CaretListener {
 	static Hashtable<String, ArrayList<String> >functionToRelatedMap;
-	static Editor editor;
+	private Editor editor;
 	
 	public RelatedLines (Editor ed) {
 	  this.editor = ed;
@@ -28,7 +28,7 @@ public class RelatedLines implements CaretListener {
               if (pieces.length >= 2) {
                 // => at least one tab
             	ArrayList<String> relFunctions = new ArrayList<String> ();
-            	for (int i = 1; i < pieces.length; i++) {
+            	for (int i = 0; i < pieces.length; i++) {
             		relFunctions.add(pieces[i].trim());
             	}
                 String keyword = pieces[0].trim();
@@ -73,5 +73,5 @@ public class RelatedLines implements CaretListener {
         }
       }
     }
-  }
+  } 
 }

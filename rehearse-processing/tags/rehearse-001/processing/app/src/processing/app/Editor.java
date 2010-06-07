@@ -52,6 +52,7 @@ public class Editor extends JFrame implements RunnerListener {
   private Base base;
   private String path;
   private int[] location;
+ //
   private RelatedLines relLines;
   // otherwise, if the window is resized with the message label
   // set to blank, it's preferredSize() will be fukered
@@ -2513,5 +2514,9 @@ public class Editor extends JFrame implements RunnerListener {
   
   public EditorConsole getConsole() {
     return console;
+  }
+
+  public void handleToggleHighlights() {
+    
   }
 }

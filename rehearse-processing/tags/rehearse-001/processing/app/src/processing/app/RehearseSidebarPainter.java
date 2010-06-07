@@ -72,5 +72,4 @@ public class RehearseSidebarPainter extends JComponent {
         	highlight.clear();
         	repaint();
         }
-
 }

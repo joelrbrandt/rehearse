@@ -760,5 +760,10 @@ implements TabExpander, Printable
   
   public int getFontHeight() {
     return fm.getHeight();
+  } 
+  
+  public void removeCustomHighlights(){
+    highlights = null;
+    repaint();
   }
 }

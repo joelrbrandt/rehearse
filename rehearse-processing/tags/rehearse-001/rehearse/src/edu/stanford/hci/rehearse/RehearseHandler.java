@@ -34,7 +34,7 @@ public class RehearseHandler implements ConsoleInterface {
 		private JFrame canvasFrame;
         private RehearsePApplet applet;
         private PrintStream outputStream;
-        private Editor editor;
+        public Editor editor;
         
         private Interpreter interpreter;
 
@@ -115,6 +115,7 @@ public class RehearseHandler implements ConsoleInterface {
          // HelpMeOutLog.getInstance().write(HelpMeOutLog.STARTED_INTERACTIVE_RUN);
         	wasLastRunInteractive = true;
         	 if (USEHIGHLIGHT) {
+        		 editor.getTextArea().getPainter().removeCustomHighlights();
                  editor.getTextArea().getPainter().addCustomHighlight(new RehearseHighlight());
         	 }
         	editor.statusEmpty(); //clear the status area
@@ -244,7 +245,7 @@ public class RehearseHandler implements ConsoleInterface {
                 editor.setCode(currentCode);
         }
 
-        private void clearExecutionInfoForLines() {
+        void clearExecutionInfoForLines() {
                 for (SketchCode sc : editor.getSketch().getCode()) {
                         SyntaxDocument doc = (SyntaxDocument)sc.getDocument();
                                 for (int line = 0; line < doc.getTokenMarker().getLineCount(); line++) {
@@ -318,29 +319,23 @@ public class RehearseHandler implements ConsoleInterface {
                         RehearseLineModel m =
                                 (RehearseLineModel)(editor.getTextArea().getTokenMarker().getLineModelAt(line));
                         if (m != null) {
-                                /*
-                                if (m.executedInLastRun)
-                                        c = Color.yellow;
-                                if (m.isMostRecentlyExecuted)
-                                        c = Color.green;
-                                */
-
-                                int i = Math.min(linesExecutedCount - m.countAtLastExec, 150);
-                                // c = new Color(i,255,i);
-                                c = new Color(78,127,78,200-i);
+                        	int i = Math.min(linesExecutedCount - m.countAtLastExec, 150);
+                        	c = new Color(78,127,78,200-i);
                         }
-
-                        //Color c = lineHighlights.get(line + 1);
+                        
+                        int offset = 0;
                         if (c != null) {
                                 FontMetrics fm = textarea.getPainter().getFontMetrics();
                                 int height = fm.getHeight();
-                                y += fm.getLeading() + fm.getMaxDescent();
+                                offset = fm.getLeading()+ fm.getMaxDescent();
+                                y += offset;
                                 gfx.setColor(c);
                                 gfx.fillRect(0,y,editor.getWidth(),height);
                         }
 
                         if (next != null) {
-                                next.paintHighlight(gfx, line, y);
+                        	//y -= offset;
+                        	next.paintHighlight(gfx, line, y);
                         }
                 }
         }
